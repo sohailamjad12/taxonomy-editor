@@ -17,7 +17,8 @@ export class LocalConnectionService {
         source: 'online'
     }
 
-    constructor(@Inject(ENVIRONMENT) private env: IConnectionType) {
+    constructor() {
+        const env = JSON.parse(localStorage.getItem('environment'));
         if (env) {
             this._vars.data.endpoint = env.data.endpoint;
             this._vars.data.token = env.data.token;

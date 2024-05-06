@@ -37,7 +37,7 @@ export class FrameworkService {
   getFrameworkInfo(): Observable<any> {
     localStorage.removeItem('terms')
     if (this.localConfig.connectionType === 'online') {
-      return this.http.get(`/api/framework/v1/read/${this.localConfig.frameworkName}`).pipe(
+      return this.http.get(`https://portal.karmayogi.nic.in/api/framework/v1/read/${this.environment.frameworkName}`).pipe(
         tap((response: any) => {
           this.resetAll()
           this.formateData(response)

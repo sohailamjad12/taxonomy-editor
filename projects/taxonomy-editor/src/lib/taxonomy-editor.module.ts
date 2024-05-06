@@ -69,8 +69,7 @@ import { DatePipe } from './pipes/date.pipe'
     DatePipe
   ],
   imports: [
-    BrowserModule,
-    BrowserAnimationsModule,
+    CommonModule,
     TaxonomyEditorRoutingModule,
     ReactiveFormsModule,
     FormsModule,
