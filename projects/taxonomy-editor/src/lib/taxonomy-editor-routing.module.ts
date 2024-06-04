@@ -10,7 +10,7 @@ const routes: Routes = [
     {
         path: '',
         pathMatch: 'full',
-        component: ConfigFrameworkComponent,
+        component: TaxonomyViewComponent,
     },
     {
         path:'home', component:ConfigFrameworkComponent
@@ -27,7 +27,7 @@ const routes: Routes = [
 ]
 @NgModule({
     imports: [
-      RouterModule.forRoot(routes),
+      RouterModule.forChild(routes),
     ],
     exports: [RouterModule],
     providers: [],

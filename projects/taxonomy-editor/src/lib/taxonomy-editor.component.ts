@@ -11,7 +11,10 @@ import { FrameworkService } from './services/framework.service';
 export class TaxonomyEditorComponent implements OnInit {
   @Input() environment;
   @Input() taxonomyConfig;
-  constructor(private frameworkService: FrameworkService) { }
+  constructor(private frameworkService: FrameworkService) { 
+    console.log('loaded lib');
+    
+  }
 
   ngOnInit() {
     this.frameworkService.updateEnvironment(this.environment);
