@@ -65,7 +65,8 @@ export const taxonomyConfig = [
                 "index": 1,
                 "category": "org",
                 "icon": "settings",
-                "color": "#1d2327"
+                "color": "#1d2327",
+                
             },
             {   
                 "index": 2,
@@ -78,6 +79,58 @@ export const taxonomyConfig = [
                 "category": "competency",
                 "icon": "extension",
                 "color": "#541675"
+            }
+        ]
+    },
+    {
+        "frameworkId" :"cats_fw",
+        "config" : [
+            {   
+                "index": 1,
+                "category": "competencyarea",
+                "icon": "settings",
+                "color": "#1d2327"
+            },
+            {   
+                "index": 2,
+                "category": "theme",
+                "icon": "extension",
+                "color": "#541675"
+            },
+            {   
+                "index": 3,
+                "category": "subtheme",
+                "icon": "extension",
+                "color": "#541675"
+            },
+            {   
+                "index": 4,
+                "category": "org",
+                "icon": "extension",
+                "color": "#541675"
+            }
+        ]
+    },
+    {
+        "frameworkId" :"kcm_fw",
+        "config" : [
+            {   
+                "index": 1,
+                "category": "competencyarea",
+                "icon": "person",
+                "color": "#"
+            },
+            {   
+                "index": 2,
+                "category": "theme",
+                "icon": "settings",
+                "color": "#F57E3B"
+            },
+            {   
+                "index": 3,
+                "category": "subtheme",
+                "icon": "extension",
+                "color": "#743CA5"
             }
         ]
     }

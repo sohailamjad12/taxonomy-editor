@@ -108,7 +108,8 @@ export namespace NSFramework {
         description: string;
         category: string;
         status: string;
-        approvalStatus: string;
+        approvalStatus?: string;
+        displayName?: string;
         parents?: ParentsElements[] | null;
         additionalProperties: AdditionalProperties;
     }

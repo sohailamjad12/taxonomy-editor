@@ -54,7 +54,9 @@ export class TaxonomyColumnViewComponent implements OnInit, OnDestroy, OnChanges
             }
           })
           this.columnData = this.termshafall;
-          this.cardsCount.emit({category: this.columnData[0].category,count:this.columnData.length});
+          if(this.columnData && this.columnData.length) {
+            this.cardsCount.emit({category: this.columnData[0].category,count:this.columnData.length});
+          }
         }
       })
     }
@@ -76,6 +78,7 @@ export class TaxonomyColumnViewComponent implements OnInit, OnDestroy, OnChanges
       this.childSubscription.unsubscribe()
     }
     this.childSubscription = this.frameworkService.currentSelection.subscribe(e => {
+       console.log('currentSelection event', e )
       if (!e) {
         return
       } else if (e.type === this.column.code) {
@@ -88,6 +91,7 @@ export class TaxonomyColumnViewComponent implements OnInit, OnDestroy, OnChanges
           }
           return item
         });
+        console.log('this.columnData ', this.columnData)
         this.setConnectors(e.cardRef, this.columnData, 'SINGLE')
         return
         // console.log("SKIP: from subscription===>", "FOR " + this.category, e)
@@ -145,15 +149,18 @@ export class TaxonomyColumnViewComponent implements OnInit, OnDestroy, OnChanges
     })
   }
   insertUpdateHandler(e, next) {
+    console.log('insertUpdateHandler')
     const back = this.frameworkService.getPreviousCategory(this.column.code)
     // console.log('current Saved ===========>', this.frameworkService.getLocalTermsByCategory(this.column.code))
     const localTerms = []
     this.frameworkService.getLocalTermsByCategory(this.column.code).forEach(f => {
       const selectedParent = back ? this.frameworkService.selectionList.get(back.code) : null; //can use current
+      console.log('insertUpdateHandler selectedParent', selectedParent)
       if (selectedParent && ((f.parent.code === selectedParent.code) || (f.parent.identifier && (f.parent.identifier === selectedParent.identifier)))) {
         localTerms.push(f.term)
       }
     })
+    console.log('insertUpdateHandler localTerms', localTerms)
     // get last parent and filter Above
     this.columnData = [...localTerms, ...(e.data.children || [])]
       .filter(x => {

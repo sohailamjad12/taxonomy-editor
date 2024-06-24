@@ -51,6 +51,12 @@ export class TaxonomyViewComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.init()
     this.showActionBar = this.isApprovalView?true:false;
+    this.frameworkService.afterAddOrEditSubject.subscribe(responseData => {
+      console.log('refreshData subscribe -----------------------------------------------*****--------------', responseData)
+      if(responseData && responseData.res && responseData.data) {
+        this.refreshData(responseData)
+      }
+    })
   }
 
   ngOnChanges() {
@@ -61,6 +67,7 @@ export class TaxonomyViewComponent implements OnInit, OnDestroy {
     this.initConfig();
     this.frameworkService.getFrameworkInfo().subscribe(res => {
       this.connectorSvc.removeAllLines()
+      console.log('this.frameworkService.categoriesHash.value.', this.frameworkService.categoriesHash.value)
       this.frameworkService.categoriesHash.value.forEach((cat:any) => {
         this.loaded[cat.code] = true
       })
@@ -71,13 +78,28 @@ export class TaxonomyViewComponent implements OnInit, OnDestroy {
     })
   
   }
-
+  refreshData(resData){
+    const res = resData.res
+    if (res && res.created) {
+      this.showPublish = true
+    }
+    this.loaded[res.term.category] = false
+    // wait
+    const parentColumn = this.frameworkService.getPreviousCategory(res.term.category)
+    res.parent = null
+    if (parentColumn) {
+      res.parent = this.frameworkService.selectionList.get(parentColumn.code)
+      res.parent.children? res.parent.children.push(res.term) :res.parent['children'] = [res.term]
+    }
+    this.updateFinalList({ selectedTerm: res.term, isSelected: false, parentData: res.parent, colIndex:resData.index })
+  }
   updateTaxonomyTerm(data: { selectedTerm: any, isSelected: boolean }) {
     
     this.updateFinalList(data)
     this.updateSelection(data.selectedTerm.category, data.selectedTerm.code);
   }
   updateSelection(category: string, selectedTermCode: string) {
+    console.log('this.frameworkService.list.get(category', this.frameworkService.list)
     this.frameworkService.list.get(category).children.map(item => {
       item.selected = selectedTermCode === item.code ? true : false
       return item
@@ -112,9 +134,17 @@ export class TaxonomyViewComponent implements OnInit, OnDestroy {
   }
   openCreateTermDialog(column, colIndex) {  
     if (!this.isEnabled(column.code)) {
+      const selectedTerms = this.frameworkService.getPreviousSelectedTerms(column.index)
       const dialog = this.dialog.open(CreateTermComponent, {
-        data: { columnInfo: column, frameworkId: this.frameworkService.getFrameworkId(), selectedparents: this.heightLighted, colIndex: colIndex },
-        width: '400px',
+        data: {
+          mode:'create',
+          columnInfo: column,
+          frameworkId: this.frameworkService.getFrameworkId(),
+          selectedparents: this.heightLighted,
+          colIndex: colIndex,
+          selectedParentTerms: selectedTerms
+        },
+        width: '800px',
         panelClass: 'custom-dialog-container'
       })
       dialog.afterClosed().subscribe(res => {

@@ -21,11 +21,12 @@ export class CreateTermComponent implements OnInit {
   termLists: Array<Card> = [];
   filtedTermLists: Observable<any[]>;
   createTermForm: FormGroup
+  createThemeForm: FormGroup
   disableCreate: boolean = false;
   isTermExist: boolean = false;
-  selectedTerm:Card = {};
+  selectedTerm: Card = {};
   app_strings = labels;
-   constructor(
+  constructor(
     public dialogRef: MatDialogRef<CreateTermComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
     private frameWorkService: FrameworkService,
@@ -33,6 +34,7 @@ export class CreateTermComponent implements OnInit {
   ) { }
 
   ngOnInit() {
+    console.log("this.data", this.data)
     this.termLists = this.data.columnInfo.children
     this.initTermForm()
   }
@@ -42,10 +44,64 @@ export class CreateTermComponent implements OnInit {
       name: ['', [Validators.required]],
       description: ['']
     })
+    this.createThemeForm = this.fb.group({
+      name: ['', [Validators.required]],
+      dname: ['', [Validators.required]],
+      description: ['']
+    })
     this.filtedTermLists = this.createTermForm.get('name').valueChanges.pipe(
       startWith(''),
       map(value => this._filter(value || '')),
     );
+
+    // if mode is "view" then check for which type of form has to be used and then append the values in form
+    if (
+      this.data &&
+      (this.data.mode === 'view')
+    ) {
+      switch (this.data.columnInfo.code) {
+        case 'theme': this.updateFormView(this.createThemeForm, this.data)
+          break
+        case 'subtheme': this.updateFormView(this.createThemeForm, this.data)
+          break
+        default: this.updateFormView(this.createThemeForm, this.data)
+          break
+      }
+      this.disableCreate = true
+    } else if (this.data &&
+      (this.data.mode === 'edit')) {
+      switch (this.data.columnInfo.code) {
+        case 'theme': this.updateFormEdit(this.createThemeForm, this.data)
+          break
+        case 'subtheme': this.updateFormEdit(this.createThemeForm, this.data)
+          break
+        default: this.updateFormEdit(this.createThemeForm, this.data)
+          break
+      }
+    }
+  }
+
+  updateFormView(form, data) {
+    console.log('FOrm :', form)
+    console.log('data :', data)
+    form.get('name').patchValue(data.childrenData.name)
+    form.get('dname').patchValue(data.childrenData.displayName)
+    form.get('description').patchValue(data.childrenData.description)
+    setTimeout(() => {
+      form.get('name').disable()
+      form.get('description').disable()
+    })
+  }
+
+  updateFormEdit(form, data) {
+    console.log('FOrm :', form)
+    console.log('data :', data)
+    form.get('name').patchValue(data.childrenData.name)
+    form.get('dname').patchValue(data.childrenData.displayName)
+    form.get('description').patchValue(data.childrenData.description)
+    setTimeout(() => {
+      form.get('name').disable()
+    })
   }
 
   private _filter(searchTxt: any): string[] {
@@ -54,7 +110,7 @@ export class CreateTermComponent implements OnInit {
     this.isTermExist = false
     this.createTermForm.get('description').enable()
     // this.createTermForm.get('description').patchValue('')
-    const filterValue = typeof(searchTxt)==='object'? this._normalizeValue(searchTxt.name):this._normalizeValue(searchTxt);
+    const filterValue = typeof (searchTxt) === 'object' ? this._normalizeValue(searchTxt.name) : this._normalizeValue(searchTxt);
     isExist = this.termLists.filter(term => this._normalizeValue(term.name).includes(filterValue));
     return isExist
   }
@@ -63,50 +119,59 @@ export class CreateTermComponent implements OnInit {
     return value.toLowerCase().replace(/\s/g, '');
   }
 
-  onSelect(term) {
+  onSelect(term, form) {
     this.selectedTerm = term.value
-    this.createTermForm.get('name').patchValue(term.value.name)
-    this.createTermForm.get('description').patchValue(term.value.description)
-    this.createTermForm.get('description').disable()
+    form.get('name').patchValue(term.value.name)
+    form.get('description').patchValue(term.value.description)
+    form.get('description').disable()
     this.disableCreate = true
   }
 
- saveTerm() {
-      if(this._filter(this.createTermForm.value.name).length>0){
-        this.isTermExist = true
-        console.log('Already exist')
-        return
+  saveTerm() {
+    if (this._filter(this.createTermForm.value.name).length > 0) {
+      this.isTermExist = true
+      console.log('Already exist')
+      return
+    }
+    if (this.createTermForm.valid) {
+      const term: NSFramework.ICreateTerm = {
+        code: this.frameWorkService.getUuid(),
+        name: this.createTermForm.value.name,
+        description: this.createTermForm.value.description,
+        category: this.data.columnInfo.code,
+        status: appConstants.LIVE,
+        // approvalStatus:appConstants.DRAFT,
+        parents: [
+          { identifier: `${this.data.frameworkId}_${this.data.columnInfo.code}` }
+        ],
+        additionalProperties: {}
       }
-      if(this.createTermForm.valid) {
-        const term:NSFramework.ICreateTerm =   {
-          code:this.frameWorkService.getUuid(),
-          name:this.createTermForm.value.name,
-          description:this.createTermForm.value.description,
-          category:this.data.columnInfo.code,
-          status: appConstants.LIVE,
-          approvalStatus:appConstants.DRAFT,
-          parents:[
-            {identifier:`${this.data.frameworkId}_${this.data.columnInfo.code}`}
-          ],
-          additionalProperties:{}
+      const requestBody = {
+        request: {
+          term: term
         }
-        const requestBody =  {
-          request: {
-            term: term
-          }
-        }
-      
-      this.frameWorkService.createTerm(this.data.frameworkId, this.data.columnInfo.code, requestBody).subscribe((res:any) => {
+      }
+
+      this.frameWorkService.createTerm(this.data.frameworkId, this.data.columnInfo.code, requestBody).subscribe((res: any) => {
         requestBody.request.term['identifier'] = res.result.node_id[0]
         this.dialogClose({ term: requestBody.request.term, created: true })
         this.selectedTerm = requestBody.request.term
-        this.updateTerm()
+        this.updateTermAssociations()
       })
     }
+  }
+
+  updateTermData(form) {
+    const req = {
+      name: this.createThemeForm.value.name,
+      description: this.createThemeForm.value.description,
+      displayName: this.createThemeForm.value.dname,
     }
-  
-  
-  updateTerm() {
+    this.updateTermAssociations(req)
+  }
+
+
+  updateTermAssociations(reqData?: any) {
     let associations = []
     let temp
     let counter = 0
@@ -115,39 +180,81 @@ export class CreateTermComponent implements OnInit {
       counter++
       temp = parent.children ? parent.children.filter(child => child.identifier === this.selectedTerm.identifier) : null
       associations = parent.children ? parent.children.map(c => {
-        return { identifier: c.identifier, approvalStatus: c.associationProperties?c.associationProperties.approvalStatus: 'Draft' }
-      }) : [] 
-      if(temp && temp.length) {
+        // return { identifier: c.identifier, approvalStatus: c.associationProperties?c.associationProperties.approvalStatus: 'Draft' }
+        return { identifier: c.identifier }
+      }) : []
+      if (temp && temp.length) {
         this.isTermExist = true
         return
-        } else { 
-          associations.push({ identifier: this.selectedTerm.identifier, approvalStatus: appConstants.DRAFT })
-          this.isTermExist = false
-          const reguestBody = {
+      } else {
+        // associations.push({ identifier: this.selectedTerm.identifier, approvalStatus: appConstants.DRAFT })
+        associations.push({ identifier: this.selectedTerm.identifier })
+        this.isTermExist = false
+        const reguestBody = {
           request: {
-              term: {
-                associations: [
-                  ...associations  
-                ]    
-              }
-            } 
-          }
-          // console.log('***************************',associations)
-          // this.dialogClose({ term: this.selectedTerm, created: true })
-          this.frameWorkService.updateTerm(this.data.frameworkId, parent.category, parent.code, reguestBody).subscribe((res: any) => {
-            if(counter === this.frameWorkService.selectionList.size ) {
-              // this.selectedTerm['associationProperties']['approvalStatus'] = 'Draft';
-              this.dialogClose({ term: {...this.selectedTerm, ...{associationProperties:{approvalStatus:'Draft'}}}, created: true })
+            term: {
+              ...reqData,
+              associations: [
+                ...associations
+              ]
             }
-          })
+          }
         }
+        // console.log('***************************',associations)
+        // this.dialogClose({ term: this.selectedTerm, created: true })
+        this.frameWorkService.updateTerm(this.data.frameworkId, parent.category, parent.code, reguestBody).subscribe((res: any) => {
+          if (counter === this.frameWorkService.selectionList.size) {
+            // this.selectedTerm['associationProperties']['approvalStatus'] = 'Draft';
+            this.dialogClose({ term: { ...this.selectedTerm, ...{ associationProperties: {} } }, created: true })
+          }
+        }, (err: any) => {
+          console.error(`Edit ${this.data.columnInfo.name} failed, please try again later`)
+        })
+      }
     })
   }
 
+  saveThemeTerm() {
+    if (this._filter(this.createThemeForm.value.name).length > 0) {
+      this.isTermExist = true
+      console.log('Already exist')
+      return
+    }
+    if (this.createThemeForm.valid) {
+      const term: NSFramework.ICreateTerm = {
+        code: this.frameWorkService.getUuid(),
+        name: this.createThemeForm.value.name,
+        description: this.createThemeForm.value.description,
+        displayName: this.createThemeForm.value.dname,
+        category: this.data.columnInfo.code,
+        status: appConstants.LIVE,
+        // approvalStatus:appConstants.DRAFT,
+        parents: [
+          { identifier: `${this.data.frameworkId}_${this.data.columnInfo.code}` }
+        ],
+        additionalProperties: {}
+      }
+      const requestBody = {
+        request: {
+          term: term
+        }
+      }
+
+      this.frameWorkService.createTerm(this.data.frameworkId, this.data.columnInfo.code, requestBody).subscribe((res: any) => {
+        requestBody.request.term['identifier'] = res.result.node_id[0]
+        this.dialogClose({ term: requestBody.request.term, created: true })
+        this.selectedTerm = requestBody.request.term
+        this.updateTermAssociations()
+      }, (err: any) => {
+        console.error(`Create ${this.data.columnInfo.name} failed, please try again later`)
+      })
+    }
+  }
+
   dialogClose(term) {
-      this.frameWorkService.publishFramework().subscribe(res => {
-        this.dialogRef.close(term)
-      });
+    this.frameWorkService.publishFramework().subscribe(res => {
+      this.dialogRef.close(term)
+    });
   }
 
 }

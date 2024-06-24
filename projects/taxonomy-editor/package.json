@@ -1,6 +1,6 @@
 {
-  "name": "taxonomy-editor",
-  "version": "0.0.1",
+  "name": "@sunbird-cb/taxonomy-editor",
+  "version": "0.0.2",
   "peerDependencies": {
     "@angular/common": "^8.2.14",
     "@angular/core": "^8.2.14"

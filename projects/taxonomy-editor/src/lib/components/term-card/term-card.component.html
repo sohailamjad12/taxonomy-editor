@@ -24,15 +24,20 @@
 
         <!-- <p>{{data.children.approvalStatus}}, {{data.children.associationProperties?.approvalStatus}}</p> -->
         <!-- *ngIf="!data.isViewOnly && data.children.approvalStatus === 'Draft' && isApprovalRequired" -->
-        <div class="term-card-checkbox">
+
+        <!-- (click)="$event.stopPropagation();" -->
+        <button type="button" mat-icon-button i18n-aria-label aria-label="action items"
+            [matMenuTriggerFor]="cardMenu" [matMenuTriggerData]="{'data':data}" class="action-btn">
+            <mat-icon>more_vert</mat-icon>
+        </button>
+        <!-- <div class="term-card-checkbox">
             <mat-checkbox color="primary" *ngIf="data.children.approvalStatus === 'Draft' && isApprovalRequired && !approvalList.length || 
             data.children.associationProperties?.approvalStatus === 'Draft' && isApprovalRequired && !approvalList.length ||
             data.children.highlight && isApprovalRequired" [checked]="data.children.highlight" class="termSelection"
                 (change)="handleProductClick(data.children, $event)" (click)="$event.stopPropagation()"></mat-checkbox>
-            <!-- data.children.highlight?'highlight':'' -->
             <mat-icon color="primary" class="approve-flag"
                 *ngIf="data.children.highlight && isApprovalRequired">{{app_strings.flag}}</mat-icon>
-        </div>
+        </div> -->
     </div>
 </ng-template>
 
@@ -50,3 +55,25 @@
         {{data.children.name}}
     </div>
 </ng-template>
+
+<mat-menu #cardMenu="matMenu">
+    <ng-template matMenuContent let-rowData="data">
+        <!-- <div > -->
+        <button (click)="view(data, data.children, data.index)" mat-menu-item name="channel-analytics-button"
+            class="ws-mat-primary-text" i18n-aria-label aria-label="Analytics">
+            <mat-icon>visibility</mat-icon> <span>view</span>
+        </button>
+        <button (click)="edit(data,  data.children,data.index)"
+            mat-menu-item name="channel-analytics-button" class="ws-mat-primary-text" i18n-aria-label
+            aria-label="Analytics">
+            <mat-icon>edit</mat-icon>
+            <span>Edit</span>
+        </button>
+        <button (click)="create(data)"
+            mat-menu-item name="channel-analytics-button" class="ws-mat-primary-text" i18n-aria-label
+            aria-label="Analytics">
+            <mat-icon>add</mat-icon>
+            <span>Add {{getNextCatName(data)}}</span>
+        </button>
+    </ng-template>
+</mat-menu>

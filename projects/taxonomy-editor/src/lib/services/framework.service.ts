@@ -18,6 +18,7 @@ export class FrameworkService {
   isDataUpdated: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false)
   currentSelection: BehaviorSubject<{ type: string, data: any, cardRef?: any } | null> = new BehaviorSubject<{ type: string, data: any, cardRef?: any } | null>(null)
   termSubject: BehaviorSubject<any> = new BehaviorSubject<any>(null)
+  afterAddOrEditSubject: BehaviorSubject<any> = new BehaviorSubject<any>(null)
   list = new Map<string, NSFramework.IColumnView>();
   selectionList = new Map<string, NSFramework.IColumnView>();
   insertUpdateDeleteNotifier: BehaviorSubject<{ type: 'select' | 'insert' | 'update' | 'delete', action: string, data: any }> = new BehaviorSubject<{ type: 'select' | 'insert' | 'update' | 'delete', action: string, data: any }>(null)
@@ -37,7 +38,7 @@ export class FrameworkService {
   getFrameworkInfo(): Observable<any> {
     localStorage.removeItem('terms')
     if (this.localConfig.connectionType === 'online') {
-      return this.http.get(`https://portal.karmayogi.nic.in/api/framework/v1/read/${this.environment.frameworkName}`).pipe(
+      return this.http.get(`${this.environment.url}/api/framework/v1/read/${this.environment.frameworkName}`).pipe(
         tap((response: any) => {
           this.resetAll()
           this.formateData(response)
@@ -55,20 +56,26 @@ export class FrameworkService {
   }
 
   readTerms(frameworkId, categoryId, requestBody) {
-    return this.http.post(`/api/framework/v1/term/search?framework=${frameworkId}&category=${categoryId}`, requestBody).pipe(
+    return this.http.post(`${this.environment.url}/api/framework/v1/term/search?framework=${frameworkId}&category=${categoryId}`, requestBody).pipe(
       map((res: any) => res.result))
   }
 
   createTerm(frameworkId, categoryId, requestBody) {
-    return this.http.post(`/api/framework/v1/term/create?framework=${frameworkId}&category=${categoryId}`, requestBody)
+    return this.http.post(`${this.environment.url}/api/framework/v1/term/create?framework=${frameworkId}&category=${categoryId}`, requestBody)
   }
 
   updateTerm(frameworkId, categoryId, categoryTermCode, reguestBody) {
-    return this.http.patch(`/api/framework/v1/term/update/${categoryTermCode}?framework=${frameworkId}&category=${categoryId}`, reguestBody)
+    return this.http.patch(`${this.environment.url}/api/framework/v1/term/update/${categoryTermCode}?framework=${frameworkId}&category=${categoryId}`, reguestBody)
   }
 
   publishFramework() {
-    return this.http.post(`/api/framework/v1/publish/${this.environment.frameworkName}`, {}, { headers: { 'X-Channel-Id': this.environment.channelId } })
+    const headers = new HttpHeaders({
+      'X-Channel-Id': this.environment.channelId,
+      'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ5RVZPODkwNHZzV0pMdWhxanN6aVFLeEVZTFdZZ0MwSiJ9.0l5-vg_d_IHtNPfhp6l4OM-dmAG8azpV2amxDYLu110'
+    })
+    return this.http.post(`${this.environment.url}/api/framework/v1/publish/${this.environment.frameworkName}`, {}, { headers: headers })
+    // return this.http.post(`${this.environment.url}/apis/proxies/v8/framework/v1/publish/${this.environment.frameworkName}`, {}, { headers})
+    // return this.http.post(`${this.environment.url}/apis/proxies/v8/framework/v1/publish/${this.environment.frameworkName}`, {}, { headers})
   }
 
   getUuid() {
@@ -168,6 +175,12 @@ export class FrameworkService {
   get getTerm(): any[] {
     return JSON.parse(localStorage.getItem('terms')) || []
   }
+
+  updateAfterAddOrEditSubject(res: any){
+    if(res){
+      this.afterAddOrEditSubject.next(res)
+    } 
+  }
   getLocalTermsByParent(parentCode: string): any[] {
     const filteredData = this.getTerm.filter(x => {
       return x.parent && x.parent.category === parentCode
@@ -224,6 +237,7 @@ export class FrameworkService {
       })
       // }
     });
+    
     const allCategories = []
     this.list.forEach(a => {
       allCategories.push({
@@ -250,6 +264,7 @@ export class FrameworkService {
 
   setConfig(config: any) {
     this.rootConfig = config
+    console.log('this.rootConfig ::', this.rootConfig)
   }
 
   getConfig(code: string) {
@@ -260,6 +275,34 @@ export class FrameworkService {
       }
     });
     return categoryConfig;
+  }
+
+  getAllSelectedTerms() {
+    const selectedTerms = []
+    this.list.forEach(l => {
+      if(l.children && l.children.length){
+          const selectedChildren = l.children.map(c => {
+          if(c.selected){
+            selectedTerms.push(c)
+          }
+        })
+      }
+    })
+    console.log('selectedTerms', selectedTerms)
+    return selectedTerms
+  }
+
+  getPreviousSelectedTerms(code) {
+    let prevSelectedTerms = []
+    console.log('this.frameWorkService.selectionList', this.selectionList)
+    console.log('code', code)
+    this.selectionList.forEach(sl => {
+      if(sl.category !== code) {
+        prevSelectedTerms.push(sl)
+      }
+    })
+    console.log('prevSelectedTerms', prevSelectedTerms)
+    return prevSelectedTerms
   }
 
 }

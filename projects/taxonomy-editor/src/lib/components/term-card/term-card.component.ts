@@ -5,6 +5,8 @@ import { FrameworkService } from '../../services/framework.service'
 import { LocalConnectionService } from '../../services/local-connection.service';
 import { labels } from '../../labels/strings';
 import { CardSelection, CardChecked, Card } from '../../models/variable-type.model';
+import { MatDialog } from '@angular/material';
+import { CreateTermComponent } from '../create-term/create-term.component';
 
 @Component({
   selector: 'lib-term-card',
@@ -16,8 +18,10 @@ export class TermCardComponent implements OnInit {
 
   private _data: NSFramework.ITermCard;
   isApprovalRequired: boolean = false
-  approvalList: Array<Card> = [];
+  approvalList: Array<Card> = []
+  heightLighted = []
   app_strings: any = labels;
+  loaded: any = {}
   @Input()
   set data(value: any) {
     this._data = value;
@@ -32,7 +36,12 @@ export class TermCardComponent implements OnInit {
   @Output() isSelected = new EventEmitter<CardSelection>()
   @Output() selectedCard = new EventEmitter<CardChecked>()
 
-  constructor(private frameworkService: FrameworkService, private localConnectionService: LocalConnectionService, private approvalService: ApprovalService) { }
+  constructor(
+    private frameworkService: FrameworkService,
+    private localConnectionService: LocalConnectionService,
+    private approvalService: ApprovalService,
+    public dialog: MatDialog, 
+  ) { }
 
   ngOnInit() {
     this.isApprovalRequired = this.localConnectionService.getConfigInfo().isApprovalRequired
@@ -76,6 +85,118 @@ export class TermCardComponent implements OnInit {
         borderColor = "8px solid" + config.color;
       }
       return borderColor;
+    }
+  }
+
+
+  view(data: any, childrenData: any, index: any){
+    console.log('data?   ', data)
+    const selectedTerms = this.frameworkService.getPreviousSelectedTerms(data.columnInfo.code)
+      const dialog = this.dialog.open(CreateTermComponent, {
+        data: { 
+          mode:'view',
+          columnInfo: data.columnInfo,
+          frameworkId: this.frameworkService.getFrameworkId(),
+          selectedparents: this.heightLighted,
+          colIndex: index,
+          childrenData: childrenData,
+          selectedParentTerms: selectedTerms
+        },
+        width: '800px',
+        panelClass: 'custom-dialog-container'
+      })
+      dialog.afterClosed().subscribe(res => {
+        if(!res) {
+          return;
+        }
+        // if (res && res.created) {
+        //   this.showPublish = true
+        // }
+        // this.loaded[res.term.category] = false
+        // // wait
+        // const parentColumn = this.frameworkService.getPreviousCategory(res.term.category)
+        // res.parent = null
+        // if (parentColumn) {
+        //   res.parent = this.frameworkService.selectionList.get(parentColumn.code)
+        //   res.parent.children? res.parent.children.push(res.term) :res.parent['children'] = [res.term]
+        // }
+        // this.updateFinalList({ selectedTerm: res.term, isSelected: false, parentData: res.parent, colIndex:colIndex })
+      })
+  }
+  edit(data: any, childrenData: any, index: any){
+    const selectedTerms = this.frameworkService.getPreviousSelectedTerms(data.columnInfo.code)
+    const dialog = this.dialog.open(CreateTermComponent, {
+      data: { 
+        mode:'edit',
+        columnInfo: data.columnInfo,
+        frameworkId: this.frameworkService.getFrameworkId(),
+        selectedparents: this.heightLighted,
+        colIndex: index,
+        childrenData: childrenData,
+        selectedParentTerms: selectedTerms
+      },
+      width: '800px',
+      panelClass: 'custom-dialog-container'
+    })
+    dialog.afterClosed().subscribe(res => {
+      if(!res) {
+        return;
+      }
+      const responseData = {
+        res,
+        index: index.index,
+        data
+      }
+      this.frameworkService.updateAfterAddOrEditSubject(responseData)
+    })
+  }
+  create(data: any){
+    const nextCat = this.getNextCat(data)
+    console.log('nextCat', nextCat)
+    if(nextCat) {
+      const selectedTerms = this.frameworkService.getPreviousSelectedTerms(nextCat.code)
+      const colInfo = Array.from(this.frameworkService.list.values()).filter(l => l.code === nextCat.code )
+      const dialog = this.dialog.open(CreateTermComponent, {
+        data: { 
+          mode:'create',
+          columnInfo: colInfo && colInfo.length ? colInfo[0] : [],
+          frameworkId: this.frameworkService.getFrameworkId(),
+          selectedparents: this.heightLighted,
+          colIndex: nextCat.index,
+          childrenData: data.childrenData,
+          selectedParentTerms: selectedTerms
+        },
+        width: '800px',
+        panelClass: 'custom-dialog-container'
+      })
+      dialog.afterClosed().subscribe(res => {
+        if(!res) {
+          return;
+        }
+        const responseData = {
+          res,
+          index: nextCat.index,
+          data
+        }
+        this.frameworkService.updateAfterAddOrEditSubject(responseData)
+      })
+    }
+  }
+
+  getNextCatName(data) {
+    if(data && data.columnInfo && data.columnInfo.code){
+      const nextCat = this.frameworkService.getNextCategory(data.columnInfo.code)
+      if(nextCat && nextCat.code){
+        return nextCat.code
+      }
+    }
+  }
+
+  getNextCat(data) {
+    console.log('getNextCat data', data)
+    if(data && data.columnInfo && data.columnInfo.code){
+      const nextCat = this.frameworkService.getNextCategory(data.columnInfo.code)
+      return nextCat
     }
   }
 }

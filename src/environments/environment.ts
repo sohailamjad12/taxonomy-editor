@@ -14,10 +14,10 @@
 // };
 export const environment = {
   production: false,
-  url: `https://portal.karmayogi.nic.in/`,
+  url: `https://portal.karmayogi.nic.in`,
   token: '',
-  frameworkName: 'organisation_fw',
-  channelId: 'in.ekstep',
+  frameworkName: 'cats_fw',
+  channelId: '0132245461338112000',
   authToken: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ5RVZPODkwNHZzV0pMdWhxanN6aVFLeEVZTFdZZ0MwSiJ9.0l5-vg_d_IHtNPfhp6l4OM-dmAG8azpV2amxDYLu110',
   isApprovalRequired: true,
   additionalProperties: []
