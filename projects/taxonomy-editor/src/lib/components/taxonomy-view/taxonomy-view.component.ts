@@ -66,6 +66,7 @@ export class TaxonomyViewComponent implements OnInit, OnDestroy {
   init() {
     this.initConfig();
     this.frameworkService.getFrameworkInfo().subscribe(res => {
+      console.log(' getFrameworkInfo res:', res)
       this.connectorSvc.removeAllLines()
       console.log('this.frameworkService.categoriesHash.value.', this.frameworkService.categoriesHash.value)
       this.frameworkService.categoriesHash.value.forEach((cat:any) => {
@@ -75,6 +76,8 @@ export class TaxonomyViewComponent implements OnInit, OnDestroy {
         setTimeout(() => {
              this.drawHeaderLine(res.result.framework.categories.length);  
         },500)
+    }, (err) => {
+      console.log('error in fetching framework', err)
     })
   
   }

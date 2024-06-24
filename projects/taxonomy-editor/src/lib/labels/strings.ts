@@ -1,6 +1,7 @@
 export const labels = {
     flag: "flag",
     createNew: "Create New",
+    edit: "Edit",
     build: "build",
     noData: "No Data Available",
     add: "add",

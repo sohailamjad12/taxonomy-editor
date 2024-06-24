@@ -18,11 +18,9 @@ export class TokenInterceptorService {
     // console.log(env);
     // env.authToken = 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ5RVZPODkwNHZzV0pMdWhxanN6aVFLeEVZTFdZZ0MwSiJ9.0l5-vg_d_IHtNPfhp6l4OM-dmAG8azpV2amxDYLu110'
     // console.log(env.authToken);
-    
     const request = req.clone({  
       setHeaders: {  
-        Authorization: env.authToken,  
-        "Cookie": "connect.sid=s%3A3Vh8oWqykuVE1GZhcUEdxo73wLldsMKq.kK2Z67JD1l3utg9%2BtBQBds0IqQi3y%2F4R5NJRJIX1Mxg"
+        Authorization: env.authToken || '',  
         // channelId: env.channelId
         // userToken:env.userToken
       }  

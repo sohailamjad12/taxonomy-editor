@@ -104,6 +104,10 @@ export class CreateTermComponent implements OnInit {
     })
   }
 
+  updateDname(name, form) {
+    form.get('dname').patchValue(name)
+  }
+
   private _filter(searchTxt: any): string[] {
     let isExist;
     this.disableCreate = false
@@ -194,9 +198,7 @@ export class CreateTermComponent implements OnInit {
           request: {
             term: {
               ...reqData,
-              associations: [
-                ...associations
-              ]
+              ...(associations && associations.length) && {associations: [...associations]},
             }
           }
         }

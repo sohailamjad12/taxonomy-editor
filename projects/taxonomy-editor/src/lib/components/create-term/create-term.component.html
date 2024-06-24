@@ -60,6 +60,7 @@
                     <mat-form-field appearance="outline" class="flex-1">
                         <input matInput name="name" id="name" #name
                             placeholder="{{app_strings.name}}" [value]="term.name" disabled>
+                        <mat-error *ngIf="isTermExist">{{app_strings.alreadyExist}}</mat-error>
                     </mat-form-field>
                 </div>
             </ng-container>
@@ -77,7 +78,7 @@
                             </label>
                             <mat-form-field appearance="outline" class="flex-1">
                                 <input matInput formControlName="name" id="name" #name
-                                    placeholder="{{app_strings.name}}">
+                                    placeholder="{{app_strings.name}}" (blur)="updateDname(name.value, createThemeForm)">
                                 <!-- <input matInput formControlName="name" id="name" #name placeholder="{{app_strings.name}}"
                                 [matAutocomplete]="auto">
                                 <mat-autocomplete #auto="matAutocomplete"
@@ -86,7 +87,6 @@
                                     {{option.name}}
                                 </mat-option>
                                 </mat-autocomplete> -->
-                                <mat-error *ngIf="isTermExist">{{app_strings.alreadyExist}}</mat-error>
                             </mat-form-field>
                         </div>
                         <div class="flex-1 flex-col">
@@ -95,7 +95,7 @@
                                 Display Name
                             </label>
                             <mat-form-field appearance="outline" class="flex-1">
-                                <input matInput formControlName="dname" id="dname" #name
+                                <input matInput formControlName="dname" id="dname" #dname
                                     placeholder="Competency display name">
                                 <!-- <input matInput formControlName="name" id="name" #name placeholder="{{app_strings.name}}"
                                 [matAutocomplete]="auto"> -->
