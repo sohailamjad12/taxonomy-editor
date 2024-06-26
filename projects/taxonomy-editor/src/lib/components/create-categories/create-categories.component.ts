@@ -61,7 +61,6 @@ export class CreateCategoriesComponent implements OnInit {
   }
 
   saveForm() {
-    console.log(this.createCategoriesForm.value.categories)
     this.updateCategory.emit(this.createCategoriesForm.value.categories)
   }
 

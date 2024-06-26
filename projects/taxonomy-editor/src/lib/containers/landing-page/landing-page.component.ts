@@ -15,7 +15,6 @@ export class LandingPageComponent implements OnInit {
 
   ngOnInit() {
     this.frameworkService.getFrameworkInfo().subscribe(res => {
-      console.log('Service...',res)
       this.frameworkCategories = res.result.framework.categories
     })
   }

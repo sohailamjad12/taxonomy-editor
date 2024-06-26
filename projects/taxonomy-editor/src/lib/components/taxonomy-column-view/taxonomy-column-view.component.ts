@@ -91,10 +91,8 @@ export class TaxonomyColumnViewComponent implements OnInit, OnDestroy, OnChanges
           }
           return item
         });
-        console.log('this.columnData ', this.columnData)
         this.setConnectors(e.cardRef, this.columnData, 'SINGLE')
         return
-        // console.log("SKIP: from subscription===>", "FOR " + this.category, e)
       } else {
         const next = this.frameworkService.getNextCategory(e.type);
         // // console.log("ADD: from subscription===>", "FOR " + this.category, next, this.children)

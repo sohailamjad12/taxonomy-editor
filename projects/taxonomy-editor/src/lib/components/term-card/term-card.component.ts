@@ -90,7 +90,6 @@ export class TermCardComponent implements OnInit {
 
 
   view(data: any, childrenData: any, index: any){
-    console.log('data?   ', data)
     const selectedTerms = this.frameworkService.getPreviousSelectedTerms(data.columnInfo.code)
       const dialog = this.dialog.open(CreateTermComponent, {
         data: { 
@@ -152,7 +151,6 @@ export class TermCardComponent implements OnInit {
   }
   create(data: any){
     const nextCat = this.getNextCat(data)
-    console.log('nextCat', nextCat)
     if(nextCat) {
       const selectedTerms = this.frameworkService.getPreviousSelectedTerms(nextCat.code)
       const colInfo = Array.from(this.frameworkService.list.values()).filter(l => l.code === nextCat.code )
@@ -193,7 +191,6 @@ export class TermCardComponent implements OnInit {
   }
 
   getNextCat(data) {
-    console.log('getNextCat data', data)
     if(data && data.columnInfo && data.columnInfo.code){
       const nextCat = this.frameworkService.getNextCategory(data.columnInfo.code)
       return nextCat

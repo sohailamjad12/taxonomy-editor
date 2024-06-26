@@ -52,7 +52,6 @@ export class TaxonomyViewComponent implements OnInit, OnDestroy {
     this.init()
     this.showActionBar = this.isApprovalView?true:false;
     this.frameworkService.afterAddOrEditSubject.subscribe(responseData => {
-      console.log('refreshData subscribe -----------------------------------------------*****--------------', responseData)
       if(responseData && responseData.res && responseData.data) {
         this.refreshData(responseData)
       }
@@ -66,9 +65,7 @@ export class TaxonomyViewComponent implements OnInit, OnDestroy {
   init() {
     this.initConfig();
     this.frameworkService.getFrameworkInfo().subscribe(res => {
-      console.log(' getFrameworkInfo res:', res)
       this.connectorSvc.removeAllLines()
-      console.log('this.frameworkService.categoriesHash.value.', this.frameworkService.categoriesHash.value)
       this.frameworkService.categoriesHash.value.forEach((cat:any) => {
         this.loaded[cat.code] = true
       })
@@ -77,7 +74,7 @@ export class TaxonomyViewComponent implements OnInit, OnDestroy {
              this.drawHeaderLine(res.result.framework.categories.length);  
         },500)
     }, (err) => {
-      console.log('error in fetching framework', err)
+      console.error('error in fetching framework', err)
     })
   
   }
@@ -102,7 +99,6 @@ export class TaxonomyViewComponent implements OnInit, OnDestroy {
     this.updateSelection(data.selectedTerm.category, data.selectedTerm.code);
   }
   updateSelection(category: string, selectedTermCode: string) {
-    console.log('this.frameworkService.list.get(category', this.frameworkService.list)
     this.frameworkService.list.get(category).children.map(item => {
       item.selected = selectedTermCode === item.code ? true : false
       return item

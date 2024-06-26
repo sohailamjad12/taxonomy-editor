@@ -52,7 +52,6 @@ export class ApproveViewComponent implements OnInit {
       serviceName:API.APPROVAL.SERVICE_NAME
     }
     this.approvalService.updateWorkFlowApproval(requestBody).subscribe(res => {
-      console.log(res)
       this._snackBar.open('Terms successfully Approved.', 'cancel')
     });
   }

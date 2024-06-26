@@ -33,8 +33,6 @@ export class ConnectorService {
   }
 
   _drawLine(source, target, options = defaultConfig, sourceContainerId = undefined, targetContainerId = undefined) {
-    console.log('sourceContainerId ::', sourceContainerId)
-    console.log('targetContainerId ::', targetContainerId)
     const _options = <LLOptions>{...defaultConfig, ...options}
     let _line;
     if (Array.isArray(target)) {

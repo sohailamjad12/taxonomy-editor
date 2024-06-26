@@ -29,8 +29,8 @@
                         {{option.name}}
                     </mat-option>
                 </mat-autocomplete>
+                <mat-error *ngIf="isTermExist">{{app_strings.alreadyExist}}</mat-error>
             </mat-form-field>
-            <mat-error *ngIf="isTermExist">{{app_strings.alreadyExist}}</mat-error>
             <mat-form-field appearance="outline">
                 <!-- <mat-label>Enter {{data.name}} name</mat-label> -->
                 <textarea matInput formControlName="description" placeholder="{{app_strings.description}}"></textarea>
@@ -60,7 +60,6 @@
                     <mat-form-field appearance="outline" class="flex-1">
                         <input matInput name="name" id="name" #name
                             placeholder="{{app_strings.name}}" [value]="term.name" disabled>
-                        <mat-error *ngIf="isTermExist">{{app_strings.alreadyExist}}</mat-error>
                     </mat-form-field>
                 </div>
             </ng-container>
@@ -87,7 +86,9 @@
                                     {{option.name}}
                                 </mat-option>
                                 </mat-autocomplete> -->
+                                <mat-error *ngIf="isTermExist">{{app_strings.alreadyExist}}</mat-error>
                             </mat-form-field>
+                            <mat-error >{{app_strings.alreadyExist}}</mat-error>
                         </div>
                         <div class="flex-1 flex-col">
                             <label for="name" class="margin-remove-bottom form-label required"
@@ -110,7 +111,7 @@
                         </div>
                     </div>
 
-                    <div class="flex-col">
+                    <div class="flex-col mt-2">
                         <label for="fname" class="margin-remove-bottom form-label required"
                             i18n="First Name label|Label which explains the user to enter first name" i18n-aria-label
                             aria-label="First name label">
@@ -133,7 +134,7 @@
                 </ng-container>
                 <ng-container *ngIf="data?.mode === 'edit'">
                     <button mat-raised-button color="primary" type="button" cdkFocusInitial 
-                    (click)="updateTermData(createThemeForm)" [disabled]="createThemeForm?.invalid"
+                    (click)="updateTermData(createThemeForm, data)" [disabled]="createThemeForm?.invalid"
                         *ngIf="!disableCreate" >{{app_strings.update}}</button>
                 </ng-container>
             </footer>

@@ -34,7 +34,6 @@ export class CreateTermComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    console.log("this.data", this.data)
     this.termLists = this.data.columnInfo.children
     this.initTermForm()
   }
@@ -82,8 +81,6 @@ export class CreateTermComponent implements OnInit {
   }
 
   updateFormView(form, data) {
-    console.log('FOrm :', form)
-    console.log('data :', data)
     form.get('name').patchValue(data.childrenData.name)
     form.get('dname').patchValue(data.childrenData.displayName)
     form.get('description').patchValue(data.childrenData.description)
@@ -94,8 +91,6 @@ export class CreateTermComponent implements OnInit {
   }
 
   updateFormEdit(form, data) {
-    console.log('FOrm :', form)
-    console.log('data :', data)
     form.get('name').patchValue(data.childrenData.name)
     form.get('dname').patchValue(data.childrenData.displayName)
     form.get('description').patchValue(data.childrenData.description)
@@ -105,7 +100,9 @@ export class CreateTermComponent implements OnInit {
   }
 
   updateDname(name, form) {
-    form.get('dname').patchValue(name)
+    if(this.data.mode === 'create'){
+      form.get('dname').patchValue(name)
+    }
   }
 
   private _filter(searchTxt: any): string[] {
@@ -165,17 +162,20 @@ export class CreateTermComponent implements OnInit {
     }
   }
 
-  updateTermData(form) {
-    const req = {
-      name: this.createThemeForm.value.name,
-      description: this.createThemeForm.value.description,
-      displayName: this.createThemeForm.value.dname,
+  updateTermData(form, data) {
+    const formData = {
+      // use this if you need disabled field values : form.getRawValue()
+      ...form.value
     }
-    this.updateTermAssociations(req)
+    const updateData = {
+      formData,
+      updateTermData: data.childrenData
+    }
+    this.updateTermAssociations(updateData)
   }
 
 
-  updateTermAssociations(reqData?: any) {
+  updateTermAssociations(updateData?: any) {
     let associations = []
     let temp
     let counter = 0
@@ -185,29 +185,30 @@ export class CreateTermComponent implements OnInit {
       temp = parent.children ? parent.children.filter(child => child.identifier === this.selectedTerm.identifier) : null
       associations = parent.children ? parent.children.map(c => {
         // return { identifier: c.identifier, approvalStatus: c.associationProperties?c.associationProperties.approvalStatus: 'Draft' }
-        return { identifier: c.identifier }
+        return c.identifier ?  { identifier: c.identifier } : null
       }) : []
       if (temp && temp.length) {
         this.isTermExist = true
         return
       } else {
         // associations.push({ identifier: this.selectedTerm.identifier, approvalStatus: appConstants.DRAFT })
-        associations.push({ identifier: this.selectedTerm.identifier })
+        if(this.selectedTerm && this.selectedTerm.identifier) {
+          associations.push({ identifier: this.selectedTerm.identifier })
+        }
         this.isTermExist = false
         const reguestBody = {
           request: {
             term: {
-              ...reqData,
-              ...(associations && associations.length) && {associations: [...associations]},
+              ...(updateData && updateData.formData && updateData.updateTermData.code === parent.code) ? {...updateData.formData}: null,
+              ...(associations && associations.length) ? {associations: [...associations]} : null,
             }
           }
         }
-        // console.log('***************************',associations)
-        // this.dialogClose({ term: this.selectedTerm, created: true })
+        this.dialogClose({ term: this.selectedTerm, created: true })
         this.frameWorkService.updateTerm(this.data.frameworkId, parent.category, parent.code, reguestBody).subscribe((res: any) => {
           if (counter === this.frameWorkService.selectionList.size) {
             // this.selectedTerm['associationProperties']['approvalStatus'] = 'Draft';
-            this.dialogClose({ term: { ...this.selectedTerm, ...{ associationProperties: {} } }, created: true })
+            this.dialogClose({ term: { ...this.selectedTerm }, created: true })
           }
         }, (err: any) => {
           console.error(`Edit ${this.data.columnInfo.name} failed, please try again later`)

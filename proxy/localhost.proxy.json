@@ -1,11 +1,14 @@
 {
-    "/api/*": {
-      "target": "https://portal.karmayogi.nic.in",
-      "secure": false,
-      "logLevel": "debug",
-      "changeOrigin": true,
-      "pathRewrite": {
-        "/api": "/api"
-      }
+  "/apis/*": {
+    "target": "https://spv.karmayogi.nic.in/",
+    "secure": false,
+    "logLevel": "debug",
+    "changeOrigin": true,
+    "pathRewrite": {
+      "/apis": "/apis"
+    },
+    "headers": {
+      "Cookie": "connect.sid=s%3AwoU2P1M1FfXRNSxUvEmFVWAiR1xoKq2q.ON6s04lxWXcKfpJ5NlRSnEc%2FygokTkxKvH5m6mCWwbI"
     }
+  }
 }

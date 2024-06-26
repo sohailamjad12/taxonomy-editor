@@ -93,7 +93,7 @@ import { DatePipe } from './pipes/date.pipe'
   ],
   providers: [
     { provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { appearance: 'outline' } },
-    { provide: HTTP_INTERCEPTORS, useClass: TokenInterceptorService, multi: true },
+    // { provide: HTTP_INTERCEPTORS, useClass: TokenInterceptorService, multi: true },
     {provide: MAT_SNACK_BAR_DEFAULT_OPTIONS, useValue: {duration: 2000}},
     { provide: MAT_TABS_CONFIG, useValue: { animationDuration: '0ms' }},
     FrameworkService,
