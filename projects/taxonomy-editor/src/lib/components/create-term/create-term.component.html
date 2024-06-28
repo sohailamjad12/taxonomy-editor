@@ -86,9 +86,8 @@
                                     {{option.name}}
                                 </mat-option>
                                 </mat-autocomplete> -->
-                                <mat-error *ngIf="isTermExist">{{app_strings.alreadyExist}}</mat-error>
                             </mat-form-field>
-                            <mat-error >{{app_strings.alreadyExist}}</mat-error>
+                            <mat-error *ngIf="isTermExist" >{{app_strings.alreadyExist}}</mat-error>
                         </div>
                         <div class="flex-1 flex-col">
                             <label for="name" class="margin-remove-bottom form-label required"

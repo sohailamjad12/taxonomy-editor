@@ -204,11 +204,17 @@ export class CreateTermComponent implements OnInit {
             }
           }
         }
-        this.dialogClose({ term: this.selectedTerm, created: true })
+        // console.log('this.selectedTerm', this.selectedTerm)
+        // console.log('(this.selectedTerm && this.selectedTerm.identifier) ? this.selectedTerm : (updateData) ? updateData.updateTermData : {}', (this.selectedTerm && this.selectedTerm.identifier) ? this.selectedTerm : (updateData) ? updateData.updateTermData : {})
+        // this.dialogClose({ term: this.selectedTerm, created: true })
         this.frameWorkService.updateTerm(this.data.frameworkId, parent.category, parent.code, reguestBody).subscribe((res: any) => {
           if (counter === this.frameWorkService.selectionList.size) {
             // this.selectedTerm['associationProperties']['approvalStatus'] = 'Draft';
-            this.dialogClose({ term: { ...this.selectedTerm }, created: true })
+
+            // this value is for selected term in case of create scenario, in case of edit scenario this won't be avaiable 
+            // so term is set from childdata which is received from params in updateData
+            const value = (this.selectedTerm && this.selectedTerm.identifier) ? this.selectedTerm : (updateData) ? updateData.updateTermData : {}
+            this.dialogClose({ term: { ...value }, created: true })
           }
         }, (err: any) => {
           console.error(`Edit ${this.data.columnInfo.name} failed, please try again later`)
