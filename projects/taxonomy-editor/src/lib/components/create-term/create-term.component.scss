@@ -130,6 +130,8 @@
 }
 
 ::ng-deep .custom-dialog-container {
+  // overflow-y: scroll;
+  max-height: 90vh;
 .mat-dialog-container {
     // width:500px;
     padding:0px;

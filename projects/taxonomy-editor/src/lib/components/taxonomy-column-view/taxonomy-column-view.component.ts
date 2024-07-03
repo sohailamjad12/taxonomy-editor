@@ -138,9 +138,14 @@ export class TaxonomyColumnViewComponent implements OnInit, OnDestroy, OnChanges
       this.newTermSubscription.unsubscribe()
     }
     this.newTermSubscription = this.frameworkService.insertUpdateDeleteNotifier.subscribe(e => {
+      console.log('newTermSubscription ::', e)
       if (e && e.action) {
         const next = this.frameworkService.getNextCategory(e.action);
         if (this.column.code === next.code && e.type === 'select') {
+          this.insertUpdateHandler(e, next)
+        } 
+        if(this.column.code === next.code && e.type === 'update') {
+          console.log('update event section')
           this.insertUpdateHandler(e, next)
         }
       }

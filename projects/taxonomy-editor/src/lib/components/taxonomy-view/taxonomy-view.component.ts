@@ -80,21 +80,44 @@ export class TaxonomyViewComponent implements OnInit, OnDestroy {
   }
   refreshData(resData){
     const res = resData.res
+    let multiTerms
     if (res && res.created) {
       this.showPublish = true
     }
+    if(res.multi && Array.isArray(res.term) && res.term.length){
+      multiTerms = res.term
+      res.term = res.term[0]
+    } 
     this.loaded[res.term.category] = false
     // wait
     const parentColumn = this.frameworkService.getPreviousCategory(res.term.category)
     res.parent = null
     if (parentColumn) {
       res.parent = this.frameworkService.selectionList.get(parentColumn.code)
-      res.parent.children? res.parent.children.push(res.term) :res.parent['children'] = [res.term]
+      console.log('this.frameworkService.selectionList.get(parentColumn.code) : ',this.frameworkService.selectionList.get(parentColumn.code))
+      if(resData.type === 'update'){
+        // console.log('inside new update handler')
+        // console.log('res.parent.children ::', res.parent.children)
+        res.parent.children[res.parent.children.findIndex(el => el.identifier === res.term.identifier)] =  res.term
+        // console.log('res.parent.children after assign::', res.parent.children)
+        // console.log('refreshData calling updateFina list ')
+        this.loaded[res.term.category] = true
+        this.updateFinalList({ selectedTerm: res.term, isSelected: false, parentData: res.parent, colIndex:resData.index }, 'update')
+      } else {
+        if(multiTerms && multiTerms.length){
+          multiTerms.forEach(term => {
+            res.parent.children? res.parent.children.push(term) :res.parent['children'] = [term]
+          })
+        } else {
+          res.parent.children? res.parent.children.push(res.term) :res.parent['children'] = [res.term]
+        }
+        this.updateFinalList({ selectedTerm: res.term, isSelected: false, parentData: res.parent, colIndex:resData.index },)
+      }
     }
-    this.updateFinalList({ selectedTerm: res.term, isSelected: false, parentData: res.parent, colIndex:resData.index })
+   
   }
   updateTaxonomyTerm(data: { selectedTerm: any, isSelected: boolean }) {
-    
+    console.log('updateTaxonomyTerm inside the output event, ')
     this.updateFinalList(data)
     this.updateSelection(data.selectedTerm.category, data.selectedTerm.code);
   }
@@ -106,7 +129,8 @@ export class TaxonomyViewComponent implements OnInit, OnDestroy {
   }
 
   //need to refactor at heigh level
-  updateFinalList(data: { selectedTerm: any, isSelected: boolean, parentData?: any, colIndex?: any }) {
+  updateFinalList(data: { selectedTerm: any, isSelected: boolean, parentData?: any, colIndex?: any }, type?: any) {
+    // console.log('updateFinalList type', type)
     if (data.isSelected) {
       // data.selectedTerm.selected = data.isSelected
       this.frameworkService.selectionList.set(data.selectedTerm.category, data.selectedTerm);
@@ -115,7 +139,11 @@ export class TaxonomyViewComponent implements OnInit, OnDestroy {
         this.frameworkService.selectionList.delete(next.code)
       }
       // notify next
-      this.frameworkService.insertUpdateDeleteNotifier.next({ action: data.selectedTerm.category, type: 'select', data: data.selectedTerm })
+      if(type && type === 'update'){
+        this.frameworkService.insertUpdateDeleteNotifier.next({ action: data.selectedTerm.category, type: type ? type : 'update', data: data.selectedTerm })
+      } else {
+        this.frameworkService.insertUpdateDeleteNotifier.next({ action: data.selectedTerm.category, type: type ? type : 'select', data: data.selectedTerm })
+      }
     } 
     if(data.colIndex === 0 && !data.isSelected) {
       this.isLoading = true;
@@ -124,6 +152,7 @@ export class TaxonomyViewComponent implements OnInit, OnDestroy {
       },3000)
     }
     setTimeout(() => {
+      // console.log('calling this loaded again ', data.selectedTerm)
       this.loaded[data.selectedTerm.category] = true
     }, 100);
 
@@ -161,6 +190,7 @@ export class TaxonomyViewComponent implements OnInit, OnDestroy {
           res.parent = this.frameworkService.selectionList.get(parentColumn.code)
           res.parent.children? res.parent.children.push(res.term) :res.parent['children'] = [res.term]
         }
+        // console.log('calling  updateFinalList from create dialogue close event')
         this.updateFinalList({ selectedTerm: res.term, isSelected: false, parentData: res.parent, colIndex:colIndex })
       })
     }

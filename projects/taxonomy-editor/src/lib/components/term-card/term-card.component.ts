@@ -51,6 +51,7 @@ export class TermCardComponent implements OnInit {
 
   cardClicked(data: any, cardRef: any) {
     // this.data.selected = true
+    console.log('card clikc method')
     if(this.frameworkService.isLastColumn(this.data.category)){
       return 
     }
@@ -144,7 +145,8 @@ export class TermCardComponent implements OnInit {
       const responseData = {
         res,
         index: index.index,
-        data
+        data,
+        type: 'update'
       }
       this.frameworkService.updateAfterAddOrEditSubject(responseData)
     })
@@ -156,7 +158,7 @@ export class TermCardComponent implements OnInit {
       const colInfo = Array.from(this.frameworkService.list.values()).filter(l => l.code === nextCat.code )
       const dialog = this.dialog.open(CreateTermComponent, {
         data: { 
-          mode:'create',
+          mode:'multi-create',
           columnInfo: colInfo && colInfo.length ? colInfo[0] : [],
           frameworkId: this.frameworkService.getFrameworkId(),
           selectedparents: this.heightLighted,
@@ -174,7 +176,8 @@ export class TermCardComponent implements OnInit {
         const responseData = {
           res,
           index: nextCat.index,
-          data
+          data,
+          type: 'multi-create'
         }
         this.frameworkService.updateAfterAddOrEditSubject(responseData)
       })

@@ -22,7 +22,9 @@ export class CreateTermComponent implements OnInit {
   filtedTermLists: Observable<any[]>;
   createTermForm: FormGroup
   createThemeForm: FormGroup
+  createThemeFormMulti: FormGroup
   disableCreate: boolean = false;
+  disableUpdate: boolean = false;
   isTermExist: boolean = false;
   selectedTerm: Card = {};
   app_strings = labels;
@@ -47,6 +49,9 @@ export class CreateTermComponent implements OnInit {
       name: ['', [Validators.required]],
       dname: ['', [Validators.required]],
       description: ['']
+    })
+    this.createThemeFormMulti = this.fb.group({
+      themeFields:this.fb.array([this.createThemeFields()])
     })
     this.filtedTermLists = this.createTermForm.get('name').valueChanges.pipe(
       startWith(''),
@@ -77,6 +82,45 @@ export class CreateTermComponent implements OnInit {
         default: this.updateFormEdit(this.createThemeForm, this.data)
           break
       }
+    } else if (this.data &&
+      (this.data.mode === 'multi-create')) {
+      // switch (this.data.columnInfo.code) {
+      //   case 'theme': this.updateFormEdit(this.createThemeForm, this.data)
+      //     break
+      //   case 'subtheme': this.updateFormEdit(this.createThemeForm, this.data)
+      //     break
+      //   default: this.updateFormEdit(this.createThemeForm, this.data)
+      //     break
+      // }
+    }
+  }
+
+  get themeFields(): FormArray {
+    return this.createThemeFormMulti.get('themeFields') as FormArray;
+  }
+
+  get themeFieldsControls() {
+    const themeFields = this.createThemeFormMulti.get('themeFields')
+    return (<any>themeFields)['controls']
+  }
+
+  createThemeFields(): FormGroup {
+    return this.fb.group({
+      name: ['', [Validators.required]],
+      dname: ['', [Validators.required]],
+      description: ['']
+    });
+  }
+
+  addThemeFields() {
+    if (this.data.mode === 'multi-create') {
+      this.themeFields.push(this.createThemeFields());
+    }
+  }
+
+  removeThemeFields(index: number) {
+    if (this.data.mode === 'multi-create') {
+      this.themeFields.removeAt(index);
     }
   }
 
@@ -96,6 +140,117 @@ export class CreateTermComponent implements OnInit {
     form.get('description').patchValue(data.childrenData.description)
     setTimeout(() => {
       form.get('name').disable()
+    })
+  }
+
+  multiCreate(form, data) {
+    console.log('inside multiCreate')
+    let counter = 0
+    let createdTerms = []
+    if(form.valid) {
+      console.log('form.valid', form.valid)
+      console.log(form.value)
+      const themeFields = form && form.value && form.value.themeFields
+      if(themeFields && themeFields.length) {
+        console.log('themeFields',themeFields)
+        themeFields.forEach((val, i) =>{
+          const term: NSFramework.ICreateTerm = {
+            code: this.frameWorkService.getUuid(),
+            name: val.name,
+            description: val.description,
+            category: this.data.columnInfo.code,
+            status: appConstants.LIVE,
+            // approvalStatus:appConstants.DRAFT,
+            parents: [
+              { identifier: `${this.data.frameworkId}_${this.data.columnInfo.code}` }
+            ],
+            additionalProperties: {}
+          }
+          const requestBody = {
+            request: {
+              term: term
+            }
+          }
+    
+          this.frameWorkService.createTerm(this.data.frameworkId, this.data.columnInfo.code, requestBody).subscribe((res: any) => {
+            requestBody.request.term['identifier'] = res.result.node_id[0]
+            createdTerms.push(requestBody.request.term)
+            console.log('createdTerms success',createdTerms)
+            counter++
+            console.log('counter :: ', counter, themeFields.length)
+            if(counter === themeFields.length){
+              this.updateTermAssociationsMulti(createdTerms)
+              this.dialogClose({ term: createdTerms, created: true, multi:true })
+            }
+          })
+        })
+        
+      }
+    }
+  }
+
+  async updateTermAssociationsMulti(createdTerms: any[]) {
+    if(createdTerms && createdTerms.length) {
+      let createdTermsCounter = 0
+      for(let createdTerm of createdTerms) {
+        console.log('createdTerm loop', createdTerm)
+        this.selectedTerm = createdTerm
+        console.log('this.selectedTerm', this.selectedTerm)
+        let associations = []
+        let temp
+        let counter = 0
+        let localIsExist = false
+        await this.frameWorkService.selectionList.forEach(async (parent, i) => {
+          counter++
+          temp = parent.children ? parent.children.filter(child => child.identifier === this.selectedTerm.identifier) : null
+          associations = parent.children ? parent.children.map(c => {
+            // return { identifier: c.identifier, approvalStatus: c.associationProperties?c.associationProperties.approvalStatus: 'Draft' }
+            return c.identifier ?  { identifier: c.identifier } : null
+          }) : []
+          if (temp && temp.length) {
+            this.isTermExist = true
+            return
+          } else {
+              associations.push({ identifier: this.selectedTerm.identifier })
+              this.isTermExist = false
+              if(createdTermsCounter === (createdTerms.length-1)) {
+                const reguestBody = {
+                  request: {
+                    term: {
+                      ...(associations && associations.length) ? {associations: [...associations]} : null,
+                    }
+                  }
+                }
+                // console.log('this.selectedTerm', this.selectedTerm)
+                // console.log('(this.selectedTerm && this.selectedTerm.identifier) ? this.selectedTerm : (updateData) ? updateData.updateTermData : {}', (this.selectedTerm && this.selectedTerm.identifier) ? this.selectedTerm : (updateData) ? updateData.updateTermData : {})
+                // this.dialogClose({ term: this.selectedTerm, created: true })
+                await this.callUpdate(counter, parent, reguestBody)
+                
+              }
+          }
+        })    
+        createdTermsCounter++
+      }
+    }
+  }
+
+  callUpdate(counter, parent, reguestBody ): Promise<any>{
+    return new Promise((resolve) => {
+      return this.frameWorkService.updateTerm(this.data.frameworkId, parent.category, parent.code, reguestBody).subscribe((res: any) => {
+        if (counter === this.frameWorkService.selectionList.size) {
+          // this.selectedTerm['associationProperties']['approvalStatus'] = 'Draft';
+  
+          // this value is for selected term in case of create scenario, in case of edit scenario this won't be avaiable 
+          // so term is set from childdata which is received from params in updateData
+          const value = (this.selectedTerm && this.selectedTerm.identifier) ? this.selectedTerm : {}
+          console.log('value :: ', value)
+          this.disableUpdate = false
+          this.dialogClose({ term: { ...value }, created: true })
+          resolve({ term: { ...value }, created: true })
+        }
+      }, (err: any) => {
+        console.error(`Edit ${this.data.columnInfo.name} failed, please try again later`)
+      })
     })
   }
 
@@ -163,6 +318,7 @@ export class CreateTermComponent implements OnInit {
   }
 
   updateTermData(form, data) {
+    this.disableUpdate = true
     const formData = {
       // use this if you need disabled field values : form.getRawValue()
       ...form.value
@@ -193,6 +349,7 @@ export class CreateTermComponent implements OnInit {
       } else {
         // associations.push({ identifier: this.selectedTerm.identifier, approvalStatus: appConstants.DRAFT })
         if(this.selectedTerm && this.selectedTerm.identifier) {
+          console.log('inside selected Term push')
           associations.push({ identifier: this.selectedTerm.identifier })
         }
         this.isTermExist = false
@@ -213,7 +370,9 @@ export class CreateTermComponent implements OnInit {
 
             // this value is for selected term in case of create scenario, in case of edit scenario this won't be avaiable 
             // so term is set from childdata which is received from params in updateData
-            const value = (this.selectedTerm && this.selectedTerm.identifier) ? this.selectedTerm : (updateData) ? updateData.updateTermData : {}
+            const value = (this.selectedTerm && this.selectedTerm.identifier) ? this.selectedTerm : (updateData) ? {...updateData.updateTermData, ...updateData.formData} : {}
+            console.log('value :: ', value)
+            this.disableUpdate = false
             this.dialogClose({ term: { ...value }, created: true })
           }
         }, (err: any) => {

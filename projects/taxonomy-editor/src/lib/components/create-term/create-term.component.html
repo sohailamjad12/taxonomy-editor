@@ -5,7 +5,7 @@
 </ng-container>
 
 <ng-template #modalTitle>
-    <ng-container *ngIf="data?.mode === 'create'">
+    <ng-container *ngIf="data?.mode === 'create' || data?.mode === 'multi-create'">
         <div class="dialog-title" mat-dialog-title>{{app_strings.createNew}} {{data.columnInfo.name}}</div>
     </ng-container>
     <!-- <ng-container *ngIf="data?.mode === 'view'">
@@ -53,90 +53,195 @@
         <div class="flex gap-4">
             <ng-container *ngFor="let term of data?.selectedParentTerms">
                 <div class="flex-1 flex-col">
-                    <label for="name" class="margin-remove-bottom form-label"
-                        aria-label="First name label">
+                    <label for="name" class="margin-remove-bottom form-label" aria-label="First name label">
                         {{term.category}}
                     </label>
                     <mat-form-field appearance="outline" class="flex-1">
-                        <input matInput name="name" id="name" #name
-                            placeholder="{{app_strings.name}}" [value]="term.name" disabled>
+                        <input matInput name="name" id="name" #name placeholder="{{app_strings.name}}"
+                            [value]="term.name" disabled>
                     </mat-form-field>
                 </div>
             </ng-container>
         </div>
         <div class="row-divider"></div>
-        <form class="themeForm" [formGroup]="createThemeForm" novalidate
-            (ngSubmit)="disableCreate?updateTermAssociations():saveThemeTerm()">
-            <div class="input-column">
-                <div class="input-wrapper margin-top-s">
-                    <div class="flex gap-4 ">
-                        <div class="flex-1 flex-col">
-                            <label for="name" class="margin-remove-bottom form-label required"
-                                aria-label="First name label">
-                                Add Name
-                            </label>
-                            <mat-form-field appearance="outline" class="flex-1">
-                                <input matInput formControlName="name" id="name" #name
-                                    placeholder="{{app_strings.name}}" (blur)="updateDname(name.value, createThemeForm)">
-                                <!-- <input matInput formControlName="name" id="name" #name placeholder="{{app_strings.name}}"
-                                [matAutocomplete]="auto">
-                                <mat-autocomplete #auto="matAutocomplete"
-                                (optionSelected)="onSelect($event.option, createThemeForm)">
-                                <mat-option *ngFor="let option of filtedTermLists | async" [value]="option">
-                                    {{option.name}}
-                                </mat-option>
-                                </mat-autocomplete> -->
-                            </mat-form-field>
-                            <mat-error *ngIf="isTermExist" >{{app_strings.alreadyExist}}</mat-error>
-                        </div>
-                        <div class="flex-1 flex-col">
-                            <label for="name" class="margin-remove-bottom form-label required"
-                                aria-label="First name label">
-                                Display Name
-                            </label>
-                            <mat-form-field appearance="outline" class="flex-1">
-                                <input matInput formControlName="dname" id="dname" #dname
-                                    placeholder="Competency display name">
-                                <!-- <input matInput formControlName="name" id="name" #name placeholder="{{app_strings.name}}"
-                                [matAutocomplete]="auto"> -->
-                                <!-- <mat-autocomplete #auto="matAutocomplete"
-                                (optionSelected)="onSelect($event.option, createThemeForm)">
-                                <mat-option *ngFor="let option of filtedTermLists | async" [value]="option">
-                                    {{option.name}}
-                                </mat-option>
+        <ng-container *ngIf="data?.mode !== 'multi-create'">
+            <form class="themeForm" [formGroup]="createThemeForm" novalidate
+                (ngSubmit)="disableCreate?updateTermAssociations():saveThemeTerm()">
+                <div class="input-column">
+                    <div class="input-wrapper margin-top-s">
+                        <div class="flex gap-4 ">
+                            <div class="flex-1 flex-col">
+                                <label for="name" class="margin-remove-bottom form-label required"
+                                    aria-label="First name label">
+                                    Add Name
+                                </label>
+                                <mat-form-field appearance="outline" class="flex-1">
+                                    <input matInput formControlName="name" id="name" #name
+                                        placeholder="{{app_strings.name}}"
+                                        (blur)="updateDname(name.value, createThemeForm)">
+                                    <!-- <input matInput formControlName="name" id="name" #name placeholder="{{app_strings.name}}"
+                            [matAutocomplete]="auto">
+                            <mat-autocomplete #auto="matAutocomplete"
+                            (optionSelected)="onSelect($event.option, createThemeForm)">
+                            <mat-option *ngFor="let option of filtedTermLists | async" [value]="option">
+                                {{option.name}}
+                            </mat-option>
                             </mat-autocomplete> -->
-                                <!-- <mat-error *ngIf="isTermExist">{{app_strings.alreadyExist}}</mat-error> -->
+                                </mat-form-field>
+                                <mat-error *ngIf="isTermExist">{{app_strings.alreadyExist}}</mat-error>
+                            </div>
+                            <div class="flex-1 flex-col">
+                                <label for="name" class="margin-remove-bottom form-label required"
+                                    aria-label="First name label">
+                                    Display Name
+                                </label>
+                                <mat-form-field appearance="outline" class="flex-1">
+                                    <input matInput formControlName="dname" id="dname" #dname
+                                        placeholder="Competency display name">
+                                    <!-- <input matInput formControlName="name" id="name" #name placeholder="{{app_strings.name}}"
+                            [matAutocomplete]="auto"> -->
+                                    <!-- <mat-autocomplete #auto="matAutocomplete"
+                            (optionSelected)="onSelect($event.option, createThemeForm)">
+                            <mat-option *ngFor="let option of filtedTermLists | async" [value]="option">
+                                {{option.name}}
+                            </mat-option>
+                        </mat-autocomplete> -->
+                                    <!-- <mat-error *ngIf="isTermExist">{{app_strings.alreadyExist}}</mat-error> -->
+                                </mat-form-field>
+                            </div>
+                        </div>
+
+                        <div class="flex-col mt-2">
+                            <label for="fname" class="margin-remove-bottom form-label required"
+                                i18n="First Name label|Label which explains the user to enter first name"
+                                i18n-aria-label aria-label="First name label">
+                                Description
+                            </label>
+                            <mat-form-field appearance="outline" class="flex-1">
+                                <!-- <mat-label>Enter {{data.name}} name</mat-label> -->
+                                <textarea matInput [matTextareaAutosize] [matAutosizeMaxRows]="10"
+                                    [matAutosizeMinRows]="3" formControlName="description"
+                                    placeholder="{{app_strings.description}}"></textarea>
                             </mat-form-field>
                         </div>
-                    </div>
-
-                    <div class="flex-col mt-2">
-                        <label for="fname" class="margin-remove-bottom form-label required"
-                            i18n="First Name label|Label which explains the user to enter first name" i18n-aria-label
-                            aria-label="First name label">
-                            Description
-                        </label>
-                        <mat-form-field appearance="outline" class="flex-1">
-                            <!-- <mat-label>Enter {{data.name}} name</mat-label> -->
-                            <textarea matInput [matTextareaAutosize] [matAutosizeMaxRows]="10" [matAutosizeMinRows]="3"
-                                formControlName="description" placeholder="{{app_strings.description}}"></textarea>
-                        </mat-form-field>
                     </div>
                 </div>
-            </div>
-            <footer class="actions">
-                <button mat-raised-button color="default" type="reset"
-                    (click)="dialogClose('')">{{app_strings.cancel}}</button>
-                <ng-container *ngIf="data?.mode === 'create'">
-                    <button mat-raised-button color="primary" type="submit" cdkFocusInitial [disabled]="createThemeForm?.invalid"
-                        *ngIf="!disableCreate">{{app_strings.create}}</button>
-                </ng-container>
-                <ng-container *ngIf="data?.mode === 'edit'">
-                    <button mat-raised-button color="primary" type="button" cdkFocusInitial 
-                    (click)="updateTermData(createThemeForm, data)" [disabled]="createThemeForm?.invalid"
-                        *ngIf="!disableCreate" >{{app_strings.update}}</button>
-                </ng-container>
-            </footer>
-        </form>
+                <footer class="actions">
+                    <button mat-raised-button color="default" type="reset"
+                        (click)="dialogClose('')">{{app_strings.cancel}}</button>
+                    <ng-container *ngIf="data?.mode === 'create'">
+                        <button mat-raised-button color="primary" type="submit" cdkFocusInitial
+                            [disabled]="createThemeForm?.invalid" *ngIf="!disableCreate">{{app_strings.create}}</button>
+                    </ng-container>
+                    <ng-container *ngIf="data?.mode === 'edit'">
+                        <button mat-raised-button color="primary" type="button" cdkFocusInitial
+                            (click)="updateTermData(createThemeForm, data)" [disabled]="createThemeForm?.invalid"
+                            *ngIf="!disableCreate">{{app_strings.update}}</button>
+                    </ng-container>
+                </footer>
+            </form>
+        </ng-container>
+        <ng-container *ngIf="data?.mode === 'multi-create'">
+            <form class="themeForm" [formGroup]="createThemeFormMulti" novalidate
+                (ngSubmit)="disableCreate?updateTermAssociations():saveThemeTerm()">
+                <button type="button" class="mat-button flex items-center " *ngIf="data.mode === 'multi-create'" (click)="addThemeFields()">
+                    <mat-icon class="mr-2 mat-icon-custom ">add_circle_outline</mat-icon>
+                    Add {{data.columnInfo.name}}
+                </button>
+                <mat-accordion formArrayName="themeFields">
+                    <mat-expansion-panel *ngFor="let field of themeFieldsControls; let i = index; let isFirst = first" 
+                    class="margin-bottom-l" [formGroupName]="i" [expanded]="isFirst">
+                        <mat-expansion-panel-header>
+                            <mat-panel-title>
+                                {{name?.value}} 
+                            </mat-panel-title>
+                            <button mat-button type="button" *ngIf="data.mode === 'multi-create'"
+                                    (click)="removeThemeFields(i)">
+                                    <mat-icon class="mat-icon-custom ">delete</mat-icon>
+                            </button>
+                        </mat-expansion-panel-header>
+                        <div class="input-column">
+                            <div class="input-wrapper margin-top-s">
+                                <div class="flex gap-4 ">
+                                    <div class="flex-1 flex-col">
+                                        <label for="name" class="margin-remove-bottom form-label required"
+                                            aria-label="First name label">
+                                            Add Name
+                                        </label>
+                                        <mat-form-field appearance="outline" class="flex-1">
+                                            <input matInput formControlName="name" id="name" #name
+                                                placeholder="{{app_strings.name}}"
+                                                (blur)="updateDname(name.value, createThemeFormMulti)">
+                                            <!-- <input matInput formControlName="name" id="name" #name placeholder="{{app_strings.name}}"
+                                        [matAutocomplete]="auto">
+                                        <mat-autocomplete #auto="matAutocomplete"
+                                        (optionSelected)="onSelect($event.option, createThemeForm)">
+                                        <mat-option *ngFor="let option of filtedTermLists | async" [value]="option">
+                                            {{option.name}}
+                                        </mat-option>
+                                        </mat-autocomplete> -->
+                                        </mat-form-field>
+                                        <mat-error *ngIf="isTermExist">{{app_strings.alreadyExist}}</mat-error>
+                                    </div>
+                                    <div class="flex-1 flex-col">
+                                        <label for="name" class="margin-remove-bottom form-label required"
+                                            aria-label="First name label">
+                                            Display Name
+                                        </label>
+                                        <mat-form-field appearance="outline" class="flex-1">
+                                            <input matInput formControlName="dname" id="dname" #dname
+                                                placeholder="Competency display name">
+                                            <!-- <input matInput formControlName="name" id="name" #name placeholder="{{app_strings.name}}"
+                                        [matAutocomplete]="auto"> -->
+                                            <!-- <mat-autocomplete #auto="matAutocomplete"
+                                        (optionSelected)="onSelect($event.option, createThemeForm)">
+                                        <mat-option *ngFor="let option of filtedTermLists | async" [value]="option">
+                                            {{option.name}}
+                                        </mat-option>
+                                    </mat-autocomplete> -->
+                                            <!-- <mat-error *ngIf="isTermExist">{{app_strings.alreadyExist}}</mat-error> -->
+                                        </mat-form-field>
+                                    </div>
+                                </div>
+
+                                <div class="flex-col mt-2">
+                                    <label for="fname" class="margin-remove-bottom form-label required"
+                                        i18n="First Name label|Label which explains the user to enter first name"
+                                        i18n-aria-label aria-label="First name label">
+                                        Description
+                                    </label>
+                                    <mat-form-field appearance="outline" class="flex-1">
+                                        <!-- <mat-label>Enter {{data.name}} name</mat-label> -->
+                                        <textarea matInput [matTextareaAutosize] [matAutosizeMaxRows]="10"
+                                            [matAutosizeMinRows]="3" formControlName="description"
+                                            placeholder="{{app_strings.description}}"></textarea>
+                                    </mat-form-field>
+                                </div>
+                            </div>
+                        </div>
+                    </mat-expansion-panel>
+                </mat-accordion>
+                <footer class="actions">
+                    <button mat-raised-button color="default" type="reset"
+                        (click)="dialogClose('')">{{app_strings.cancel}}</button>
+                    <ng-container *ngIf="data?.mode === 'create'">
+                        <button mat-raised-button color="primary" type="submit" cdkFocusInitial
+                            [disabled]="createThemeForm?.invalid" *ngIf="!disableCreate">{{app_strings.create}}</button>
+                    </ng-container>
+                    <ng-container *ngIf="data?.mode === 'multi-create'">
+                        <button mat-raised-button color="primary" type="button" cdkFocusInitial
+                            [disabled]="createThemeFormMulti.invalid" *ngIf="!disableCreate" (click)="multiCreate(createThemeFormMulti, data)">
+                            {{app_strings.create}}
+                        </button>
+                    </ng-container>
+                    <ng-container *ngIf="data?.mode === 'edit'">
+                        <button mat-raised-button color="primary" type="button" cdkFocusInitial
+                            (click)="updateTermData(createThemeForm, data)"
+                            [disabled]="createThemeForm?.invalid || disableUpdate"
+                            *ngIf="!disableCreate">{{app_strings.update}}</button>
+                    </ng-container>
+                </footer>
+            </form>
+        </ng-container>
     </div>
 </ng-template>

@@ -7,7 +7,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 import { MatFormFieldModule, MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field'
 import { MatButtonModule } from '@angular/material/button'
-import { MatInputModule, MatMenuModule, MatSelect, MatSelectModule } from '@angular/material'
+import { MatExpansionModule, MatInputModule, MatMenuModule, MatSelect, MatSelectModule } from '@angular/material'
 import { MatIconModule } from '@angular/material/icon'
 import { MatCardModule } from '@angular/material/card';
 import { MatDialogModule } from '@angular/material/dialog'
@@ -89,7 +89,8 @@ import { DatePipe } from './pipes/date.pipe'
     MatTooltipModule,
     MatCheckboxModule,
     MatTableModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatExpansionModule
   ],
   providers: [
     { provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { appearance: 'outline' } },
