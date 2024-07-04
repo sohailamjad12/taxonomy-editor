@@ -28,6 +28,29 @@ export class CreateTermComponent implements OnInit {
   isTermExist: boolean = false;
   selectedTerm: Card = {};
   app_strings = labels;
+  themCode = ''
+  designationsList = [
+    {
+      designationId: 0,
+      designationName: 'trainey'
+    },
+    {
+      designationId: 1,
+      designationName: 'manager'
+    },
+    {
+      designationId: 2,
+      designationName: 'team lead'
+    },
+    {
+      designationId: 3,
+      designationName: 'software engineer'
+    },
+    {
+      designationId: 4,
+      designationName: 'ceo'
+    },
+  ]
   constructor(
     public dialogRef: MatDialogRef<CreateTermComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
@@ -37,6 +60,8 @@ export class CreateTermComponent implements OnInit {
 
   ngOnInit() {
     this.termLists = this.data.columnInfo.children
+    this.themCode = this.data!.columnInfo!.code
+    console.log('data: ', this.data)
     this.initTermForm()
   }
 
@@ -45,18 +70,29 @@ export class CreateTermComponent implements OnInit {
       name: ['', [Validators.required]],
       description: ['']
     })
-    this.createThemeForm = this.fb.group({
-      name: ['', [Validators.required]],
-      dname: ['', [Validators.required]],
-      description: ['']
-    })
-    this.createThemeFormMulti = this.fb.group({
-      themeFields:this.fb.array([this.createThemeFields()])
-    })
-    this.filtedTermLists = this.createTermForm.get('name').valueChanges.pipe(
-      startWith(''),
-      map(value => this._filter(value || '')),
-    );
+
+    switch (this.themCode) {
+      case 'designation':
+        this.createThemeForm = this.fb.group({
+          designations: this.fb.array([])
+        });
+        this.addDesignation();
+        break;
+      default:
+        this.createThemeForm = this.fb.group({
+          name: ['', [Validators.required]],
+          dname: ['', [Validators.required]],
+          description: ['']
+        })
+        this.createThemeFormMulti = this.fb.group({
+          themeFields:this.fb.array([this.createThemeFields()])
+        })
+        this.filtedTermLists = this.createTermForm.get('name').valueChanges.pipe(
+          startWith(''),
+          map(value => this._filter(value || '')),
+        );
+        break
+    }
 
     // if mode is "view" then check for which type of form has to be used and then append the values in form
     if (
@@ -276,6 +312,41 @@ export class CreateTermComponent implements OnInit {
       form.controls.themeFields.controls[i].controls['dname'].patchValue(name)
     }
   }
+
+  get designationControls() {
+    return (this.createThemeForm.get('designations') as FormArray).controls;
+  }
+
+  getFilteredDesignationList(index: string) {
+    const filterKey = this.createThemeForm.value.designations[index].designationName
+    if(filterKey && this.designationsList) {
+      const filteredList = this.designationsList.filter((designation: any) => designation.designationName.includes(filterKey))
+      return filteredList
+    }
+
+    return []
+  }
+
+  addDesignation() {
+    const newDesignation = this.fb.group({
+      designationName: ['', Validators.required],
+      description: ['', Validators.required, Validators.maxLength(600)],
+      isSaved: [false]
+    });
+    (this.createThemeForm.get('designations') as FormArray).push(newDesignation);
+  }
+
+  deleteDesignation(index: number) {
+    (this.createThemeForm.get('designations') as FormArray).removeAt(index);
+  }
+
+  saveDesignation(index: number) {
+    const savedDesignation = this.createThemeForm.get('designations').value[index];
+  }
+
+  submitDesignation() {}
+
+  cancel() {}
 
   private _filter(searchTxt: any): string[] {
     let isExist;

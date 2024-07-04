@@ -2,6 +2,7 @@
     <ng-container *ngSwitchDefault [ngTemplateOutlet]="themeCreate"></ng-container>
     <ng-container *ngSwitchCase="'theme'" [ngTemplateOutlet]="themeCreate"></ng-container>
     <ng-container *ngSwitchCase="'subtheme'" [ngTemplateOutlet]="themeCreate"></ng-container>
+    <ng-container *ngSwitchCase="'designation'" [ngTemplateOutlet]="themeDesignation"></ng-container>
 </ng-container>
 
 <ng-template #modalTitle>
@@ -245,5 +246,92 @@
                 </footer>
             </form>
         </ng-container>
+    </div>
+</ng-template>
+
+<ng-template #themeDesignation>
+    <div class="themDesignation">
+        <div class="dialogNew">
+            <ng-container [ngTemplateOutlet]="modalTitle"></ng-container>
+            <div class="mb-2">
+                <span class="organisation">Organisation</span>
+                <div class="org-name pl-4 flex items-center">
+                    <!-- <span>Department of Fisheries</span> -->
+                    <span>{{data?.columnInfo?.name}}</span>
+                </div>
+            </div>
+            <!-- <div class="flex gap-4">
+                <ng-container *ngFor="let term of data?.selectedParentTerms">
+                    <div class="flex-1 flex-col">
+                        <label for="name" class="margin-remove-bottom form-label mt-4"
+                            aria-label="First name label">
+                            {{term.category}}
+                        </label>
+                        <mat-form-field appearance="outline" class="flex-1">
+                            <input matInput name="name" id="name" #name
+                                placeholder="{{app_strings.name}}" [value]="term.name" disabled>
+                        </mat-form-field>
+                    </div>
+                </ng-container>
+            </div> -->
+            <div class="row-divider"></div>
+            <div class="flex w-full items-center justify-end mt-4">
+                <a mat-button class="add-designation flex justify-center items-center" (click)="addDesignation()">
+                    <mat-icon class="add-icon mr-2">add_circle_outline</mat-icon>
+                    <span>Add Designations</span>
+                </a>
+            </div>
+            <div class="mt-5">
+                <form  [formGroup]="createThemeForm">
+                    <mat-accordion class="flex flex-col gap-2" formArrayName="designations">
+                        <ng-container *ngFor="let designation of designationControls; let i = index">
+                            <mat-expansion-panel [formGroupName]="i"  class="designation-panel">
+                                <mat-expansion-panel-header>
+                                    <div class="flex w-full items-center justify-end">
+                                        <mat-icon class="deletDesignation mr-4" (click)="deleteDesignation(i)">delete</mat-icon>
+                                    </div>
+                                </mat-expansion-panel-header>
+                                <div class="flex flex-col gap-2 ">
+                                    <div class="w-full">
+                                        <label for="name" class="margin-remove-bottom form-label required" aria-label="First name label">
+                                            Designation Name <mat-icon class="info-icon">info</mat-icon>
+                                        </label>
+                                        <mat-form-field appearance="outline" class="flex-1">
+                                            <input matInput formControlName="designationName" placeholder="Type here" [matAutocomplete]="auto">
+                                            <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onSelect($event.option, createThemeForm)">
+                                                <mat-option *ngFor="let option of getFilteredDesignationList(i)" [value]="option.id">
+                                                    {{option.designationName}}
+                                                </mat-option>
+                                            </mat-autocomplete>
+                                            <!-- <mat-error *ngIf="isTermExist">{{app_strings.alreadyExist}}</mat-error> -->
+                                        </mat-form-field>
+                                        <!-- <mat-error>{{app_strings.alreadyExist}}</mat-error> -->
+                                    </div>
+                                    <div class="w-full">
+                                        <label for="name" class="margin-remove-bottom form-label required" aria-label="First name label">
+                                            Description <mat-icon class="info-icon">info</mat-icon>
+                                        </label>
+                                        <mat-form-field appearance="outline" class="flex-1">
+                                            <textarea matInput formControlName="description"
+                                                placeholder="Type the decription in fewer than 600 characters"></textarea>
+                                        </mat-form-field>
+                                    </div>
+                                
+                                    <div class="w-full flex justify-end items-center">
+                                        <button mat-raised-button class="saveDesignaton flex justify-center items-center"
+                                            (click)="saveDesignation(i)">Save</button>
+                                    </div>
+                                </div>
+                            </mat-expansion-panel>
+                        </ng-container>
+                    </mat-accordion>
+                </form>
+            </div>
+        </div>
+        <div class="flex justify-end items-center gap-4 mt-5 designation-footer">
+            <button mat-raised-button class="cancel flex justify-center items-center"
+                (click)="cancel()">Cancel</button>
+            <button mat-raised-button class="saveDesignaton flex justify-center items-center" (click)="submitDesignation()">Add</button>
+        </div>
     </div>
 </ng-template>

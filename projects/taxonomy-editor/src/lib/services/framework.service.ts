@@ -265,11 +265,13 @@ export class FrameworkService {
 
   getConfig(code: string) {
     let categoryConfig: any;
-    this.rootConfig.forEach((config: any, index: number) => {
-      if(this.frameworkId == config.frameworkId) {
-        categoryConfig = config.config.find((obj: any) => obj.category == code);
-      }
-    });
+    if(this.rootConfig && this.rootConfig[0]) {
+      this.rootConfig.forEach((config: any, index: number) => {
+        if(this.frameworkId == config.frameworkId) {
+          categoryConfig = config.config.find((obj: any) => obj.category == code);
+        }
+      });
+    }
     return categoryConfig;
   }
 
