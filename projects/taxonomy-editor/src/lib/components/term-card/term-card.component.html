@@ -27,7 +27,7 @@
 
         <!-- (click)="$event.stopPropagation();" -->
         <button type="button" mat-icon-button i18n-aria-label aria-label="action items"
-            [matMenuTriggerFor]="cardMenu" [matMenuTriggerData]="{'data':data}" class="action-btn">
+            [matMenuTriggerFor]="cardMenu" [matMenuTriggerData]="{'data':data, 'cardRef': cardRef}" class="action-btn">
             <mat-icon>more_vert</mat-icon>
         </button>
         <!-- <div class="term-card-checkbox">
@@ -57,13 +57,13 @@
 </ng-template>
 
 <mat-menu #cardMenu="matMenu">
-    <ng-template matMenuContent let-rowData="data">
+    <ng-template matMenuContent let-rowData="data" let-cardRef="cardRef">
         <!-- <div > -->
         <button (click)="view(data, data.children, data.index)" mat-menu-item name="channel-analytics-button"
             class="ws-mat-primary-text" i18n-aria-label aria-label="Analytics">
             <mat-icon>visibility</mat-icon> <span>view</span>
         </button>
-        <button (click)="edit(data,  data.children,data.index)"
+        <button (click)="edit(data,  data.children,data.index, cardRef)"
             mat-menu-item name="channel-analytics-button" class="ws-mat-primary-text" i18n-aria-label
             aria-label="Analytics">
             <mat-icon>edit</mat-icon>

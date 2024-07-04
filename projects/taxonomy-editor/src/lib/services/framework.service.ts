@@ -70,10 +70,7 @@ export class FrameworkService {
   }
 
   publishFramework() {
-    const headers = new HttpHeaders({
-      'X-Channel-Id': this.environment.channelId,
-    })
-    return this.http.post(`/${this.proxiesPath}/framework/v1/publish/${this.environment.frameworkName}`, {}, { headers: headers })
+    return this.http.post(`/${this.proxiesPath}/framework/v1/publish/${this.environment.frameworkName}`, {})
     // return this.http.post(`${this.environment.url}/apis/proxies/v8/framework/v1/publish/${this.environment.frameworkName}`, {}, { headers})
     // return this.http.post(`${this.environment.url}/apis/proxies/v8/framework/v1/publish/${this.environment.frameworkName}`, {}, { headers})
   }

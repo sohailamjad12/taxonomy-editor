@@ -180,7 +180,7 @@ export class CreateTermComponent implements OnInit {
             console.log('counter :: ', counter, themeFields.length)
             if(counter === themeFields.length){
               this.updateTermAssociationsMulti(createdTerms)
-              this.dialogClose({ term: createdTerms, created: true, multi:true })
+              // this.dialogClose({ term: createdTerms, created: true, multi:true })
             }
           })
         })
@@ -200,7 +200,8 @@ export class CreateTermComponent implements OnInit {
         let temp
         let counter = 0
         let localIsExist = false
-        await this.frameWorkService.selectionList.forEach(async (parent, i) => {
+        for(const [key, value] of this.frameWorkService.selectionList){
+          const parent = value
           counter++
           temp = parent.children ? parent.children.filter(child => child.identifier === this.selectedTerm.identifier) : null
           associations = parent.children ? parent.children.map(c => {
@@ -213,7 +214,7 @@ export class CreateTermComponent implements OnInit {
           } else {
               associations.push({ identifier: this.selectedTerm.identifier })
               this.isTermExist = false
-              if(createdTermsCounter === (createdTerms.length-1)) {
+              // if(createdTermsCounter === (createdTerms.length-1)) {
                 const reguestBody = {
                   request: {
                     term: {
@@ -224,19 +225,22 @@ export class CreateTermComponent implements OnInit {
                 // console.log('this.selectedTerm', this.selectedTerm)
                 // console.log('(this.selectedTerm && this.selectedTerm.identifier) ? this.selectedTerm : (updateData) ? updateData.updateTermData : {}', (this.selectedTerm && this.selectedTerm.identifier) ? this.selectedTerm : (updateData) ? updateData.updateTermData : {})
                 // this.dialogClose({ term: this.selectedTerm, created: true })
-                await this.callUpdate(counter, parent, reguestBody)
+                await this.callUpdateAssociations(counter, parent, reguestBody)
                 
-              }
+              // }
           }
-        })    
+        }
         createdTermsCounter++
+        if(createdTermsCounter === createdTerms.length) {
+          this.dialogClose({ term: [this.selectedTerm], created: true, multi:true })
+        }
       }
     }
   }
 
-  callUpdate(counter, parent, reguestBody ): Promise<any>{
+  callUpdateAssociations(counter, parent, reguestBody ): Promise<any>{
     return new Promise((resolve) => {
-      return this.frameWorkService.updateTerm(this.data.frameworkId, parent.category, parent.code, reguestBody).subscribe((res: any) => {
+      this.frameWorkService.updateTerm(this.data.frameworkId, parent.category, parent.code, reguestBody).subscribe((res: any) => {
         if (counter === this.frameWorkService.selectionList.size) {
           // this.selectedTerm['associationProperties']['approvalStatus'] = 'Draft';
   
@@ -244,9 +248,19 @@ export class CreateTermComponent implements OnInit {
           // so term is set from childdata which is received from params in updateData
           const value = (this.selectedTerm && this.selectedTerm.identifier) ? this.selectedTerm : {}
           console.log('value :: ', value)
+          const found = parent.children ? parent.children.find(c=> c.identifier === this.selectedTerm.identifier) : false
+          if(!found) {
+            parent.children ? parent.children.push(this.selectedTerm) : parent['children'] = [this.selectedTerm]
+          }
           this.disableUpdate = false
-          this.dialogClose({ term: { ...value }, created: true })
-          resolve({ term: { ...value }, created: true })
+          // this.frameWorkService.publishFramework().subscribe(res => {
+          //   // this.dialogRef.close(term)
+          //   console.log('published')
+          //   return resolve(true)
+          // });
+          resolve(true)
+        } else {
+          return resolve(true)
         }
       }, (err: any) => {
         console.error(`Edit ${this.data.columnInfo.name} failed, please try again later`)
@@ -254,9 +268,12 @@ export class CreateTermComponent implements OnInit {
     })
   }
 
-  updateDname(name, form) {
+  updateDname(name, form, i?) {
     if(this.data.mode === 'create'){
       form.get('dname').patchValue(name)
+    }
+    if(this.data.mode === 'multi-create'){
+      form.controls.themeFields.controls[i].controls['dname'].patchValue(name)
     }
   }
 

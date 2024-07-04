@@ -102,15 +102,12 @@ export class TaxonomyViewComponent implements OnInit, OnDestroy {
         // console.log('res.parent.children after assign::', res.parent.children)
         // console.log('refreshData calling updateFina list ')
         this.loaded[res.term.category] = true
-        this.updateFinalList({ selectedTerm: res.term, isSelected: false, parentData: res.parent, colIndex:resData.index }, 'update')
+        // res.term.selected = false
+        this.updateFinalList({ selectedTerm: res.term, isSelected: true, parentData: res.parent, colIndex:resData.index }, 'update')
       } else {
-        if(multiTerms && multiTerms.length){
-          multiTerms.forEach(term => {
-            res.parent.children? res.parent.children.push(term) :res.parent['children'] = [term]
-          })
-        } else {
+        if(!res.multi){
           res.parent.children? res.parent.children.push(res.term) :res.parent['children'] = [res.term]
-        }
+        } 
         this.updateFinalList({ selectedTerm: res.term, isSelected: false, parentData: res.parent, colIndex:resData.index },)
       }
     }
@@ -139,11 +136,7 @@ export class TaxonomyViewComponent implements OnInit, OnDestroy {
         this.frameworkService.selectionList.delete(next.code)
       }
       // notify next
-      if(type && type === 'update'){
-        this.frameworkService.insertUpdateDeleteNotifier.next({ action: data.selectedTerm.category, type: type ? type : 'update', data: data.selectedTerm })
-      } else {
-        this.frameworkService.insertUpdateDeleteNotifier.next({ action: data.selectedTerm.category, type: type ? type : 'select', data: data.selectedTerm })
-      }
+      this.frameworkService.insertUpdateDeleteNotifier.next({ action: data.selectedTerm.category, type: type ? type : 'select', data: data.selectedTerm })
     } 
     if(data.colIndex === 0 && !data.isSelected) {
       this.isLoading = true;

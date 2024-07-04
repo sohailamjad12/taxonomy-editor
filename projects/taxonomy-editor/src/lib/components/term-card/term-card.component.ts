@@ -123,7 +123,7 @@ export class TermCardComponent implements OnInit {
         // this.updateFinalList({ selectedTerm: res.term, isSelected: false, parentData: res.parent, colIndex:colIndex })
       })
   }
-  edit(data: any, childrenData: any, index: any){
+  edit(data: any, childrenData: any, index: any, cardRef: any){
     const selectedTerms = this.frameworkService.getPreviousSelectedTerms(data.columnInfo.code)
     const dialog = this.dialog.open(CreateTermComponent, {
       data: { 
@@ -133,7 +133,8 @@ export class TermCardComponent implements OnInit {
         selectedparents: this.heightLighted,
         colIndex: index,
         childrenData: childrenData,
-        selectedParentTerms: selectedTerms
+        selectedParentTerms: selectedTerms,
+        cardRef: cardRef
       },
       width: '800px',
       panelClass: 'custom-dialog-container'
@@ -146,7 +147,8 @@ export class TermCardComponent implements OnInit {
         res,
         index: index.index,
         data,
-        type: 'update'
+        type: 'update',
+        cardRef: cardRef
       }
       this.frameworkService.updateAfterAddOrEditSubject(responseData)
     })
