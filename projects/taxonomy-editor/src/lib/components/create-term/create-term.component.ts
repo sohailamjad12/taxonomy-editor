@@ -9,6 +9,7 @@ import { NSFramework } from '../../models/framework.model';
 import * as appConstants from '../../constants/app-constant';
 import { labels } from '../../labels/strings';
 import { CardChecked, CardSelection, CardsCount, Card } from '../../models/variable-type.model';
+import { OdcsService } from '../../services/odcs.service';
 
 @Component({
   selector: 'lib-create-term',
@@ -29,40 +30,23 @@ export class CreateTermComponent implements OnInit {
   selectedTerm: Card = {};
   app_strings = labels;
   themCode = ''
-  designationsList = [
-    {
-      designationId: 0,
-      designationName: 'trainey'
-    },
-    {
-      designationId: 1,
-      designationName: 'manager'
-    },
-    {
-      designationId: 2,
-      designationName: 'team lead'
-    },
-    {
-      designationId: 3,
-      designationName: 'software engineer'
-    },
-    {
-      designationId: 4,
-      designationName: 'ceo'
-    },
-  ]
+  savedDesignations = []
+  addedDesignationCount = 0
+  designationsList = []
+  panelOpenState: any[] = [];
   constructor(
     public dialogRef: MatDialogRef<CreateTermComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
     private frameWorkService: FrameworkService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private odcsService: OdcsService
   ) { }
 
   ngOnInit() {
     this.termLists = this.data.columnInfo.children
     this.themCode = this.data!.columnInfo!.code
-    console.log('data: ', this.data)
     this.initTermForm()
+    this.loadDesignations()
   }
 
   initTermForm() {
@@ -313,14 +297,25 @@ export class CreateTermComponent implements OnInit {
     }
   }
 
+  //#region (designations)
+
   get designationControls() {
     return (this.createThemeForm.get('designations') as FormArray).controls;
   }
 
+  loadDesignations() {
+    this.odcsService.getDesignations({}).subscribe(
+      (data: any) => {
+        this.designationsList = data.responseData
+      },
+      (_err: any) => {
+      })
+  }
+
   getFilteredDesignationList(index: string) {
-    const filterKey = this.createThemeForm.value.designations[index].designationName
+    const filterKey = this.createThemeForm.value.designations[index].name.toLowerCase()
     if(filterKey && this.designationsList) {
-      const filteredList = this.designationsList.filter((designation: any) => designation.designationName.includes(filterKey))
+      const filteredList = this.designationsList.filter((designation: any) => designation.name.toLowerCase().includes(filterKey))
       return filteredList
     }
 
@@ -329,25 +324,62 @@ export class CreateTermComponent implements OnInit {
 
   addDesignation() {
     const newDesignation = this.fb.group({
-      designationName: ['', Validators.required],
-      description: ['', Validators.required, Validators.maxLength(600)],
-      isSaved: [false]
+      name: ['', Validators.required],
+      id:[null, Validators.required],
+      designationDescription: ['', [Validators.required, Validators.maxLength(600)]],
+      isSaved: [false], // isSaved can be used to change button text from save to update if needed
+      creationId: this.addedDesignationCount // creationId is created to use locally to give unique id to added records
     });
-    (this.createThemeForm.get('designations') as FormArray).push(newDesignation);
+    this.addedDesignationCount = this.addedDesignationCount + 1;
+    (this.createThemeForm.get('designations') as FormArray).insert(0, newDesignation);
+    // this.panelOpenState.insert(0, true)
+    this.panelOpenState.splice(0, 0, true);
+  }
+
+  clearSelectedDesignaionOnChange(index, event) {
+    const selectedName = this.createThemeForm.value.designations[index].name
+    if(selectedName !== event.value) {
+      const designationsToReset = this.designationControls[index]
+      designationsToReset.get('id').reset()
+    }
   }
 
   deleteDesignation(index: number) {
+    const reovedCreationId = this.designationControls[index].value.creationId;
     (this.createThemeForm.get('designations') as FormArray).removeAt(index);
+    this.savedDesignations = this.savedDesignations.filter((savedDesignation: any) => savedDesignation.creationId !== reovedCreationId)
   }
 
   saveDesignation(index: number) {
-    const savedDesignation = this.createThemeForm.get('designations').value[index];
+    const designations = this.designationControls
+    const designationToSave = designations[index]
+    if (designationToSave.valid) {
+      designationToSave.value.isSaved = true
+      const savedDesignationIndex = this.savedDesignations.findIndex(e => e.creationId === designationToSave.value.creationId)
+      if (savedDesignationIndex >= 0) {
+        this.savedDesignations[savedDesignationIndex] = designationToSave.value
+      } else {
+        this.savedDesignations.push(designationToSave.value)
+      }
+    }
   }
 
-  submitDesignation() {}
+  submitDesignation() {
+    // console.log('saved designations: ', this.savedDesignations)
+  }
 
-  cancel() {}
+  cancel() {
+    this.dialogRef.close()
+  }
 
+  get enableAddBtn() {
+    if(this.themCode === 'designation') {
+      return this.designationControls.length > 0 ? true : false
+    }
+  }
+
+  //#endregion
+  
   private _filter(searchTxt: any): string[] {
     let isExist;
     this.disableCreate = false
@@ -364,11 +396,18 @@ export class CreateTermComponent implements OnInit {
   }
 
   onSelect(term, form) {
-    this.selectedTerm = term.value
-    form.get('name').patchValue(term.value.name)
-    form.get('description').patchValue(term.value.description)
-    form.get('description').disable()
-    this.disableCreate = true
+    switch (this.themCode) {
+      case 'designation':
+        form.get('name').patchValue(term.value.name)
+        form.get('id').patchValue(term.value.id)
+        break;
+      default:
+        this.selectedTerm = term.value
+        form.get('name').patchValue(term.value.name)
+        form.get('description').patchValue(term.value.description)
+        form.get('description').disable()
+        this.disableCreate = true
+    }
   }
 
   saveTerm() {

@@ -569,6 +569,7 @@ input.mat-input-element {
   font-weight: 500;
   font-size: 14px;
   font-family: 'Lato';
+  cursor: pointer;
 
   .add-icon{
     color: #1B4CA1 !important;
@@ -632,10 +633,10 @@ input.mat-input-element {
 }
 
 .addBtn {
-  color: #FFFFFF;
+  color: #FFFFFF !important;
   height: 40px;
   width: 80px;
-  background-color: #1B4CA1;
+  background-color: #1B4CA1 !important;
   border: 1px solid #1B4CA1;
   font-weight: 700;
   font-size: 14px;
