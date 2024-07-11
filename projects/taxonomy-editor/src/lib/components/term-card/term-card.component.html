@@ -59,17 +59,17 @@
 <mat-menu #cardMenu="matMenu">
     <ng-template matMenuContent let-rowData="data" let-cardRef="cardRef">
         <!-- <div > -->
-        <button (click)="view(data, data.children, data.index)" mat-menu-item name="channel-analytics-button"
+        <button *ngIf="data.columnInfo.config.enableView"  (click)="view(data, data.children, data.index)" mat-menu-item name="channel-analytics-button"
             class="ws-mat-primary-text" i18n-aria-label aria-label="Analytics">
-            <mat-icon>visibility</mat-icon> <span>view</span>
+            <mat-icon>visibility</mat-icon> <span>View</span>
         </button>
-        <button (click)="edit(data,  data.children,data.index, cardRef)"
+        <button *ngIf="data.columnInfo.config.enabaleEdit" (click)="edit(data,  data.children,data.index, cardRef)"
             mat-menu-item name="channel-analytics-button" class="ws-mat-primary-text" i18n-aria-label
             aria-label="Analytics">
             <mat-icon>edit</mat-icon>
             <span>Edit</span>
         </button>
-        <button (click)="create(data)"
+        <button *ngIf="data.columnInfo.config.enableAdd" (click)="create(data)"
             mat-menu-item name="channel-analytics-button" class="ws-mat-primary-text" i18n-aria-label
             aria-label="Analytics">
             <mat-icon>add</mat-icon>

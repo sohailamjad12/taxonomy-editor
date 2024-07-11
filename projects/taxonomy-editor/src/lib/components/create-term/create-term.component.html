@@ -5,8 +5,11 @@
 </ng-container>
 
 <ng-template #modalTitle>
+    <!-- <ng-container *ngIf="data?.mode === 'create' || data?.mode === 'multi-create'">
+        <div class="dialog-title" mat-dialog-title>{{data.columnInfo.name === 'Theme' ? app_strings.addCompetency : app_strings.createNew}} {{data.columnInfo.name}}</div>
+    </ng-container> -->
     <ng-container *ngIf="data?.mode === 'create' || data?.mode === 'multi-create'">
-        <div class="dialog-title" mat-dialog-title>{{app_strings.createNew}} {{data.columnInfo.name}}</div>
+        <div class="dialog-title" mat-dialog-title>{{getCreateName(data.columnInfo.name)}}</div>
     </ng-container>
     <!-- <ng-container *ngIf="data?.mode === 'view'">
         <div class="dialog-title" mat-dialog-title>View {{data.columnInfo.name}}</div>
@@ -33,7 +36,7 @@
             </mat-form-field>
             <mat-form-field appearance="outline">
                 <!-- <mat-label>Enter {{data.name}} name</mat-label> -->
-                <textarea matInput formControlName="description" placeholder="{{app_strings.description}}"></textarea>
+                <textarea matInput formControlName="description" placeholder="{{app_strings.description}}" maxlength="2000"></textarea>
             </mat-form-field>
             <footer class="actions">
                 <button mat-raised-button color="default" type="reset"
@@ -78,7 +81,7 @@
                                 <mat-form-field appearance="outline" class="flex-1">
                                     <input matInput formControlName="name" id="name" #name
                                         placeholder="{{app_strings.name}}"
-                                        (blur)="updateDname(name.value, createThemeForm)">
+                                        (blur)="updateDname(name.value, createThemeForm)" maxlength="70">
                                     <!-- <input matInput formControlName="name" id="name" #name placeholder="{{app_strings.name}}"
                             [matAutocomplete]="auto">
                             <mat-autocomplete #auto="matAutocomplete"
@@ -97,7 +100,7 @@
                                 </label>
                                 <mat-form-field appearance="outline" class="flex-1">
                                     <input matInput formControlName="dname" id="dname" #dname
-                                        placeholder="Competency display name">
+                                        placeholder="Competency display name" maxlength="70">
                                     <!-- <input matInput formControlName="name" id="name" #name placeholder="{{app_strings.name}}"
                             [matAutocomplete]="auto"> -->
                                     <!-- <mat-autocomplete #auto="matAutocomplete"
@@ -121,7 +124,7 @@
                                 <!-- <mat-label>Enter {{data.name}} name</mat-label> -->
                                 <textarea matInput [matTextareaAutosize] [matAutosizeMaxRows]="10"
                                     [matAutosizeMinRows]="3" formControlName="description"
-                                    placeholder="{{app_strings.description}}"></textarea>
+                                    placeholder="{{app_strings.description}}" maxlength="2000"></textarea>
                             </mat-form-field>
                         </div>
                     </div>
@@ -173,7 +176,7 @@
                                         <mat-form-field appearance="outline" class="flex-1">
                                             <input matInput formControlName="name" id="name" #name
                                                 placeholder="{{app_strings.name}}"
-                                                (blur)="updateDname(name.value, createThemeFormMulti, i)">
+                                                (blur)="updateDname(name.value, createThemeFormMulti, i)" maxlength="70">
                                             <!-- <input matInput formControlName="name" id="name" #name placeholder="{{app_strings.name}}"
                                         [matAutocomplete]="auto">
                                         <mat-autocomplete #auto="matAutocomplete"
@@ -192,7 +195,7 @@
                                         </label>
                                         <mat-form-field appearance="outline" class="flex-1">
                                             <input matInput formControlName="dname" id="dname" #dname
-                                                placeholder="Competency display name">
+                                                placeholder="Competency display name" maxlength="70">
                                             <!-- <input matInput formControlName="name" id="name" #name placeholder="{{app_strings.name}}"
                                         [matAutocomplete]="auto"> -->
                                             <!-- <mat-autocomplete #auto="matAutocomplete"
@@ -216,7 +219,7 @@
                                         <!-- <mat-label>Enter {{data.name}} name</mat-label> -->
                                         <textarea matInput [matTextareaAutosize] [matAutosizeMaxRows]="10"
                                             [matAutosizeMinRows]="3" formControlName="description"
-                                            placeholder="{{app_strings.description}}"></textarea>
+                                            placeholder="{{app_strings.description}}" maxlength="2000"></textarea>
                                     </mat-form-field>
                                 </div>
                             </div>

@@ -22,6 +22,7 @@ export class TermCardComponent implements OnInit {
   heightLighted = []
   app_strings: any = labels;
   loaded: any = {}
+  isCompetencyArea:any;
   @Input()
   set data(value: any) {
     this._data = value;
@@ -41,12 +42,22 @@ export class TermCardComponent implements OnInit {
     private localConnectionService: LocalConnectionService,
     private approvalService: ApprovalService,
     public dialog: MatDialog, 
+    
   ) { }
 
   ngOnInit() {
     this.isApprovalRequired = this.localConnectionService.getConfigInfo().isApprovalRequired
     // console.log(this._data)
     this.updateApprovalStatus()
+    console.log('dataaaa',this.data)
+    this.frameworkService.insertUpdateDeleteNotifier.subscribe((e)=>{
+      console.log('termCard',e);
+      if(e){
+       this.isCompetencyArea = e.action
+      }
+      
+      
+    })
   }
 
   cardClicked(data: any, cardRef: any) {
@@ -190,6 +201,7 @@ export class TermCardComponent implements OnInit {
     if(data && data.columnInfo && data.columnInfo.code){
       const nextCat = this.frameworkService.getNextCategory(data.columnInfo.code)
       if(nextCat && nextCat.code){
+        console.log(nextCat.code)
         return nextCat.code
       }
     }
