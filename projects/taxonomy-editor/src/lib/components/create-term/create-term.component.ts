@@ -26,6 +26,7 @@ export class CreateTermComponent implements OnInit {
   createThemeFormMulti: FormGroup
   disableCreate: boolean = false;
   disableUpdate: boolean = false;
+  disableMultiCreate: boolean = false;
   isTermExist: boolean = false;
   selectedTerm: Card = {};
   app_strings = labels;
@@ -174,7 +175,8 @@ export class CreateTermComponent implements OnInit {
 
   addThemeFields() {
     if (this.data.mode === 'multi-create') {
-      this.themeFields.push(this.createThemeFields());
+      // this.themeFields.push(this.createThemeFields());
+      this.themeFields.insert(0, this.createThemeFields());
     }
   }
 
@@ -236,6 +238,7 @@ export class CreateTermComponent implements OnInit {
 
   multiCreate(form, data) {
     console.log('inside multiCreate')
+    this.disableMultiCreate = true
     let counter = 0
     let createdTerms = []
     if(form.valid) {
@@ -275,7 +278,7 @@ export class CreateTermComponent implements OnInit {
             }
           })
         })
-        
+        this.disableMultiCreate = true
       }
     }
   }

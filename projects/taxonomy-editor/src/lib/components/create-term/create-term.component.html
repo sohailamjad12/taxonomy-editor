@@ -114,7 +114,7 @@
                         </div>
 
                         <div class="flex-col mt-2">
-                            <label for="fname" class="margin-remove-bottom form-label required"
+                            <label for="fname" class="margin-remove-bottom form-label"
                                 i18n="First Name label|Label which explains the user to enter first name"
                                 i18n-aria-label aria-label="First name label">
                                 Description
@@ -137,7 +137,7 @@
                     </ng-container>
                     <ng-container *ngIf="data?.mode === 'edit'">
                         <button mat-raised-button color="primary" type="button" cdkFocusInitial
-                            (click)="updateTermData(createThemeForm, data)" [disabled]="createThemeForm?.invalid"
+                            (click)="updateTermData(createThemeForm, data)" [disabled]="createThemeForm?.invalid || disableUpdate"
                             *ngIf="!disableCreate">{{app_strings.update}}</button>
                     </ng-container>
                 </footer>
@@ -153,7 +153,7 @@
                     </button>
                 </div>
                 <mat-accordion formArrayName="themeFields">
-                    <mat-expansion-panel *ngFor="let field of themeFieldsControls; let i = index; let isFirst = first" 
+                    <mat-expansion-panel #mep="matExpansionPanel" *ngFor="let field of themeFieldsControls; let i = index; let isFirst = first" 
                     class="margin-bottom-l" [formGroupName]="i" [expanded]="isFirst">
                         <mat-expansion-panel-header>
                             <mat-panel-title>
@@ -209,7 +209,7 @@
                                 </div>
 
                                 <div class="flex-col mt-2">
-                                    <label for="fname" class="margin-remove-bottom form-label required"
+                                    <label for="fname" class="margin-remove-bottom form-label"
                                         i18n="First Name label|Label which explains the user to enter first name"
                                         i18n-aria-label aria-label="First name label">
                                         Description
@@ -223,6 +223,12 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="flex flex-end">
+                            <button mat-raised-button color="primary" type="button" (click)="mep.expanded = false"
+                            [disabled]="createThemeFormMulti.get('themeFields')['controls'][i].invalid">
+                                Save
+                            </button>
+                        </div>
                     </mat-expansion-panel>
                 </mat-accordion>
                 <footer class="actions">
@@ -234,7 +240,7 @@
                     </ng-container>
                     <ng-container *ngIf="data?.mode === 'multi-create'">
                         <button mat-raised-button color="primary" type="button" cdkFocusInitial
-                            [disabled]="createThemeFormMulti.invalid" *ngIf="!disableCreate" (click)="multiCreate(createThemeFormMulti, data)">
+                            [disabled]="createThemeFormMulti.invalid || disableMultiCreate" *ngIf="!disableCreate" (click)="multiCreate(createThemeFormMulti, data)">
                             {{app_strings.create}}
                         </button>
                     </ng-container>

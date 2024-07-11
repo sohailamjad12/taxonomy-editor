@@ -11,7 +11,7 @@ declare var LeaderLine: any;
   styleUrls: ['./taxonomy-column-view.component.scss']
 })
 export class TaxonomyColumnViewComponent implements OnInit, OnDestroy, OnChanges {
-  @Input() column: Card;
+  @Input() column: any;
   @Input() containerId: string
   connectorMapping: any = {}
   @Output() updateTaxonomyTerm = new EventEmitter<CardSelection>(true);
@@ -78,11 +78,16 @@ export class TaxonomyColumnViewComponent implements OnInit, OnDestroy, OnChanges
       this.childSubscription.unsubscribe()
     }
     this.childSubscription = this.frameworkService.currentSelection.subscribe(e => {
-       console.log('currentSelection event', e )
+       console.log('currentSelection event', e, this.column.code )
       if (!e) {
         return
       } else if (e.type === this.column.code) {
-        this.updateTaxonomyTerm.emit({ isSelected: true, selectedTerm: e.data })
+        const selectedTerm = {...e.data, cardRef: e.cardRef }
+        if(e.isUpdate){
+          this.updateTaxonomyTerm.emit({ isSelected: true, selectedTerm, isUpdate: true })
+        } else {
+          this.updateTaxonomyTerm.emit({ isSelected: true, selectedTerm })
+        }
         this.columnData = (this.columnData || []).map(item => {
           if (item.code === e.data.code) {
             item.selected = true
@@ -144,14 +149,29 @@ export class TaxonomyColumnViewComponent implements OnInit, OnDestroy, OnChanges
         if (this.column.code === next.code && e.type === 'select') {
           this.insertUpdateHandler(e, next)
         } 
-        if(this.column.code === next.code && e.type === 'update') {
-          console.log('update event section')
-          this.insertUpdateHandler(e, next)
+        if(e.type === 'update') {
+          if(this.column.code === next.code && e.type === 'update') {
+            // this.column = this.frameworkService.list.get(e.action)
+            console.log('update event section')
+            
+            const selectedParent = this.frameworkService.getPreviousCategory(e.action);
+            const selectedParentData = this.frameworkService.list.get(selectedParent.code)
+            const selectedParentCardRef = this.frameworkService.selectionList.get(selectedParent.code) && 
+            this.frameworkService.selectionList.get(selectedParent.code).cardRef
+            console.log('selectedParentCardRef', selectedParentCardRef)
+            if(selectedParent) {
+              console.log('selectedParent', selectedParent)
+              // this.insertUpdateHandler(e, next, 'update')
+              // this.column = this.frameworkService.list.get(e.action)
+              // this.column = this.frameworkService.list.get()
+              this.frameworkService.currentSelection.next({ type: selectedParent.code, data:selectedParentData, cardRef:selectedParentCardRef, isUpdate: true})
+            }
+          }
         }
       }
     })
   }
-  insertUpdateHandler(e, next) {
+  insertUpdateHandler(e, next, isUpdate?) {
     console.log('insertUpdateHandler')
     const back = this.frameworkService.getPreviousCategory(this.column.code)
     // console.log('current Saved ===========>', this.frameworkService.getLocalTermsByCategory(this.column.code))
@@ -163,7 +183,8 @@ export class TaxonomyColumnViewComponent implements OnInit, OnDestroy, OnChanges
         localTerms.push(f.term)
       }
     })
-    console.log('insertUpdateHandler localTerms', localTerms)
+    if(!isUpdate) {
+      console.log('insertUpdateHandler localTerms', localTerms)
     // get last parent and filter Above
     this.columnData = [...localTerms, ...(e.data.children || [])]
       .filter(x => {
@@ -187,9 +208,7 @@ export class TaxonomyColumnViewComponent implements OnInit, OnDestroy, OnChanges
     // this.updateTerms()
 
     // console.log(this.columnData)
-
-
-
+    }
   }
   updateSelection1(data: any) { }
   updateSelection(selection: any) {

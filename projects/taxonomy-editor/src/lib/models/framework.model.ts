@@ -96,6 +96,7 @@ export namespace NSFramework {
         category:string,
         associations: string,
         config: any
+        cardRef?: any
     }
     export interface ParentsElements {
         identifier: string;
