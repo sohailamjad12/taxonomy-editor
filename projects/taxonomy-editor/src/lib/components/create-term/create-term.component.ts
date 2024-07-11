@@ -27,7 +27,14 @@ export class CreateTermComponent implements OnInit {
   disableUpdate: boolean = false;
   isTermExist: boolean = false;
   selectedTerm: Card = {};
-  app_strings = labels;
+  allCompetency:any[]=[]
+  seletedCompetencyArea: any
+  allCompetencyTheme:any[]=[]
+  filteredallCompetencyTheme:any[]=[]
+  allCompetencySubtheme:any[]=[]
+  filteredallCompetencySubTheme:any[]=[]
+   app_strings = labels;
+   competencyForm: FormGroup
   constructor(
     public dialogRef: MatDialogRef<CreateTermComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
@@ -38,6 +45,8 @@ export class CreateTermComponent implements OnInit {
   ngOnInit() {
     this.termLists = this.data.columnInfo.children
     this.initTermForm()
+    this.getComptencyData()
+    
   }
 
   initTermForm() {
@@ -53,6 +62,12 @@ export class CreateTermComponent implements OnInit {
     this.createThemeFormMulti = this.fb.group({
       themeFields:this.fb.array([this.createThemeFields()])
     })
+  
+    this.competencyForm = this.fb.group({
+      compArea:['',Validators.required],
+      compThemeFields: this.fb.array([this.createCompThemeFields()])
+    })
+
     this.filtedTermLists = this.createTermForm.get('name').valueChanges.pipe(
       startWith(''),
       map(value => this._filter(value || '')),
@@ -95,6 +110,25 @@ export class CreateTermComponent implements OnInit {
     }
   }
 
+  getComptencyData(){
+    const filterObj = {
+      search: {
+        type: 'Competency Area',
+      },
+      filter: {
+        isDetail: true,
+      },
+    }
+    this.frameWorkService.getFilterEntity(filterObj).subscribe((data)=>{
+     console.log(data);
+     if(data && data.length){
+      this.allCompetency = data
+     }
+    
+     
+    })
+  }
+
   get themeFields(): FormArray {
     return this.createThemeFormMulti.get('themeFields') as FormArray;
   }
@@ -123,6 +157,37 @@ export class CreateTermComponent implements OnInit {
       this.themeFields.removeAt(index);
     }
   }
+
+ 
+
+  createCompThemeFields():FormGroup {
+    return this.fb.group({
+      competencyTheme:['', [Validators.required]],
+      competencySubTheme:['', [Validators.required]]
+    })
+  }
+
+  addCompetencyTheme(){
+    if (this.data.mode === 'multi-create') {
+      this.compThemeFields.push(this.createCompThemeFields());
+    }
+  }
+
+  removeCompFields(index: number) {
+    if (this.data.mode === 'multi-create') {
+      this.compThemeFields.removeAt(index);
+    }
+  }
+
+  get compThemeFields(): FormArray {
+    return this.competencyForm.get('compThemeFields') as FormArray;
+  }
+
+  // get compThemeFieldsControls() {
+  //   const createCompThemeFields = this.competencyForm.get('createCompThemeFields')
+  //   return (<any>createCompThemeFields)['controls']
+  // }
+
 
   updateFormView(form, data) {
     form.get('name').patchValue(data.childrenData.name)
@@ -291,6 +356,44 @@ export class CreateTermComponent implements OnInit {
   private _normalizeValue(value: string): string {
     return value.toLowerCase().replace(/\s/g, '');
   }
+
+  onSelectionArea(option:any){
+    this.allCompetency.forEach((val:any)=>{
+      if (option.name === val.name) {
+        this.seletedCompetencyArea = val
+        this.allCompetencyTheme = val.children
+        this.filteredallCompetencyTheme = this.allCompetencyTheme
+
+      }
+    })
+   
+  }
+
+  OnThemeSelection(event) {
+    console.log(event);
+    const selectedTheme = event.source.value
+    this.filteredallCompetencyTheme.forEach((val: any) => {
+      if (selectedTheme.name === val.name) {
+        this.allCompetencySubtheme = val.children
+        this.filteredallCompetencySubTheme = this.allCompetencySubtheme
+      }
+
+    })
+
+
+  }
+
+  // compAreaSelected(option: any) {
+  //   this.resetCompSubfields()
+  //   this.allCompetencies.forEach((val: any) => {
+  //     if (option.name === val.name) {
+  //       this.seletedCompetencyArea = val
+  //       this.allCompetencyTheme = val.children
+  //       this.filteredallCompetencyTheme = this.allCompetencyTheme
+  
+  //     }
+  //   })
+  // }
 
   onSelect(term, form) {
     this.selectedTerm = term.value
