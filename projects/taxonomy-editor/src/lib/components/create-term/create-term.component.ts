@@ -48,7 +48,7 @@ export class CreateTermComponent implements OnInit {
     @Inject(MAT_DIALOG_DATA) public data: any,
     private frameWorkService: FrameworkService,
     private fb: FormBuilder,
-    private odcsService: OdcsService
+    private odcsService: OdcsService,
     private _snackBar: MatSnackBar,
   ) { }
 
