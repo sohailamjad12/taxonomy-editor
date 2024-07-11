@@ -9,6 +9,7 @@ import { NSFramework } from '../../models/framework.model';
 import * as appConstants from '../../constants/app-constant';
 import { labels } from '../../labels/strings';
 import { CardChecked, CardSelection, CardsCount, Card } from '../../models/variable-type.model';
+import { OdcsService } from '../../services/odcs.service';
 
 @Component({
   selector: 'lib-create-term',
@@ -25,27 +26,42 @@ export class CreateTermComponent implements OnInit {
   createThemeFormMulti: FormGroup
   disableCreate: boolean = false;
   disableUpdate: boolean = false;
+  disableMultiCreate: boolean = false;
   isTermExist: boolean = false;
   selectedTerm: Card = {};
+  app_strings = labels;
+  colCode = ''
+  savedDesignations = []
+  addedDesignationCount = 0
+  designationsList = []
+  panelOpenState: any[] = [];
   allCompetency:any[]=[]
   seletedCompetencyArea: any
   allCompetencyTheme:any[]=[]
   filteredallCompetencyTheme:any[]=[]
   allCompetencySubtheme:any[]=[]
   filteredallCompetencySubTheme:any[]=[]
-   app_strings = labels;
    competencyForm: FormGroup
   constructor(
     public dialogRef: MatDialogRef<CreateTermComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
     private frameWorkService: FrameworkService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private odcsService: OdcsService
   ) { }
 
   ngOnInit() {
     this.termLists = this.data.columnInfo.children
+    this.colCode = this.data!.columnInfo!.code
     this.initTermForm()
-    this.getComptencyData()
+    switch (this.colCode) {
+      case 'designation':
+        this.loadDesignations()
+        break
+      case 'competency':
+        this.getComptencyData()
+        break
+    }
     
   }
 
@@ -54,24 +70,35 @@ export class CreateTermComponent implements OnInit {
       name: ['', [Validators.required]],
       description: ['']
     })
-    this.createThemeForm = this.fb.group({
-      name: ['', [Validators.required]],
-      dname: ['', [Validators.required]],
-      description: ['']
-    })
-    this.createThemeFormMulti = this.fb.group({
-      themeFields:this.fb.array([this.createThemeFields()])
-    })
-  
-    this.competencyForm = this.fb.group({
-      compArea:['',Validators.required],
-      compThemeFields: this.fb.array([this.createCompThemeFields()])
-    })
 
-    this.filtedTermLists = this.createTermForm.get('name').valueChanges.pipe(
-      startWith(''),
-      map(value => this._filter(value || '')),
-    );
+    switch (this.colCode) {
+      case 'designation':
+        this.createThemeForm = this.fb.group({
+          designations: this.fb.array([])
+        });
+        this.addDesignation();
+        break;
+      default:
+        this.createThemeForm = this.fb.group({
+          name: ['', [Validators.required]],
+          dname: ['', [Validators.required]],
+          description: ['']
+        })
+        this.createThemeFormMulti = this.fb.group({
+          themeFields:this.fb.array([this.createThemeFields()])
+        })
+        this.filtedTermLists = this.createTermForm.get('name').valueChanges.pipe(
+          startWith(''),
+          map(value => this._filter(value || '')),
+        );
+        
+        this.competencyForm = this.fb.group({
+          compArea:['',Validators.required],
+          compThemeFields: this.fb.array([this.createCompThemeFields()])
+        })
+        break
+    }
+  
 
     // if mode is "view" then check for which type of form has to be used and then append the values in form
     if (
@@ -148,7 +175,8 @@ export class CreateTermComponent implements OnInit {
 
   addThemeFields() {
     if (this.data.mode === 'multi-create') {
-      this.themeFields.push(this.createThemeFields());
+      // this.themeFields.push(this.createThemeFields());
+      this.themeFields.insert(0, this.createThemeFields());
     }
   }
 
@@ -210,6 +238,7 @@ export class CreateTermComponent implements OnInit {
 
   multiCreate(form, data) {
     console.log('inside multiCreate')
+    this.disableMultiCreate = true
     let counter = 0
     let createdTerms = []
     if(form.valid) {
@@ -249,7 +278,7 @@ export class CreateTermComponent implements OnInit {
             }
           })
         })
-        
+        this.disableMultiCreate = true
       }
     }
   }
@@ -342,6 +371,89 @@ export class CreateTermComponent implements OnInit {
     }
   }
 
+  //#region (designations)
+
+  get designationControls() {
+    return (this.createThemeForm.get('designations') as FormArray).controls;
+  }
+
+  loadDesignations() {
+    this.odcsService.getDesignations({}).subscribe(
+      (data: any) => {
+        this.designationsList = data.responseData
+      },
+      (_err: any) => {
+      })
+  }
+
+  getFilteredDesignationList(index: string) {
+    const filterKey = this.createThemeForm.value.designations[index].name.toLowerCase()
+    if(filterKey && this.designationsList) {
+      const filteredList = this.designationsList.filter((designation: any) => designation.name.toLowerCase().includes(filterKey))
+      return filteredList
+    }
+
+    return []
+  }
+
+  addDesignation() {
+    const newDesignation = this.fb.group({
+      name: ['', Validators.required],
+      id:[null, Validators.required],
+      designationDescription: ['', [Validators.required, Validators.maxLength(600)]],
+      isSaved: [false], // isSaved can be used to change button text from save to update if needed
+      creationId: this.addedDesignationCount // creationId is created to use locally to give unique id to added records
+    });
+    this.addedDesignationCount = this.addedDesignationCount + 1;
+    (this.createThemeForm.get('designations') as FormArray).insert(0, newDesignation);
+    // this.panelOpenState.insert(0, true)
+    this.panelOpenState.splice(0, 0, true);
+  }
+
+  clearSelectedDesignaionOnChange(index, event) {
+    const selectedName = this.createThemeForm.value.designations[index].name
+    if(selectedName !== event.value) {
+      const designationsToReset = this.designationControls[index]
+      designationsToReset.get('id').reset()
+    }
+  }
+
+  deleteDesignation(index: number) {
+    const reovedCreationId = this.designationControls[index].value.creationId;
+    (this.createThemeForm.get('designations') as FormArray).removeAt(index);
+    this.savedDesignations = this.savedDesignations.filter((savedDesignation: any) => savedDesignation.creationId !== reovedCreationId)
+  }
+
+  saveDesignation(index: number) {
+    const designations = this.designationControls
+    const designationToSave = designations[index]
+    if (designationToSave.valid) {
+      designationToSave.value.isSaved = true
+      const savedDesignationIndex = this.savedDesignations.findIndex(e => e.creationId === designationToSave.value.creationId)
+      if (savedDesignationIndex >= 0) {
+        this.savedDesignations[savedDesignationIndex] = designationToSave.value
+      } else {
+        this.savedDesignations.push(designationToSave.value)
+      }
+    }
+  }
+
+  submitDesignation() {
+    // console.log('saved designations: ', this.savedDesignations)
+  }
+
+  cancel() {
+    this.dialogRef.close()
+  }
+
+  get enableAddBtn() {
+    if(this.colCode === 'designation') {
+      return this.designationControls.length > 0 ? true : false
+    }
+  }
+
+  //#endregion
+  
   private _filter(searchTxt: any): string[] {
     let isExist;
     this.disableCreate = false
@@ -396,11 +508,18 @@ export class CreateTermComponent implements OnInit {
   // }
 
   onSelect(term, form) {
-    this.selectedTerm = term.value
-    form.get('name').patchValue(term.value.name)
-    form.get('description').patchValue(term.value.description)
-    form.get('description').disable()
-    this.disableCreate = true
+    switch (this.colCode) {
+      case 'designation':
+        form.get('name').patchValue(term.value.name)
+        form.get('id').patchValue(term.value.id)
+        break;
+      default:
+        this.selectedTerm = term.value
+        form.get('name').patchValue(term.value.name)
+        form.get('description').patchValue(term.value.description)
+        form.get('description').disable()
+        this.disableCreate = true
+    }
   }
 
   saveTerm() {

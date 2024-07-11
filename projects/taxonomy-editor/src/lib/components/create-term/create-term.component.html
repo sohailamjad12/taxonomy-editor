@@ -2,6 +2,7 @@
     <ng-container *ngSwitchDefault [ngTemplateOutlet]="themeCreate"></ng-container>
     <ng-container *ngSwitchCase="'theme'" [ngTemplateOutlet]="themeCreate"></ng-container>
     <ng-container *ngSwitchCase="'subtheme'" [ngTemplateOutlet]="themeCreate"></ng-container>
+    <ng-container *ngSwitchCase="'designation'" [ngTemplateOutlet]="themeDesignation"></ng-container>
     <ng-container *ngSwitchCase="'competency'" [ngTemplateOutlet]="compTheme"></ng-container>
 </ng-container>
 
@@ -113,7 +114,7 @@
                         </div>
 
                         <div class="flex-col mt-2">
-                            <label for="fname" class="margin-remove-bottom form-label required"
+                            <label for="fname" class="margin-remove-bottom form-label"
                                 i18n="First Name label|Label which explains the user to enter first name"
                                 i18n-aria-label aria-label="First name label">
                                 Description
@@ -136,7 +137,7 @@
                     </ng-container>
                     <ng-container *ngIf="data?.mode === 'edit'">
                         <button mat-raised-button color="primary" type="button" cdkFocusInitial
-                            (click)="updateTermData(createThemeForm, data)" [disabled]="createThemeForm?.invalid"
+                            (click)="updateTermData(createThemeForm, data)" [disabled]="createThemeForm?.invalid || disableUpdate"
                             *ngIf="!disableCreate">{{app_strings.update}}</button>
                     </ng-container>
                 </footer>
@@ -152,7 +153,7 @@
                     </button>
                 </div>
                 <mat-accordion formArrayName="themeFields">
-                    <mat-expansion-panel *ngFor="let field of themeFieldsControls; let i = index; let isFirst = first" 
+                    <mat-expansion-panel #mep="matExpansionPanel" *ngFor="let field of themeFieldsControls; let i = index; let isFirst = first" 
                     class="margin-bottom-l" [formGroupName]="i" [expanded]="isFirst">
                         <mat-expansion-panel-header>
                             <mat-panel-title>
@@ -208,7 +209,7 @@
                                 </div>
 
                                 <div class="flex-col mt-2">
-                                    <label for="fname" class="margin-remove-bottom form-label required"
+                                    <label for="fname" class="margin-remove-bottom form-label"
                                         i18n="First Name label|Label which explains the user to enter first name"
                                         i18n-aria-label aria-label="First name label">
                                         Description
@@ -222,6 +223,12 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="flex flex-end">
+                            <button mat-raised-button color="primary" type="button" (click)="mep.expanded = false"
+                            [disabled]="createThemeFormMulti.get('themeFields')['controls'][i].invalid">
+                                Save
+                            </button>
+                        </div>
                     </mat-expansion-panel>
                 </mat-accordion>
                 <footer class="actions">
@@ -233,7 +240,7 @@
                     </ng-container>
                     <ng-container *ngIf="data?.mode === 'multi-create'">
                         <button mat-raised-button color="primary" type="button" cdkFocusInitial
-                            [disabled]="createThemeFormMulti.invalid" *ngIf="!disableCreate" (click)="multiCreate(createThemeFormMulti, data)">
+                            [disabled]="createThemeFormMulti.invalid || disableMultiCreate" *ngIf="!disableCreate" (click)="multiCreate(createThemeFormMulti, data)">
                             {{app_strings.create}}
                         </button>
                     </ng-container>
@@ -249,6 +256,78 @@
     </div>
 </ng-template>
 
+<ng-template #themeDesignation>
+    <div class="themDesignation">
+        <div class="dialogNew">
+            <ng-container [ngTemplateOutlet]="modalTitle"></ng-container>
+            <div class="mb-2">
+                <span class="organisation">Organisation</span>
+                <div class="org-name pl-4 flex items-center">
+                    <!-- <span>Department of Fisheries</span> -->
+                    <span>{{data?.columnInfo?.name}}</span>
+                </div>
+            </div>
+            <div class="row-divider"></div>
+            <div class="flex w-full items-center justify-end mt-4">
+                <a class="add-designation flex justify-center items-center" (click)="addDesignation()">
+                    <mat-icon class="add-icon mr-2">add_circle_outline</mat-icon>
+                    <span>Add Designations</span>
+                </a>
+            </div>
+            <div class="mt-5">
+                <form  [formGroup]="createThemeForm">
+                    <mat-accordion class="flex flex-col gap-2" formArrayName="designations">
+                        <ng-container *ngFor="let designation of designationControls; let i = index">
+                            <mat-expansion-panel [formGroupName]="i"  class="designation-panel" [expanded]="panelOpenState[i]">
+                                <mat-expansion-panel-header>
+                                    <div class="flex w-full items-center justify-end">
+                                        <mat-icon class="deletDesignation mr-4" (click)="deleteDesignation(i)">delete</mat-icon>
+                                    </div>
+                                </mat-expansion-panel-header>
+                                <div class="flex flex-col gap-2 ">
+                                    <div class="w-full">
+                                        <label for="name" class="margin-remove-bottom form-label required">
+                                            Designation Name <mat-icon class="info-icon">info</mat-icon>
+                                        </label>
+                                        <mat-form-field appearance="outline" class="flex-1">
+                                            <input matInput formControlName="name" placeholder="Type here" [matAutocomplete]="auto" (change)="clearSelectedDesignaionOnChange(i, $event)">
+                                            <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onSelect($event.option, designation)">
+                                                <mat-option *ngFor="let option of getFilteredDesignationList(i)" [value]="option">
+                                                    {{option.name}}
+                                                </mat-option>
+                                            </mat-autocomplete>
+                                            <!-- <mat-error *ngIf="isTermExist">{{app_strings.alreadyExist}}</mat-error> -->
+                                        </mat-form-field>
+                                        <!-- <mat-error>{{app_strings.alreadyExist}}</mat-error> -->
+                                    </div>
+                                    <div class="w-full">
+                                        <label for="name" class="margin-remove-bottom form-label required">
+                                            Description <mat-icon class="info-icon">info</mat-icon>
+                                        </label>
+                                        <mat-form-field appearance="outline" class="flex-1">
+                                            <textarea matInput formControlName="designationDescription"
+                                                placeholder="Type the decription in fewer than 600 characters"></textarea>
+                                        </mat-form-field>
+                                    </div>
+                                
+                                    <div class="w-full flex justify-end items-center">
+                                        <button mat-raised-button class="saveDesignaton flex justify-center items-center"
+                                            (click)="saveDesignation(i)">Save</button>
+                                    </div>
+                                </div>
+                            </mat-expansion-panel>
+                        </ng-container>
+                    </mat-accordion>
+                </form>
+            </div>
+        </div>
+        <div class="flex justify-end items-center gap-4 mt-5 designation-footer">
+            <button mat-raised-button class="cancel flex justify-center items-center"
+                (click)="cancel()">Cancel</button>
+            <button mat-raised-button [disabled]="!enableAddBtn" class="addBtn flex justify-center items-center" (click)="submitDesignation()">Add</button>
+        </div>
+    </div>
+</ng-template>
 <ng-template #compTheme>
     <div class="dialogNew">
         <ng-container [ngTemplateOutlet]="modalTitle"></ng-container>
