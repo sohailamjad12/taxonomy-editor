@@ -8,6 +8,13 @@ import { v4 as uuidv4 } from 'uuid';
 import { IConnection } from '../models/connection.model';
 // import { LibConnectionService } from 'taxonomy-editor/lib/services/connection.service';
 import { LocalConnectionService } from './local-connection.service';
+/* tslint:disable */
+import _ from 'lodash'
+/* tslint:enable */
+
+const API_END_POINTS = {
+  GET_FILTER_ENTITY: 'apis/proxies/v8/competency/v4/search',
+}
 
 @Injectable({
   providedIn: 'root'
@@ -297,6 +304,10 @@ export class FrameworkService {
       }
     })
     return prevSelectedTerms
+  }
+
+  getFilterEntity(filter: object): Observable<any> {
+    return this.http.post<any>(`${API_END_POINTS.GET_FILTER_ENTITY}`, filter).pipe(map(res => _.get(res, 'result.competency')))
   }
 
 }

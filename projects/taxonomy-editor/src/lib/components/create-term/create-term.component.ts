@@ -29,11 +29,18 @@ export class CreateTermComponent implements OnInit {
   isTermExist: boolean = false;
   selectedTerm: Card = {};
   app_strings = labels;
-  themCode = ''
+  colCode = ''
   savedDesignations = []
   addedDesignationCount = 0
   designationsList = []
   panelOpenState: any[] = [];
+  allCompetency:any[]=[]
+  seletedCompetencyArea: any
+  allCompetencyTheme:any[]=[]
+  filteredallCompetencyTheme:any[]=[]
+  allCompetencySubtheme:any[]=[]
+  filteredallCompetencySubTheme:any[]=[]
+   competencyForm: FormGroup
   constructor(
     public dialogRef: MatDialogRef<CreateTermComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
@@ -44,9 +51,17 @@ export class CreateTermComponent implements OnInit {
 
   ngOnInit() {
     this.termLists = this.data.columnInfo.children
-    this.themCode = this.data!.columnInfo!.code
+    this.colCode = this.data!.columnInfo!.code
     this.initTermForm()
-    this.loadDesignations()
+    switch (this.colCode) {
+      case 'designation':
+        this.loadDesignations()
+        break
+      case 'competency':
+        this.getComptencyData()
+        break
+    }
+    
   }
 
   initTermForm() {
@@ -55,7 +70,7 @@ export class CreateTermComponent implements OnInit {
       description: ['']
     })
 
-    switch (this.themCode) {
+    switch (this.colCode) {
       case 'designation':
         this.createThemeForm = this.fb.group({
           designations: this.fb.array([])
@@ -75,8 +90,14 @@ export class CreateTermComponent implements OnInit {
           startWith(''),
           map(value => this._filter(value || '')),
         );
+        
+        this.competencyForm = this.fb.group({
+          compArea:['',Validators.required],
+          compThemeFields: this.fb.array([this.createCompThemeFields()])
+        })
         break
     }
+  
 
     // if mode is "view" then check for which type of form has to be used and then append the values in form
     if (
@@ -115,6 +136,25 @@ export class CreateTermComponent implements OnInit {
     }
   }
 
+  getComptencyData(){
+    const filterObj = {
+      search: {
+        type: 'Competency Area',
+      },
+      filter: {
+        isDetail: true,
+      },
+    }
+    this.frameWorkService.getFilterEntity(filterObj).subscribe((data)=>{
+     console.log(data);
+     if(data && data.length){
+      this.allCompetency = data
+     }
+    
+     
+    })
+  }
+
   get themeFields(): FormArray {
     return this.createThemeFormMulti.get('themeFields') as FormArray;
   }
@@ -143,6 +183,37 @@ export class CreateTermComponent implements OnInit {
       this.themeFields.removeAt(index);
     }
   }
+
+ 
+
+  createCompThemeFields():FormGroup {
+    return this.fb.group({
+      competencyTheme:['', [Validators.required]],
+      competencySubTheme:['', [Validators.required]]
+    })
+  }
+
+  addCompetencyTheme(){
+    if (this.data.mode === 'multi-create') {
+      this.compThemeFields.push(this.createCompThemeFields());
+    }
+  }
+
+  removeCompFields(index: number) {
+    if (this.data.mode === 'multi-create') {
+      this.compThemeFields.removeAt(index);
+    }
+  }
+
+  get compThemeFields(): FormArray {
+    return this.competencyForm.get('compThemeFields') as FormArray;
+  }
+
+  // get compThemeFieldsControls() {
+  //   const createCompThemeFields = this.competencyForm.get('createCompThemeFields')
+  //   return (<any>createCompThemeFields)['controls']
+  // }
+
 
   updateFormView(form, data) {
     form.get('name').patchValue(data.childrenData.name)
@@ -373,7 +444,7 @@ export class CreateTermComponent implements OnInit {
   }
 
   get enableAddBtn() {
-    if(this.themCode === 'designation') {
+    if(this.colCode === 'designation') {
       return this.designationControls.length > 0 ? true : false
     }
   }
@@ -395,8 +466,46 @@ export class CreateTermComponent implements OnInit {
     return value.toLowerCase().replace(/\s/g, '');
   }
 
+  onSelectionArea(option:any){
+    this.allCompetency.forEach((val:any)=>{
+      if (option.name === val.name) {
+        this.seletedCompetencyArea = val
+        this.allCompetencyTheme = val.children
+        this.filteredallCompetencyTheme = this.allCompetencyTheme
+
+      }
+    })
+   
+  }
+
+  OnThemeSelection(event) {
+    console.log(event);
+    const selectedTheme = event.source.value
+    this.filteredallCompetencyTheme.forEach((val: any) => {
+      if (selectedTheme.name === val.name) {
+        this.allCompetencySubtheme = val.children
+        this.filteredallCompetencySubTheme = this.allCompetencySubtheme
+      }
+
+    })
+
+
+  }
+
+  // compAreaSelected(option: any) {
+  //   this.resetCompSubfields()
+  //   this.allCompetencies.forEach((val: any) => {
+  //     if (option.name === val.name) {
+  //       this.seletedCompetencyArea = val
+  //       this.allCompetencyTheme = val.children
+  //       this.filteredallCompetencyTheme = this.allCompetencyTheme
+  
+  //     }
+  //   })
+  // }
+
   onSelect(term, form) {
-    switch (this.themCode) {
+    switch (this.colCode) {
       case 'designation':
         form.get('name').patchValue(term.value.name)
         form.get('id').patchValue(term.value.id)
