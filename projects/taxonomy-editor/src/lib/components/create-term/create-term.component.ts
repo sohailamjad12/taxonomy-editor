@@ -9,6 +9,7 @@ import { NSFramework } from '../../models/framework.model';
 import * as appConstants from '../../constants/app-constant';
 import { labels } from '../../labels/strings';
 import { CardChecked, CardSelection, CardsCount, Card } from '../../models/variable-type.model';
+import { MatSnackBar } from '@angular/material';
 
 @Component({
   selector: 'lib-create-term',
@@ -33,11 +34,14 @@ export class CreateTermComponent implements OnInit {
     public dialogRef: MatDialogRef<CreateTermComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
     private frameWorkService: FrameworkService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private _snackBar: MatSnackBar,
   ) { }
 
   ngOnInit() {
     this.termLists = this.data.columnInfo.children
+    console.log(this.data);
+    
     this.initTermForm()
   }
 
@@ -125,6 +129,33 @@ export class CreateTermComponent implements OnInit {
       this.themeFields.removeAt(index);
     }
   }
+  getCreateName(name: string): string {
+  console.log('createName',name);
+   switch(name){
+    case 'Theme':
+    return `Add Competency ${name}`;
+    case 'Sub Theme':
+    return `Add Competency ${name}`
+   }
+  
+  }
+
+
+  getName(item:any){
+  console.log('itemName',item);
+  return item.toUpperCase()
+  }
+
+  getLabelName(labelName:string): string {
+    console.log('ssdsdd',labelName);
+    
+   switch(labelName){
+    case 'Theme':
+      return `Competency ${labelName} name`;
+      case 'Sub Theme':
+      return `Competency ${labelName} name`
+   }
+  }
 
   updateFormView(form, data) {
     form.get('name').patchValue(data.childrenData.name)
@@ -132,7 +163,10 @@ export class CreateTermComponent implements OnInit {
     form.get('description').patchValue(data.childrenData.description)
     setTimeout(() => {
       form.get('name').disable()
+      form.get('dname').disable()
       form.get('description').disable()
+      
+      
     })
   }
 
@@ -179,6 +213,7 @@ export class CreateTermComponent implements OnInit {
             requestBody.request.term['identifier'] = res.result.node_id[0]
             createdTerms.push(requestBody.request.term)
             console.log('createdTerms success',createdTerms)
+            
             counter++
             console.log('counter :: ', counter, themeFields.length)
             if(counter === themeFields.length){
@@ -236,6 +271,13 @@ export class CreateTermComponent implements OnInit {
         createdTermsCounter++
         if(createdTermsCounter === createdTerms.length) {
           this.dialogClose({ term: [this.selectedTerm], created: true, multi:true })
+          console.log('close dialog',createdTerms)
+          if(createdTerms[0].category === 'theme'){
+            this._snackBar.open(`Competency ${createdTerms[0].category} created successfully.`)
+          }
+          if(createdTerms[0].category === 'subtheme'){
+            this._snackBar.open(`Competency ${createdTerms[0].category} created successfully.`)
+          }
         }
       }
     }
@@ -298,6 +340,7 @@ export class CreateTermComponent implements OnInit {
   onSelect(term, form) {
     this.selectedTerm = term.value
     form.get('name').patchValue(term.value.name)
+    form.get('dname').patch(term.value.dname)
     form.get('description').patchValue(term.value.description)
     form.get('description').disable()
     this.disableCreate = true

@@ -31,5 +31,7 @@ export const labels = {
     treeView: "tree view...",
     categoryName: "Enter Category Name",
     name: "Enter Name",
-    description: "Enter Description"
+    description: "Enter Description",
+    addCompetency:"Add Competency",
+    add_btn:"Add"
 }
