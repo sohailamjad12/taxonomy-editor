@@ -94,16 +94,31 @@ export class TaxonomyViewComponent implements OnInit, OnDestroy {
     res.parent = null
     if (parentColumn) {
       res.parent = this.frameworkService.selectionList.get(parentColumn.code)
-      console.log('this.frameworkService.selectionList.get(parentColumn.code) : ',this.frameworkService.selectionList.get(parentColumn.code))
       if(resData.type === 'update'){
         // console.log('inside new update handler')
-        // console.log('res.parent.children ::', res.parent.children)
         res.parent.children[res.parent.children.findIndex(el => el.identifier === res.term.identifier)] =  res.term
-        // console.log('res.parent.children after assign::', res.parent.children)
+        // this.frameworkService.list.get(res.parent.category).children = [...res.parent.children]
         // console.log('refreshData calling updateFina list ')
-        this.loaded[res.term.category] = true
-        // res.term.selected = false
+        
+
+        // this.frameworkService.currentSelection.next({ type: res.term.category, data: res.term.children, cardRef:resData.cardRef })
+        // this.updateSelection(res.term.category, res.term.code);
+        // this.updateSelection(res.parent.category, res.parent.code);
+        // setTimeout(() => {
+        //   this.frameworkService.currentSelection.next({ type: res.term.category, data: res.term.children, cardRef:resData.cardRef })
+        // }, 100);
+        // this.updateFinalList({ selectedTerm: res.term, isSelected: true, parentData: res.parent, colIndex:resData.index })
+        // this.loaded[res.term.category] = true
+        res.term.selected = false
+        this.frameworkService.selectionList.delete(res.term.category)
+        // this.frameworkService.insertUpdateDeleteNotifier.next({ action: res.term.category, type:'update', data: res.term })
         this.updateFinalList({ selectedTerm: res.term, isSelected: true, parentData: res.parent, colIndex:resData.index }, 'update')
+        // res.term.selected = true
+        // const next = this.frameworkService.getNextCategory(res.term.category)
+        // console.log('next:: ', next)
+        //   if (next && next.code) {
+        //     this.frameworkService.selectionList.delete(next.code)
+        //   }
       } else {
         if(!res.multi){
           res.parent.children? res.parent.children.push(res.term) :res.parent['children'] = [res.term]
@@ -113,10 +128,16 @@ export class TaxonomyViewComponent implements OnInit, OnDestroy {
     }
    
   }
-  updateTaxonomyTerm(data: { selectedTerm: any, isSelected: boolean }) {
-    console.log('updateTaxonomyTerm inside the output event, ')
-    this.updateFinalList(data)
-    this.updateSelection(data.selectedTerm.category, data.selectedTerm.code);
+  updateTaxonomyTerm(data: { selectedTerm: any, isSelected: boolean, isUpdate?:any}) {
+    if(data && data.selectedTerm && data.selectedTerm.category) {
+      console.log('updateTaxonomyTerm inside the output event, ')
+      if(!data.isUpdate){
+        this.updateFinalList(data)
+      } else {
+        this.updateFinalList(data, 'update')
+      }
+      this.updateSelection(data.selectedTerm.category, data.selectedTerm.code);
+    }
   }
   updateSelection(category: string, selectedTermCode: string) {
     this.frameworkService.list.get(category).children.map(item => {
@@ -126,7 +147,7 @@ export class TaxonomyViewComponent implements OnInit, OnDestroy {
   }
 
   //need to refactor at heigh level
-  updateFinalList(data: { selectedTerm: any, isSelected: boolean, parentData?: any, colIndex?: any }, type?: any) {
+  updateFinalList(data: { selectedTerm: any, isSelected: boolean, parentData?: any, colIndex?: any}, type?: any) {
     // console.log('updateFinalList type', type)
     if (data.isSelected) {
       // data.selectedTerm.selected = data.isSelected
@@ -147,6 +168,10 @@ export class TaxonomyViewComponent implements OnInit, OnDestroy {
     setTimeout(() => {
       // console.log('calling this loaded again ', data.selectedTerm)
       this.loaded[data.selectedTerm.category] = true
+      // if(type && type === 'update'){
+      //   this.frameworkService.selectionList.delete(data.selectedTerm.category);
+      //   this.frameworkService.currentSelection.next({ type: data.parentData.category, data: data.parentData.children })
+      // }
     }, 100);
 
   }

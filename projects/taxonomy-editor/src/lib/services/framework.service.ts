@@ -16,7 +16,8 @@ export class FrameworkService {
   categoriesHash: BehaviorSubject<NSFramework.ICategory[] | []> = new BehaviorSubject<NSFramework.ICategory[] | []>([])
   // termsByCategory: BehaviorSubject<NSFramework.ITermsByCategory[] | []> = new BehaviorSubject<NSFramework.ITermsByCategory[] | []>([])
   isDataUpdated: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false)
-  currentSelection: BehaviorSubject<{ type: string, data: any, cardRef?: any } | null> = new BehaviorSubject<{ type: string, data: any, cardRef?: any } | null>(null)
+  currentSelection: BehaviorSubject<{ type: string, data: any, cardRef?: any, isUpdate?:boolean } | null> = 
+    new BehaviorSubject<{ type: string, data: any, cardRef?: any, isUpdate?:boolean } | null>(null)
   termSubject: BehaviorSubject<any> = new BehaviorSubject<any>(null)
   afterAddOrEditSubject: BehaviorSubject<any> = new BehaviorSubject<any>(null)
   list = new Map<string, NSFramework.IColumnView>();

@@ -23,7 +23,9 @@ export interface Card {
 export interface  CardSelection {
     element?: Array<Card>,
     selectedTerm?: Array<Card>,
-    isSelected: boolean
+    isSelected: boolean,
+    cardRef?: any,
+    isUpdate?: boolean
 }
 
 export interface CardChecked {
