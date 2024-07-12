@@ -9,7 +9,7 @@
         <div class="dialog-title" mat-dialog-title>{{data.columnInfo.name === 'Theme' ? app_strings.addCompetency : app_strings.createNew}} {{data.columnInfo.name}}</div>
     </ng-container> -->
     <ng-container *ngIf="data?.mode === 'create' || data?.mode === 'multi-create'">
-        <div class="dialog-title" mat-dialog-title>{{getCreateName(data.columnInfo.name)}}</div>
+        <div class="dialog-title" mat-dialog-title>Add {{data.columnInfo.config.categoryName}} </div>
     </ng-container>
     <!-- <ng-container *ngIf="data?.mode === 'view'">
         <div class="dialog-title" mat-dialog-title>View {{data.columnInfo.name}}</div>
@@ -57,7 +57,7 @@
             <ng-container *ngFor="let term of data?.selectedParentTerms">
                 <div class="flex-1 flex-col">
                     <label for="name" class="margin-remove-bottom form-label" aria-label="First name label">
-                        {{term.category}}
+                        {{getCategoryName(term.category)}}
                     </label>
                     <mat-form-field appearance="outline" class="flex-1">
                         <input matInput name="name" id="name" #name placeholder="{{app_strings.name}}"
@@ -76,7 +76,7 @@
                             <div class="flex-1 flex-col">
                                 <label for="name" class="margin-remove-bottom form-label required"
                                     aria-label="First name label">
-                                    Add Name
+                                     {{data.columnInfo.config.categoryName}} Name
                                 </label>
                                 <mat-form-field appearance="outline" class="flex-1">
                                     <input matInput formControlName="name" id="name" #name
@@ -171,7 +171,7 @@
                                     <div class="flex-1 flex-col">
                                         <label for="name" class="margin-remove-bottom form-label required"
                                             aria-label="First name label">
-                                            Add Name
+                                             {{data.columnInfo.config.categoryName}} Name
                                         </label>
                                         <mat-form-field appearance="outline" class="flex-1">
                                             <input matInput formControlName="name" id="name" #name
@@ -237,12 +237,12 @@
                         (click)="dialogClose('')">{{app_strings.cancel}}</button>
                     <ng-container *ngIf="data?.mode === 'create'">
                         <button mat-raised-button color="primary" type="submit" cdkFocusInitial
-                            [disabled]="createThemeForm?.invalid" *ngIf="!disableCreate">{{app_strings.create}}</button>
+                            [disabled]="createThemeForm?.invalid" *ngIf="!disableCreate">{{app_strings.add_btn}}</button>
                     </ng-container>
                     <ng-container *ngIf="data?.mode === 'multi-create'">
                         <button mat-raised-button color="primary" type="button" cdkFocusInitial
                             [disabled]="createThemeFormMulti.invalid || disableMultiCreate" *ngIf="!disableCreate" (click)="multiCreate(createThemeFormMulti, data)">
-                            {{app_strings.create}}
+                            {{app_strings.add_btn}}
                         </button>
                     </ng-container>
                     <ng-container *ngIf="data?.mode === 'edit'">

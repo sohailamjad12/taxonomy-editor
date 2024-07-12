@@ -30,6 +30,7 @@ export class CreateTermComponent implements OnInit {
   isTermExist: boolean = false;
   selectedTerm: Card = {};
   app_strings = labels;
+  compLabeltext:string = ''
   constructor(
     public dialogRef: MatDialogRef<CreateTermComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
@@ -40,7 +41,8 @@ export class CreateTermComponent implements OnInit {
 
   ngOnInit() {
     this.termLists = this.data.columnInfo.children
-    console.log(this.data);
+    console.log('configData',this.data);
+    this.compLabeltext = this.data.columnInfo.config.labelName
     
     this.initTermForm()
   }
@@ -140,6 +142,16 @@ export class CreateTermComponent implements OnInit {
   
   }
 
+  getCategoryName(categoryName:any){
+    if(categoryName==='competencyarea'){
+      return 'Competency Area'
+    }
+    else {
+      return categoryName
+    }
+   
+  }
+
 
   getName(item:any){
   console.log('itemName',item);
@@ -188,6 +200,8 @@ export class CreateTermComponent implements OnInit {
       console.log('form.valid', form.valid)
       console.log(form.value)
       const themeFields = form && form.value && form.value.themeFields
+      console.log('form',form.value.themeFields);
+      
       if(themeFields && themeFields.length) {
         console.log('themeFields',themeFields)
         themeFields.forEach((val, i) =>{
@@ -314,10 +328,10 @@ export class CreateTermComponent implements OnInit {
   }
 
   updateDname(name, form, i?) {
-    if(this.data.mode === 'create'){
+    if(this.data.mode === 'create' && !form.controls.themeFields.controls[i].controls['dname'].value.trim().length){
       form.get('dname').patchValue(name)
     }
-    if(this.data.mode === 'multi-create'){
+    if(this.data.mode === 'multi-create' && !form.controls.themeFields.controls[i].controls['dname'].value.trim().length){
       form.controls.themeFields.controls[i].controls['dname'].patchValue(name)
     }
   }
@@ -436,6 +450,9 @@ export class CreateTermComponent implements OnInit {
             const value = (this.selectedTerm && this.selectedTerm.identifier) ? this.selectedTerm : (updateData) ? {...updateData.updateTermData, ...updateData.formData} : {}
             console.log('value :: ', value)
             this.disableUpdate = false
+            console.log('selectedterms',value);
+            
+            this._snackBar.open(`Competency ${value.category} updated successfully`)
             this.dialogClose({ term: { ...value }, created: true })
           }
         }, (err: any) => {
