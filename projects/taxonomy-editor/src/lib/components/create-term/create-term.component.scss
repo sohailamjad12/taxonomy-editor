@@ -649,5 +649,11 @@ input.mat-input-element {
   font-weight: 700;
   font-size: 14px;
   font-family: 'Lato';
+::ng-deep .tooltip-sec {
+  background-color: 000000 !important;
+  font-size: 12px !important;
+  font-family: 500 !important;
+  color: white !important;
+  
 }
 
