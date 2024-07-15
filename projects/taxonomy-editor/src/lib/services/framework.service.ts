@@ -8,6 +8,9 @@ import { v4 as uuidv4 } from 'uuid';
 import { IConnection } from '../models/connection.model';
 // import { LibConnectionService } from 'taxonomy-editor/lib/services/connection.service';
 import { LocalConnectionService } from './local-connection.service';
+/* tslint:disable */
+import _ from 'lodash'
+/* tslint:enable */
 
 @Injectable({
   providedIn: 'root'
@@ -296,6 +299,10 @@ export class FrameworkService {
       }
     })
     return prevSelectedTerms
+  }
+
+  getKcmSearchList(requestBody:any){
+    return this.http.post(`/${this.proxiesPath}/competencyArea/search`, requestBody).pipe(map(res => _.get(res, 'result.result')))
   }
 
 }

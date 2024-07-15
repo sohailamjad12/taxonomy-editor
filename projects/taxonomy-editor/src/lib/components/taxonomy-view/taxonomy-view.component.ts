@@ -108,12 +108,12 @@ export class TaxonomyViewComponent implements OnInit, OnDestroy {
         //   this.frameworkService.currentSelection.next({ type: res.term.category, data: res.term.children, cardRef:resData.cardRef })
         // }, 100);
         // this.updateFinalList({ selectedTerm: res.term, isSelected: true, parentData: res.parent, colIndex:resData.index })
-        // this.loaded[res.term.category] = true
+         this.loaded[res.term.category] = true
         res.term.selected = false
         this.frameworkService.selectionList.delete(res.term.category)
-        // this.frameworkService.insertUpdateDeleteNotifier.next({ action: res.term.category, type:'update', data: res.term })
-        this.updateFinalList({ selectedTerm: res.term, isSelected: true, parentData: res.parent, colIndex:resData.index }, 'update')
-        // res.term.selected = true
+         this.frameworkService.insertUpdateDeleteNotifier.next({ action: res.term.category, type:'update', data: res.term })
+         this.updateFinalList({ selectedTerm: res.term, isSelected: true, parentData: res.parent, colIndex:resData.index }, 'update')
+         res.term.selected = true
         // const next = this.frameworkService.getNextCategory(res.term.category)
         // console.log('next:: ', next)
         //   if (next && next.code) {

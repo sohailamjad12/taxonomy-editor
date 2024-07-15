@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, Inject, OnInit } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { FrameworkService } from '../../services/framework.service';
 import { startWith, map } from 'rxjs/operators';
@@ -17,7 +17,7 @@ import { MatSnackBar } from '@angular/material';
   styleUrls: ['./create-term.component.scss']
 })
 
-export class CreateTermComponent implements OnInit {
+export class CreateTermComponent implements OnInit, AfterViewInit {
   name: string = '';
   termLists: Array<Card> = [];
   filtedTermLists: Observable<any[]>;
@@ -30,19 +30,27 @@ export class CreateTermComponent implements OnInit {
   isTermExist: boolean = false;
   selectedTerm: Card = {};
   app_strings = labels;
+  compLabeltext:string = ''
   constructor(
     public dialogRef: MatDialogRef<CreateTermComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
     private frameWorkService: FrameworkService,
     private fb: FormBuilder,
     private _snackBar: MatSnackBar,
+    private cdr:ChangeDetectorRef
   ) { }
 
   ngOnInit() {
     this.termLists = this.data.columnInfo.children
-    console.log(this.data);
+    console.log('configData',this.data);
+    this.compLabeltext = this.data.columnInfo.config.labelName
     
     this.initTermForm()
+    // this.getKcmSearch()
+  }
+
+  ngAfterViewInit(): void {
+    this.cdr.detectChanges()
   }
 
   initTermForm() {
@@ -55,9 +63,16 @@ export class CreateTermComponent implements OnInit {
       dname: ['', [Validators.required]],
       description: ['']
     })
+    // this.createThemeForm.controls['dname'].disable()
+    // this.createThemeForm.controls['name'].valueChanges.subscribe((value)=>{
+    //   if(value.length){
+    //    this.createThemeForm.controls['dname'].enable()
+    //   }
+    // })
     this.createThemeFormMulti = this.fb.group({
       themeFields:this.fb.array([this.createThemeFields()])
     })
+    // this.initializeValueChanges()
     this.filtedTermLists = this.createTermForm.get('name').valueChanges.pipe(
       startWith(''),
       map(value => this._filter(value || '')),
@@ -100,6 +115,24 @@ export class CreateTermComponent implements OnInit {
     }
   }
 
+  // initializeValueChanges() {
+  //   this.themeFields.controls.forEach((group: FormGroup) => {
+  //     this.setUpValueChanges(group);
+  //   });
+  // }
+
+  // setUpValueChanges(group: FormGroup) {
+  //   group.controls['name'].valueChanges.subscribe(value => {
+  //     const dnameControl = group.controls['dname'];
+  //     dnameControl.disable();
+  //     if (value.trim().length) {
+  //       dnameControl.enable();
+  //     } else {
+  //       dnameControl.disable();
+  //     }
+  //   });
+  // }
+
   get themeFields(): FormArray {
     return this.createThemeFormMulti.get('themeFields') as FormArray;
   }
@@ -140,6 +173,20 @@ export class CreateTermComponent implements OnInit {
   
   }
 
+  getCategoryName(categoryName:any){
+    console.log('categoryName',categoryName);
+
+    switch(categoryName){
+      case 'competencyarea':
+      return 'Competency Area';
+      case 'theme':
+      return 'Competency Theme'
+      case 'subtheme':
+      return 'Competency Sub Theme'
+     }
+   
+  }
+
 
   getName(item:any){
   console.log('itemName',item);
@@ -158,6 +205,8 @@ export class CreateTermComponent implements OnInit {
   }
 
   updateFormView(form, data) {
+    console.log('view',data);
+    
     form.get('name').patchValue(data.childrenData.name)
     form.get('dname').patchValue(data.childrenData.displayName)
     form.get('description').patchValue(data.childrenData.description)
@@ -171,6 +220,8 @@ export class CreateTermComponent implements OnInit {
   }
 
   updateFormEdit(form, data) {
+    console.log('ddd',data);
+    
     form.get('name').patchValue(data.childrenData.name)
     form.get('dname').patchValue(data.childrenData.displayName)
     form.get('description').patchValue(data.childrenData.description)
@@ -178,6 +229,22 @@ export class CreateTermComponent implements OnInit {
       form.get('name').disable()
     })
   }
+
+  // getKcmSearch(){
+  //   const requestObj = {
+  //     filterCriteriaMap: {
+  //       status: "Live",
+  //       isActive: true
+  //   },
+  //   requestedFields: [],
+  //   pageNumber: 0,
+  //   pagesize: 200
+  //   }
+  //   this.frameWorkService.getKcmSearchList(requestObj).subscribe((response)=>{
+  //     console.log('response',response);
+      
+  //   })
+  // }
 
   multiCreate(form, data) {
     console.log('inside multiCreate')
@@ -188,12 +255,15 @@ export class CreateTermComponent implements OnInit {
       console.log('form.valid', form.valid)
       console.log(form.value)
       const themeFields = form && form.value && form.value.themeFields
+      console.log('form',form.value.themeFields);
+      
       if(themeFields && themeFields.length) {
         console.log('themeFields',themeFields)
         themeFields.forEach((val, i) =>{
           const term: NSFramework.ICreateTerm = {
             code: this.frameWorkService.getUuid(),
             name: val.name,
+            displayName:val.dname,
             description: val.description,
             category: this.data.columnInfo.code,
             status: appConstants.LIVE,
@@ -314,10 +384,10 @@ export class CreateTermComponent implements OnInit {
   }
 
   updateDname(name, form, i?) {
-    if(this.data.mode === 'create'){
+    if(this.data.mode === 'create' && !form.controls['dname'].value.trim().length){
       form.get('dname').patchValue(name)
     }
-    if(this.data.mode === 'multi-create'){
+    if(this.data.mode === 'multi-create' && !form.controls.themeFields.controls[i].controls['dname'].value.trim().length){
       form.controls.themeFields.controls[i].controls['dname'].patchValue(name)
     }
   }
@@ -357,6 +427,7 @@ export class CreateTermComponent implements OnInit {
         code: this.frameWorkService.getUuid(),
         name: this.createTermForm.value.name,
         description: this.createTermForm.value.description,
+        displayName:this.createTermForm.value.dname,
         category: this.data.columnInfo.code,
         status: appConstants.LIVE,
         // approvalStatus:appConstants.DRAFT,
@@ -381,10 +452,15 @@ export class CreateTermComponent implements OnInit {
   }
 
   updateTermData(form, data) {
+    
+    
+    form.value.displayName = form.value.dname
+    console.log('formValue',form.value);
     this.disableUpdate = true
     const formData = {
       // use this if you need disabled field values : form.getRawValue()
-      ...form.value
+      ...form.value,
+      // displayName:{...form.value.dname}
     }
     const updateData = {
       formData,
@@ -436,6 +512,9 @@ export class CreateTermComponent implements OnInit {
             const value = (this.selectedTerm && this.selectedTerm.identifier) ? this.selectedTerm : (updateData) ? {...updateData.updateTermData, ...updateData.formData} : {}
             console.log('value :: ', value)
             this.disableUpdate = false
+            console.log('selectedterms',value);
+            
+            this._snackBar.open(`Competency ${value.category} updated successfully`)
             this.dialogClose({ term: { ...value }, created: true })
           }
         }, (err: any) => {
