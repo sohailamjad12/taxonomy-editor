@@ -31,6 +31,8 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
   selectedTerm: Card = {};
   app_strings = labels;
   compLabeltext:string = ''
+  masterList:any[]=[];
+  expansionTitle:string = ''
   constructor(
     public dialogRef: MatDialogRef<CreateTermComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
@@ -38,7 +40,9 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
     private fb: FormBuilder,
     private _snackBar: MatSnackBar,
     private cdr:ChangeDetectorRef
-  ) { }
+  ) { 
+    this.getKcmSearch()
+  }
 
   ngOnInit() {
     this.termLists = this.data.columnInfo.children
@@ -46,7 +50,7 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
     this.compLabeltext = this.data.columnInfo.config.labelName
     
     this.initTermForm()
-    // this.getKcmSearch()
+    
   }
 
   ngAfterViewInit(): void {
@@ -206,10 +210,24 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
 
   updateFormView(form, data) {
     console.log('view',data);
-    
-    form.get('name').patchValue(data.childrenData.name)
+    console.log('array',this.masterList);
     form.get('dname').patchValue(data.childrenData.displayName)
     form.get('description').patchValue(data.childrenData.description)
+
+      if (data.childrenData.name && this.masterList.length) {
+        const assignName = this.masterList.find(option =>
+          data.childrenData.name === option.title
+        )
+        if (assignName) {
+          form.controls['name'].setValue(assignName)
+        }
+        console.log(assignName);
+        
+      }
+  
+    
+    // form.get('name').patchValue(data.childrenData.name)
+    
     setTimeout(() => {
       form.get('name').disable()
       form.get('dname').disable()
@@ -221,30 +239,56 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
 
   updateFormEdit(form, data) {
     console.log('ddd',data);
-    
-    form.get('name').patchValue(data.childrenData.name)
     form.get('dname').patchValue(data.childrenData.displayName)
     form.get('description').patchValue(data.childrenData.description)
+    if (data.childrenData.name && this.masterList.length) {
+      const assignName = this.masterList.find(option =>
+        data.childrenData.name === option.title
+      )
+      if (assignName) {
+        form.controls['name'].setValue(assignName)
+      }
+      console.log(assignName);
+      
+    }
+    // form.get('name').patchValue(data.childrenData.name)
+   
     setTimeout(() => {
       form.get('name').disable()
     })
   }
 
-  // getKcmSearch(){
-  //   const requestObj = {
-  //     filterCriteriaMap: {
-  //       status: "Live",
-  //       isActive: true
-  //   },
-  //   requestedFields: [],
-  //   pageNumber: 0,
-  //   pagesize: 200
-  //   }
-  //   this.frameWorkService.getKcmSearchList(requestObj).subscribe((response)=>{
-  //     console.log('response',response);
-      
-  //   })
-  // }
+  getKcmSearch(){
+    const requestObj = {
+      filterCriteriaMap: {
+        status: "Live",
+        isActive: true
+    },
+    requestedFields: [],
+    pageNumber: 0,
+    pagesize: 200
+    }
+    this.frameWorkService.getKcmSearchList(requestObj,this.data.columnInfo.code).subscribe((response)=>{
+      console.log('response',response);
+      if(response.data && response.data.length){
+        this.masterList = response.data;
+        setTimeout(()=>{
+          if(this.data &&
+            (this.data.mode === 'edit')){
+              this.updateFormEdit(this.createThemeForm, this.data)
+            }
+            else if(this.data &&
+              (this.data.mode === 'view')){
+                this.updateFormView(this.createThemeForm, this.data)
+            }
+
+          
+        },1000)
+       
+
+      }
+    })
+  }
 
   multiCreate(form, data) {
     console.log('inside multiCreate')
@@ -254,6 +298,8 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
     if(form.valid) {
       console.log('form.valid', form.valid)
       console.log(form.value)
+      console.log('formValueTheme',form.value.themeFields);
+      
       const themeFields = form && form.value && form.value.themeFields
       console.log('form',form.value.themeFields);
       
@@ -262,11 +308,13 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
         themeFields.forEach((val, i) =>{
           const term: NSFramework.ICreateTerm = {
             code: this.frameWorkService.getUuid(),
-            name: val.name,
+            name: val.name.title,
             displayName:val.dname,
             description: val.description,
             category: this.data.columnInfo.code,
             status: appConstants.LIVE,
+            refId:val.name.id,
+            refType:this.data.columnInfo.code,
             // approvalStatus:appConstants.DRAFT,
             parents: [
               { identifier: `${this.data.frameworkId}_${this.data.columnInfo.code}` }
@@ -384,13 +432,29 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
   }
 
   updateDname(name, form, i?) {
-    if(this.data.mode === 'create' && !form.controls['dname'].value.trim().length){
-      form.get('dname').patchValue(name)
-    }
-    if(this.data.mode === 'multi-create' && !form.controls.themeFields.controls[i].controls['dname'].value.trim().length){
-      form.controls.themeFields.controls[i].controls['dname'].patchValue(name)
-    }
+    // if(this.data.mode === 'create' && !form.controls['dname'].value.trim().length){
+    //   form.get('dname').patchValue(name)
+    // }
+    // if(this.data.mode === 'multi-create' && !form.controls.themeFields.controls[i].controls['dname'].value.trim().length){
+    //   form.controls.themeFields.controls[i].controls['dname'].patchValue(name)
+    // }
   }
+  change(event,form, i?){
+   if(this.data.mode === 'create'){
+    form.get('dname').patchValue(event.source.value.title)
+    this.expansionTitle = event.source.value.title
+    this.cdr.detectChanges()
+
+  }
+  if(this.data.mode === 'multi-create'){
+    form.controls.themeFields.controls[i].controls['dname'].patchValue(event.source.value.title)
+    console.log('Updated themeFields dname:', form.controls.themeFields.controls[i].controls['dname'].value);
+    this.expansionTitle = event.source.value.title
+    this.cdr.detectChanges()
+  }
+   
+  }
+  
 
   private _filter(searchTxt: any): string[] {
     let isExist;

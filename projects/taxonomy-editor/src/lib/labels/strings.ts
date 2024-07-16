@@ -30,7 +30,7 @@ export const labels = {
     allFrac: "All Frac",
     treeView: "tree view...",
     categoryName: "Enter Category Name",
-    name: "Enter Name",
+    name: "Select Name",
     description: "Enter Description",
     addCompetency:"Add Competency",
     add_btn:"Add"

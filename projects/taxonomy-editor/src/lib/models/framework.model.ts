@@ -113,6 +113,8 @@ export namespace NSFramework {
         displayName?: string;
         parents?: ParentsElements[] | null;
         additionalProperties: AdditionalProperties;
+        refId?:string;
+        refType?:string
     }
 }
 
