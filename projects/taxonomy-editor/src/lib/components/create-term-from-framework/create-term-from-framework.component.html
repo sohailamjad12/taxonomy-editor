@@ -1,0 +1,159 @@
+
+<div class="dialogNew">
+    <ng-container [ngTemplateOutlet]="modalTitle"></ng-container>
+    <div class="flex gap-4">
+        <ng-container *ngFor="let term of data?.selectedParentTerms">
+            <div class="flex-1 flex-col">
+                <label for="name" class="margin-remove-bottom form-label" aria-label="First name label">
+                    {{term.category}}
+                </label>
+                <mat-form-field appearance="outline" class="flex-1">
+                    <input matInput name="name" id="name" #name placeholder="{{app_strings.name}}"
+                        [value]="term.name" disabled>
+                </mat-form-field>
+            </div>
+        </ng-container>
+    </div>
+    <div class="row-divider"></div>
+    <form [formGroup]="competencyForm">
+    <div class="title-text">
+        <label for="name" class="margin-remove-bottom form-label" aria-label="First name label">
+            {{'Select Area'}}
+        </label>
+        <div class="mt-5">
+            <mat-radio-group aria-label="Select an option" formControlName="compArea">
+                <mat-radio-button class="learning-section"  *ngFor="let item of competencyArea?.children" [value]="item" (change)="onSelectionArea(item)">{{item.name}}</mat-radio-button>
+            </mat-radio-group>
+        </div>
+    </div>
+    <ng-container *ngIf="data?.mode === 'multi-create'">
+       
+            <div class="flex flex-end mb-4">
+                <button type="button" class="mat-button flex items-center " *ngIf="data.mode === 'multi-create'" (click)="addCompetencyTheme()">
+                    <mat-icon class="mr-2 mat-icon-custom ">add_circle_outline</mat-icon>
+                    Add {{data.columnInfo.name}}
+                </button>
+            </div>
+            <mat-accordion formArrayName="compThemeFields">
+                <mat-expansion-panel *ngFor="let field of competencyForm.get('compThemeFields')['controls']; let i = index; let isFirst = first" 
+                class="margin-bottom-l" [formGroupName]="i" [expanded]="isFirst">               
+                 <mat-expansion-panel-header>
+                        <mat-panel-title>
+                            <!-- {{name?.value}}  -->
+                        </mat-panel-title>
+                        <button mat-button type="button" *ngIf="data.mode === 'multi-create'"
+                                (click)="removeCompFields(i)">
+                                <mat-icon class="mat-icon-custom ">delete</mat-icon>
+                        </button>
+                    </mat-expansion-panel-header>
+                    <div class="input-column">
+                        <div class="input-wrapper margin-top-s">
+                            <div class="flex gap-4 ">
+                                <div class="flex-1 flex-col">
+                                    <label for="name" class="margin-remove-bottom form-label required"
+                                        aria-label="First name label">
+                                        Select Competency Theme
+                                    </label>
+                                    <mat-form-field appearance="outline" class="flex-1">
+                                        <mat-select placeholder="Choose the Competency Theme" formControlName="competencyTheme">
+                                            <mat-option *ngFor="let option of filteredallCompetencyTheme" [value]="option" (onSelectionChange)="OnThemeSelection($event)"  >{{option.name}}</mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+                                    <mat-error *ngIf="isTermExist">{{app_strings.alreadyExist}}</mat-error>
+                                </div>
+                            </div>
+
+                            <div class="flex-col mt-2">
+                                <label for="fname" class="margin-remove-bottom form-label required"
+                                    i18n="First Name label|Label which explains the user to enter first name"
+                                    i18n-aria-label aria-label="First name label">
+                                    Select Competency Sub-Theme
+                                </label>
+                                <!-- <mat-form-field appearance="outline" class="flex-1">
+                                    <mat-select placeholder="Choose the Competency Theme" formControlName="competencySubTheme">
+                                        <mat-option *ngFor="let option of filteredallCompetencySubTheme" [value]="option">{{option.name}}</mat-option>
+                                    </mat-select>
+                                </mat-form-field> -->
+                                
+                                <mat-form-field appearance="outline" class="w-full field-height" >
+                                    <mat-select class=" placeholder-text" placeholder="Choose the provider"
+                                      formControlName="competencySubTheme" multiple>
+                                      <!-- [ngClass]="{'disbaledSelect':isHideData}" -->
+                                      <mat-select-trigger >
+                                        <mat-chip-list>
+                                            <!-- (removed)="onProviderRemoved(item)" -->
+                                          <mat-chip *ngFor="let item of competencyForm?.get('compThemeFields')['controls'][i]['controls']?.competencySubTheme?.value" [removable]="true">
+                                            {{ item.name }}
+                                            <mat-icon matChipRemove>cancel</mat-icon>
+                                          </mat-chip>
+                                        </mat-chip-list>
+                                      </mat-select-trigger>
+                                      <!-- {{competencyForm?.get('compThemeFields') |json}} -->
+                                      <mat-optgroup>
+                                        <mat-form-field floatLabel="never">
+                                          <input #search autocomplete="off" placeholder="Search" (keydown.space)="$event.stopPropagation()"
+                                            formControlName="competencySubTheme" matInput>
+                                          <!-- <button [disableRipple]="true" *ngIf="search.value" matSuffix mat-icon-button aria-label="Clear"
+                                            (click)="clearSearch($event,'competencySubTheme')"><mat-icon>close</mat-icon></button> -->
+                                        </mat-form-field>
+                                      </mat-optgroup>
+                                      <mat-optgroup *ngIf="filteredallCompetencySubTheme.length === 0">
+                                        <div>No results found!</div>
+                                      </mat-optgroup>
+                                      <!-- <mat-option *ngFor="let option of requestObjData.preferredProvider" [value]="option.providerName">{{option.providerName}}</mat-option> -->
+                                      <ng-container *ngFor="let option of filteredallCompetencySubTheme">
+                                        <mat-option 
+                                           [value]="option">{{option.name}}</mat-option>
+                                      </ng-container>
+                    
+                                    </mat-select>
+                                    <!-- <mat-error *ngIf="requestForm.controls['providerText'].hasError('required')">
+                                      Please select up to five preferred providers for the request.
+                                    </mat-error> -->
+                                  </mat-form-field>
+                            </div>
+                        </div>
+                    </div>
+                </mat-expansion-panel>
+            </mat-accordion>
+            <footer class="actions">
+                <button mat-raised-button color="default" type="reset"
+                    (click)="dialogClose('')">{{app_strings.cancel}}</button>
+                <ng-container *ngIf="data?.mode === 'create'">
+                    <button mat-raised-button color="primary" type="submit" cdkFocusInitial
+                        [disabled]="competencyForm?.invalid" *ngIf="!disableCreate">{{app_strings.create}}</button>
+                </ng-container>
+                <ng-container *ngIf="data?.mode === 'multi-create'">
+                    <button mat-raised-button color="primary" type="button" cdkFocusInitial
+                        [disabled]="competencyForm.invalid" *ngIf="!disableCreate" (click)="multiCreate(competencyForm, data)">
+                        {{app_strings.create}}
+                    </button>
+                </ng-container>
+                <ng-container *ngIf="data?.mode === 'edit'">
+                    <button mat-raised-button color="primary" type="button" cdkFocusInitial
+                        (click)="updateTermData(competencyForm, data)"
+                        [disabled]="competencyForm?.invalid || disableUpdate"
+                        *ngIf="!disableCreate">{{app_strings.update}}</button>
+                </ng-container>
+            </footer>
+        </ng-container>
+    </form>
+</div>
+
+
+<!-- Title of the popup -->
+<ng-template #modalTitle>
+    <!-- <ng-container *ngIf="data?.mode === 'create' || data?.mode === 'multi-create'">
+        <div class="dialog-title" mat-dialog-title>{{data.columnInfo.name === 'Theme' ? app_strings.addCompetency : app_strings.createNew}} {{data.columnInfo.name}}</div>
+    </ng-container> -->
+    <!-- {{data |json}} -->
+    <ng-container *ngIf="data?.mode === 'create' || data?.mode === 'multi-create'">
+        <div class="dialog-title" mat-dialog-title>{{getCreateName(data.columnInfo.name)}}</div>
+    </ng-container>
+    <!-- <ng-container *ngIf="data?.mode === 'view'">
+        <div class="dialog-title" mat-dialog-title>View {{data.columnInfo.name}}</div>
+    </ng-container> -->
+    <ng-container *ngIf="data?.mode === 'edit'">
+        <div class="dialog-title" mat-dialog-title>{{app_strings.edit}} {{data.columnInfo.name}}</div>
+    </ng-container>
+</ng-template>

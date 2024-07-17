@@ -69,8 +69,10 @@ export class TaxonomyColumnViewComponent implements OnInit, OnDestroy, OnChanges
  
   isExists(e){
     let temp;
-    temp = this.termshafall.map(t => t.identifier)
-    return temp.includes(e.identifier)
+    if(this.termshafall && this.termshafall.length) {
+      temp = this.termshafall.map(t => t.identifier)
+      return temp.includes(e.identifier)
+    } return false
   }
   
   subscribeEvents() {

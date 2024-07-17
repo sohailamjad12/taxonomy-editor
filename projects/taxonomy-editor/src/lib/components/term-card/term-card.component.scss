@@ -26,9 +26,11 @@
             // margin-left: 0.5em;
             .card-title {
                 margin-bottom: 0.5em;
+                font-family: 'Lato-Bold';
             }
             .card-description {
                 color: rgba(0, 0, 0, 0.4);
+                font-size: 14px !important;
                 overflow: hidden;
                 text-overflow: ellipsis;
                 display: -webkit-box;
@@ -56,4 +58,10 @@
     right: 5px;
     top: 35px;
     font-size: $font-size-24;
+}
+
+
+   ::ng-deep .menu-sec {
+        min-height: 0px !important;
+    
 }

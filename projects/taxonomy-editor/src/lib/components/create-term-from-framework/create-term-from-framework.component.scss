@@ -79,9 +79,9 @@
 }
 
 .dialogNew {
-    padding: 0 1rem ;
+    padding: 1rem ;
     .mat-dialog-title{
-        padding: 1em;
+        padding: 1em 0em;
         margin-bottom: 0;
         // background: $light-gray;
     }
@@ -100,6 +100,14 @@
         // padding:0 25px;
         margin-top:-10px;
     }
+     .learning-section {
+      padding: 16px;
+      border: 1px solid #0000002e;
+      margin-right: 18px;
+      padding-top: 9px;
+      padding-right: 69px;
+      padding-left: 10px;
+  }
 
 }
 
@@ -548,10 +556,105 @@ input.mat-input-element {
   }
 }
 
-::ng-deep .tooltip-sec {
-  background-color: 000000 !important;
-  font-size: 12px !important;
-  font-family: 500 !important;
-  color: white !important;
-  
+.organisation {
+  color: #212529;
+  font-weight: 700;
+  font-size: 14px;
+  font-family: 'Lato';
+}
+
+.org-name {
+  height: 50px;
+  border: 1px solid #e2e2e2;
+  border-radius: 5px;
+  background-color: #ebebeb;
+  font-size: 14px;
+}
+
+.add-designation {
+  height: 25px;
+  color: #1B4CA1 !important;
+  font-weight: 500;
+  font-size: 14px;
+  font-family: 'Lato';
+  cursor: pointer;
+
+  .add-icon{
+    color: #1B4CA1 !important;
+    height: 24px;
+    width: 24px;
+    font-size: 24px;
+  }
+}
+
+.info-icon {
+  width: 14px;
+  height: 14px;
+  font-size: 14px;
+  color: #a7a9ae !important;
+}
+
+.themDesignation {
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.designation-panel {
+
+  margin-bottom: 0px !important;
+  background-color: #EEF1F7 !important;
+  border: 1px solid #DBE0E9;
+  box-shadow: none !important;
+
+  .deletDesignation {
+    font-size: 18px;
+    width: 14px;
+    height: 14px;
+    color: #5f6063;
+  }
+
+  .saveDesignaton {
+    color: #FFFFFF;
+    height: 40px;
+    width: 80px;
+    background-color: #1B4CA1;
+    border: 1px solid #1B4CA1;
+    font-weight: 700;
+    font-size: 14px;
+    font-family: 'Lato';
+  }
+}
+
+.designation-footer {
+  padding: 1rem;
+  border-top: 1px solid #efefef;
+}
+
+.cancel {
+  width: 93px;
+  height: 40px;
+  font-weight: 700;
+  font-size: 14px;
+  font-family: 'Lato';
+  border: 1px solid #eee;
+  color: #363636;
+}
+
+.addBtn {
+  color: #FFFFFF !important;
+  height: 40px;
+  width: 80px;
+  background-color: #1B4CA1 !important;
+  border: 1px solid #1B4CA1;
+  font-weight: 700;
+  font-size: 14px;
+  font-family: 'Lato';
+}
+
+::ng-deep .mat-option.mat-selected:not(.mat-option-disabled) {
+    color: rgba(0, 0, 0, 0.87) !important;
+  }
+
+::ng-deep .theme-igot.day-mode .mat-pseudo-checkbox-checked{
+    background: #0074b6 !important;
 }
