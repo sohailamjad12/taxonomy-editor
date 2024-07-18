@@ -301,8 +301,17 @@ export class FrameworkService {
     return prevSelectedTerms
   }
 
-  getKcmSearchList(requestBody:any){
-    return this.http.post(`/${this.proxiesPath}/competencyArea/search`, requestBody).pipe(map(res => _.get(res, 'result.result')))
+  getKcmSearchList(requestBody:any,category){
+     let categoryItem
+    console.log('categoryItem',category);
+    if(category === 'theme'){
+      categoryItem = 'competencyTheme'
+    }
+    else {
+      categoryItem = 'competencySubTheme'
+    }
+    
+    return this.http.post(`/${this.proxiesPath}/${categoryItem}/search`, requestBody).pipe(map(res => _.get(res, 'result.result')))
   }
 
 }
