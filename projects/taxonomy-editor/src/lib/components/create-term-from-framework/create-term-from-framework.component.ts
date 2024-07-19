@@ -1,11 +1,14 @@
 import { Component, Inject, OnInit } from '@angular/core';
-import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef, MatSnackBar } from '@angular/material';
 import { labels } from '../../labels/strings';
 import { FrameworkService } from '../../services/framework.service';
 import { NSFramework } from '../../models/framework.model';
 import * as appConstants from '../../constants/app-constant';
 import { Card } from '../../models/variable-type.model';
+/* tslint:disable */
+import _ from 'lodash'
+/* tslint:enable */
 
 @Component({
   selector: 'lib-create-term-from-framework',
@@ -18,7 +21,9 @@ export class CreateTermFromFrameworkComponent implements OnInit {
   environment: any
 
   selectedTerm: Card = {};
+  selectedTermArray : any = []
   kcmConfigData: any
+  selectedThemeData: any
 
 
   isTermExist: boolean = false;
@@ -33,6 +38,7 @@ export class CreateTermFromFrameworkComponent implements OnInit {
   kcmList : any= new Map<string, NSFramework.IColumnView>();
   // categoriesHash: any
   competencyArea: any
+  selectedCardCompThemeData: any
 
   allCompetency:any[]=[]
   seletedCompetencyArea: any
@@ -50,38 +56,37 @@ export class CreateTermFromFrameworkComponent implements OnInit {
   ) { }
 
   ngOnInit() {
+    this.environment = this.frameWorkService.getEnviroment()
+    this.getComptencyData()
+    this.kcmConfigData = this.frameWorkService.getConfigByFrameWorkId(this.environment.kcmFrameworkName)
     this.competencyForm = this.fb.group({
       compArea:['',Validators.required],
       compThemeFields: this.fb.array([this.createCompThemeFields()])
     })
-    this.environment = this.frameWorkService.getEnviroment()
-    this.kcmConfigData = this.frameWorkService.getConfigByFrameWorkId(this.environment.kcmFrameworkName)
-    
-    this.getComptencyData()
 
   }
 
   getComptencyData(){
     this.frameWorkService.getFrameworkRead(this.environment.kcmFrameworkName).subscribe((data)=>{
-     console.log(data,this.kcmConfigData,'=======kcmData');
-     
      if(data.categories) {
       this.formateData(data, this.environment.kcmFrameworkName)
-      console.log(this.kcmList,'kcmList============')
-      console.log(this.competencyArea,'categoriesHash============')
+      this.selectedCardCompThemeData =  ''
+      // to do: change getting selectedParentTerms to dynamic
+      if(this.data && this.data.selectedParentTerms) {
+        this.data.selectedParentTerms.forEach((ele: any) => {
+          if(ele.category === "competency") {
+            this.selectedCardCompThemeData = ele
+            let option = this.selectedCardCompThemeData.additionalProperties.competencyArea
+            this.onSelectionArea(option)
+          }
+        });
+      }
+      
      }
-    //  if(data && data.length){
-    //   this.allCompetency = data
-    //  }
     })
   }
 
   formateData(response: any, frameworkId: string) {
-    // this.frameworkId = response.result.framework.code;
-    // console.log('response', response);
-    // // const obj = FRAMEWORK;
-    // // const columns: NSFramework.IColumnView[] = [];
-    // // const obj = response
     (response.categories).forEach((a, idx) => {
       if(a.code !== undefined) {
         this.kcmList.set(a.code, {
@@ -102,24 +107,12 @@ export class CreateTermFromFrameworkComponent implements OnInit {
         })
       }
     });
-    const allCategories = []
-    this.kcmList.forEach(a => {
-      
+    this.kcmList.forEach((a: any) => {
       if(a.code === this.kcmConfigData.config[0].category){
         this.competencyArea = a
       }
-      // allCategories.push({
-      //   code: a.code,
-      //   identifier: a.identifier,
-      //   index: a.index,
-      //   name: a.name,
-      //   status: a.status as NSFramework.TNodeStatus,
-      //   description: a.description,
-      //   translations: a.translations,
-      // } as NSFramework.ICategory)
     })
     
-    // this.categoriesHash = allCategories
 
   }
 
@@ -148,12 +141,38 @@ export class CreateTermFromFrameworkComponent implements OnInit {
       this.seletedCompetencyArea = option
       this.filteredallCompetencyTheme = []
       this.allCompetencyTheme = []
-      option.children.forEach((ele: any) => {
-        if(ele.category === 'theme') {
-          this.allCompetencyTheme.push(ele)
-          this.filteredallCompetencyTheme.push(ele)
+      if(option &&  option.children &&  option.children.length){
+        option.children.forEach((ele: any) => {
+          if(ele.category === 'theme') {
+            this.allCompetencyTheme.push(ele)
+            this.filteredallCompetencyTheme.push(ele)
+          }
+        });
+      } else {
+        if(this.competencyArea && this.competencyArea.children) {
+          this.competencyArea.children.forEach(element => {
+            if(element.code === option.code) {
+              this.seletedCompetencyArea = option
+              element.children.forEach((ele: any) => {
+                if(ele.category === 'theme') {
+                  this.allCompetencyTheme.push(ele)
+                  this.filteredallCompetencyTheme.push(ele)
+                  // to do:  to be check based on reff id
+                  if(this.selectedCardCompThemeData.name.toLowerCase() === ele.name.toLowerCase()){
+                    let formArray = this.competencyForm.get('compThemeFields') as FormArray;
+                    formArray.at(0).get('competencyTheme').patchValue(ele)
+                    formArray.at(0).get('competencyTheme').updateValueAndValidity()
+                    this.competencyForm.get('compArea').patchValue(option)
+                    this.competencyForm.get('compArea').updateValueAndValidity()
+                  }
+                  
+                }
+              });
+            }
+          });
         }
-      });
+      }
+      
     }
   }
 
@@ -169,19 +188,24 @@ export class CreateTermFromFrameworkComponent implements OnInit {
     }
   }
 
-  OnThemeSelection(event: any) {
-    
+  OnThemeSelection(event: any, _indexValue: any, optionData:any) {
     if (event.isUserInput) {   
     console.log(event);
     const selectedTheme = event.source.value
     this.kcmList.forEach(ele => {
-      console.log(ele,'--------subTheme---------')
       if(selectedTheme.category === ele.code) {
         if(ele.children && ele.children.length) {
           ele.children.forEach((themeChild: any) => {
             if(themeChild.identifier === selectedTheme.identifier) {
               if(themeChild.children && themeChild.children.length) {
+                optionData['children'] = themeChild.children
                 this.filteredallCompetencySubTheme = themeChild.children 
+                let matchedData = _.intersectionBy(themeChild.children,this.selectedCardCompThemeData.children, 'name');
+                 // to do:  to be check based on reff id
+                let formArray = this.competencyForm.get('compThemeFields') as FormArray;
+                formArray.at(0).get('competencySubTheme').patchValue(matchedData)
+                formArray.at(0).get('competencySubTheme').updateValueAndValidity()
+                
               }
             }
           });
@@ -189,6 +213,21 @@ export class CreateTermFromFrameworkComponent implements OnInit {
       }
     });
   }
+  }
+
+  onTermRemove(termData: any, indexValue: number) {
+    let formArray = this.competencyForm.get('compThemeFields') as FormArray;
+    const compThemeControl = formArray.at(indexValue).get('competencySubTheme') as FormControl | null
+    if (compThemeControl) {
+      const themes = compThemeControl.value
+      if (themes) {
+        const index = themes.indexOf(termData)
+        if (index >= 0) {
+          themes.splice(index, 1)
+          compThemeControl.setValue(themes)
+        }
+      }
+    }
   }
 
   // add form
@@ -199,15 +238,26 @@ export class CreateTermFromFrameworkComponent implements OnInit {
     let counterSubTheme = 0
     let parentCategory = {}
     let createdTerms = []
+    let createdSubTheme = []
     if(form.valid) {
       console.log('form.valid', form.valid)
       console.log(form.value)
       const themeFields = form && form.value && form.value.compThemeFields
       if(themeFields && themeFields.length) {
         console.log('themeFields',themeFields)
-        themeFields.forEach(async (objVal, i) =>{
+        let localCompArea = {...this.seletedCompetencyArea}
+        if(localCompArea.children && localCompArea.children.length) {
+          delete localCompArea.children
+        }
+        if(localCompArea.associations && localCompArea.associations.length) {
+          delete localCompArea.associations
+        }
+
+        // themeFields.forEach(async (objVal, themeIndex) =>
+        for(let objVal of themeFields) {
           parentCategory = {}
           if(objVal['competencyTheme']) {
+            createdTerms= []
             let value = objVal['competencyTheme']
             const term: NSFramework.ICreateTerm = {
               code: this.frameWorkService.getUuid(),
@@ -215,11 +265,15 @@ export class CreateTermFromFrameworkComponent implements OnInit {
               description: value.description,
               category: this.data.columnInfo.code,
               status: appConstants.LIVE,
+              refId: value.refId || '',
+              refType: value.refType || '',
               // approvalStatus:appConstants.DRAFT,
               parents: [
                 { identifier: `${this.data.frameworkId}_${this.data.columnInfo.code}` }
               ],
-              additionalProperties: {}
+              additionalProperties: {
+                competencyArea: localCompArea
+              }
             }
             const requestBody = {
               request: {
@@ -227,24 +281,40 @@ export class CreateTermFromFrameworkComponent implements OnInit {
               }
             }
             
-            console.log(this.selectedTerm)
-            console.log(this.frameWorkService.selectionList)
             await this.frameWorkService.createTerm(this.data.frameworkId, this.data.columnInfo.code, requestBody).toPromise().then(async (res: any) => {
               requestBody.request.term['identifier'] = res.result.node_id[0]
+              this.frameWorkService.selectionList.delete('competency')
               parentCategory = requestBody.request.term
               createdTerms.push(requestBody.request.term)
               console.log('createdTerms success',createdTerms)
-              
               counterTheme++
               console.log('counter :: ', counterTheme, themeFields.length)
-              if(counterTheme === themeFields.length){
-                await this.updateTermAssociationsMulti(createdTerms)
+              await this.updateTermAssociationsMulti(createdTerms)
+              console.log(this.selectedTerm)
+              console.log(this.frameWorkService.selectionList)
+              const parentColumn = this.frameWorkService.getPreviousCategory(this.data.columnInfo.code)
+              let parentCol: any = this.frameWorkService.selectionList.get(parentColumn.code)
+              console.log(parentColumn)
+              console.log(parentCol)
+              let data = {
+                "selected": false,
+                "category": parentColumn.code,
+                "cardSubType": "minimal",
+                "isViewOnly": false,
+                "index": parentColumn.index,
+                "columnInfo": this.data.cardColInfo
               }
+              const responseData12 = {
+                res: { term: [this.selectedTerm], created: true, multi:true },
+                index: this.data.columnInfo.index,
+                data: data,
+                type: 'multi-create'
+              }
+              this.frameWorkService.updateAfterAddOrEditSubject(responseData12)
+
             })
-            
           }
           if(objVal['competencySubTheme']) {
-            createdTerms=  []
             this.frameWorkService.selectionList.set(this.data.columnInfo.code, parentCategory)
 
             let value = objVal['competencySubTheme']
@@ -256,7 +326,8 @@ export class CreateTermFromFrameworkComponent implements OnInit {
                   description: ele.description,
                   category: this.data.nextColInfo.code,
                   status: appConstants.LIVE,
-                  // approvalStatus:appConstants.DRAFT,
+                  refId: ele.refId || '',
+                  refType: ele.refType || '',
                   parents: [
                     { identifier: `${this.data.frameworkId}_${this.data.nextColInfo.code}` }
                   ],
@@ -269,33 +340,124 @@ export class CreateTermFromFrameworkComponent implements OnInit {
                 }
                 await this.frameWorkService.createTerm(this.data.frameworkId, this.data.nextColInfo.code, requestBody).toPromise().then(async (res: any) => {
                   requestBody.request.term['identifier'] = res.result.node_id[0]
-                  createdTerms.push(requestBody.request.term)
+                  createdSubTheme.push(requestBody.request.term)
                   console.log('createdTerms success',createdTerms)
                   
                   counterSubTheme++
                   console.log('counter :: ', counterSubTheme, themeFields.length)
-                  if(counterSubTheme === themeFields.length){
-                    await this.updateTermAssociationsMulti(createdTerms)
-                    // this.dialogClose({ term: createdTerms, created: true, multi:true })
+                  if((counterSubTheme === objVal['competencySubTheme'].length)){
+                    await this.updateTermAssociationsMultiV2(createdSubTheme)
+
+                    const parentColumn = this.frameWorkService.getPreviousCategory(this.data.nextColInfo.code)
+                    let parentCol: any = this.frameWorkService.selectionList.get(parentColumn.code)
+                    let data = {
+                      "selected": false,
+                      "category": parentColumn.code,
+                      "cardSubType": "minimal",
+                      "isViewOnly": false,
+                      "index": parentColumn.index,
+                      "columnInfo": this.data.columnInfo
+                    }
+                    const responseData12 = {
+                      res: { term: [this.selectedTerm], created: true, multi:true },
+                      index: this.data.columnInfo.index,
+                      data: data,
+                      type: 'multi-create'
+                    }
+                    debugger
+                    console.log(this.data)
+                    this.frameWorkService.selectionList.delete('competency')
+                    console.log('===========11111112',this.frameWorkService.list)
+                    this.frameWorkService.updateAfterAddOrEditSubject(responseData12)
+
+                    
                   }
+                  
                 })
               });
             }
-            
-            
-            console.log(this.selectedTerm)
-            
-            
-            
           }
-        })
+          
+        }
+        
         this.disableMultiCreate = true
       }
     }
   }
 
 
+
+  async updateTermAssociationsMultiV2(createdTerms: any[], parentSelectedTerm?: any) {
+    if(createdTerms && createdTerms.length) {
+      this.selectedTermArray = []
+      let createdTermsCounter = 0
+      let createdTermsIdentifiers = []
+      this.selectedTermArray = createdTerms
+      this.selectedTerm = createdTerms[createdTerms.length -1]
+      for(let createdTerm of createdTerms) {
+        createdTermsIdentifiers.push({ identifier: createdTerm.identifier })
+      }
+      let associations = []
+      let counter = 0
+      if(!parentSelectedTerm) {
+        for(const [key, value] of this.frameWorkService.selectionList){
+          const parent = value
+          counter++
+          associations = parent.children ? parent.children.map(c => {
+            return c.identifier ?  { identifier: c.identifier } : null
+          }) : []
+            associations = [...associations, ...createdTermsIdentifiers]
+            this.isTermExist = false
+            const reguestBody = {
+              request: {
+                term: {
+                  ...(associations && associations.length) ? {associations: [...associations]} : null,
+                }
+              }
+            }
+            await this.callUpdateAssociationsV2(counter, parent, reguestBody)
+          createdTermsCounter++
+          if(createdTermsCounter === this.frameWorkService.selectionList.size) {
+            // this.selectedTerm['children'] = createdTerms
+            console.log('===========11111113',this.frameWorkService.list)
+                      this.frameWorkService.selectionList.delete('competency')
+              this.dialogClose({ term: [this.selectedTerm], created: true, multi:true, callUpdate: false })
+            console.log('close dialog',createdTerms)
+            if(createdTerms[0].category === 'theme'){
+              this._snackBar.open(`Competency ${createdTerms[0].category} created successfully.`)
+            }
+            if(createdTerms[0].category === 'subtheme'){         
+  
+              this._snackBar.open(`Competency ${createdTerms[0].category} created successfully.`)
+            }
+          }
+        } 
+      } else {
+        const parent = parentSelectedTerm
+        associations = parent.children ? parent.children.map(c => {
+          return c.identifier ?  { identifier: c.identifier } : null
+        }) : []
+          associations = [...associations, ...createdTermsIdentifiers]
+          this.isTermExist = false
+          const reguestBody = {
+            request: {
+              term: {
+                ...(associations && associations.length) ? {associations: [...associations]} : null,
+              }
+            }
+          }
+          await this.callUpdateAssociationsV2(counter, parent, reguestBody)
+
+          this.dialogClose({ term: [this.selectedTerm], created: true, multi:true, stopUpdate: false })
+          if(createdTerms[0].category === 'subtheme'){   
+            this._snackBar.open(`Competency ${createdTerms[0].category} created successfully.`)
+          }
+      }
+    }
+  }
+
   async updateTermAssociationsMulti(createdTerms: any[]) {
+    debugger
     if(createdTerms && createdTerms.length) {
       let createdTermsCounter = 0
       for(let createdTerm of createdTerms) {
@@ -312,7 +474,6 @@ export class CreateTermFromFrameworkComponent implements OnInit {
           counter++
           temp = parent.children ? parent.children.filter(child => child.identifier === this.selectedTerm.identifier) : null
           associations = parent.children ? parent.children.map(c => {
-            // return { identifier: c.identifier, approvalStatus: c.associationProperties?c.associationProperties.approvalStatus: 'Draft' }
             return c.identifier ?  { identifier: c.identifier } : null
           }) : []
           if (temp && temp.length) {
@@ -335,18 +496,40 @@ export class CreateTermFromFrameworkComponent implements OnInit {
           }
         }
         createdTermsCounter++
-        if(createdTermsCounter === createdTerms.length) {
-          this.dialogClose({ term: [this.selectedTerm], created: true, multi:true })
-          console.log('close dialog',createdTerms)
-          if(createdTerms[0].category === 'theme'){
-            this._snackBar.open(`Competency ${createdTerms[0].category} created successfully.`)
-          }
-          if(createdTerms[0].category === 'subtheme'){
-            this._snackBar.open(`Competency ${createdTerms[0].category} created successfully.`)
-          }
-        }
       }
     }
+  }
+
+  async callUpdateAssociationsV2(counter: any, parent: any, reguestBody: any ): Promise<any>{
+    return new Promise(async (resolve) => {
+       this.frameWorkService.updateTerm(this.data.frameworkId, parent.category, parent.code, reguestBody).subscribe(async (res: any) => {
+        debugger
+        parent['children'] = parent && parent.children ?[...parent.children, ...this.selectedTermArray]:this.selectedTermArray
+
+        if (counter === this.frameWorkService.selectionList.size) {
+          // this value is for selected term in case of create scenario, in case of edit scenario this won't be avaiable 
+          // so term is set from childdata which is received from params in updateData
+          // const value = (this.selectedTerm && this.selectedTerm.identifier) ? this.selectedTerm : {}
+          // console.log('value :: ', value)
+          // const found = parent.children ? parent.children.find(c=> c.identifier === this.selectedTerm.identifier) : false
+          // if(!found) {
+
+            // parent['children'] = parent && parent.children ?[...parent.children, ...this.selectedTermArray]:this.selectedTermArray
+            // parent.children ? parent.children.push(this.selectedTerm) : parent['children'] = [this.selectedTerm]
+          // }
+          this.disableUpdate = false
+          let returnValue : any = true
+          resolve(true)
+          await returnValue
+        } else {
+          let returnValue : any = true
+          resolve(true)
+          await returnValue
+        }
+      }, (err: any) => {
+        console.error(`Edit ${this.data.columnInfo.name} failed, please try again later`)
+      })
+    })
   }
 
   async callUpdateAssociations(counter: any, parent: any, reguestBody: any ): Promise<any>{
@@ -451,6 +634,64 @@ export class CreateTermFromFrameworkComponent implements OnInit {
 
 
 
+
+
+  multiCreateSubTheme(form: any, data: any) {
+    debugger
+    let formArray = this.competencyForm.get('compThemeFields') as FormArray;
+    let selectedFormData = formArray.at(0).get('competencySubTheme').value
+    let previousSubThemeData = data.childrenData.children
+    console.log(selectedFormData, previousSubThemeData,'-------------qwer') 
+    let newlyAdded = []
+    let removedExisting = []
+    let createdSubTheme = []
+    let counterSubTheme = 0
+    newlyAdded = _.differenceBy(selectedFormData, previousSubThemeData, 'refId');
+    console.log(newlyAdded,'-------------newlyAdded') 
+    removedExisting = _.differenceBy(previousSubThemeData, selectedFormData, 'refId');
+    console.log(removedExisting,'-------------newlyAdded') 
+    if(newlyAdded && newlyAdded.length) {
+        console.log('themeFields',newlyAdded)
+        newlyAdded.forEach(async (val, i) =>{
+        const term: NSFramework.ICreateTerm = {
+          code: this.frameWorkService.getUuid(),
+          name: val.name,
+          description: val.description,
+          category: this.data.columnInfo.code,
+          status: appConstants.LIVE,
+          refId: val.refId,
+          refType: val.refType,
+          // approvalStatus:appConstants.DRAFT,
+          parents: [
+            { identifier: `${this.data.frameworkId}_${this.data.columnInfo.code}` }
+          ],
+          additionalProperties: {}
+        }
+        const requestBody = {
+          request: {
+            term: term
+          }
+        }
+
+        const parentColumnConfigData = this.frameWorkService.getPreviousCategory(this.data.columnInfo.code)
+        let parentCol: any = this.frameWorkService.selectionList.get(parentColumnConfigData.code)
+      
+        console.log(requestBody,'requestBody')
+        await this.frameWorkService.createTerm(this.data.frameworkId, this.data.columnInfo.code, requestBody).toPromise().then(async (res: any) => {
+          requestBody.request.term['identifier'] = res.result.node_id[0]
+          createdSubTheme.push(requestBody.request.term)
+          console.log('createdTerms success',createdSubTheme)
+          
+          counterSubTheme++
+          console.log('counter :: ', counterSubTheme, newlyAdded.length)
+          if(counterSubTheme === newlyAdded.length){
+            this.updateTermAssociationsMultiV2(createdSubTheme, parentCol)
+          }
+        })
+      })
+      this.disableMultiCreate = true
+    }
+  }
 
   // getter methods
 

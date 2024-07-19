@@ -179,18 +179,17 @@ export class TermCardComponent implements OnInit {
         nextColInfo = Array.from(this.frameworkService.list.values()).filter(l => l.code === nextNextCat.code )
       }
       let dialog: any
-      debugger
       if(this.environment && this.environment.frameworkType === 'MDO_DESIGNATION'){
-        debugger
         dialog = this.dialog.open(CreateTermFromFrameworkComponent, {
           data: { 
             mode:'multi-create',
+            cardColInfo: this.data.columnInfo,
             columnInfo: colInfo && colInfo.length ? colInfo[0] : [],
             nextColInfo: nextColInfo && nextColInfo.length ? nextColInfo[0] : [],
             frameworkId: this.frameworkService.getFrameworkId(),
             selectedparents: this.heightLighted,
             colIndex: nextCat.index,
-            childrenData: data.childrenData,
+            childrenData: data.children,
             selectedParentTerms: selectedTerms
           },
           width: '800px',
@@ -204,7 +203,7 @@ export class TermCardComponent implements OnInit {
             frameworkId: this.frameworkService.getFrameworkId(),
             selectedparents: this.heightLighted,
             colIndex: nextCat.index,
-            childrenData: data.childrenData,
+            childrenData: data.children,
             selectedParentTerms: selectedTerms
           },
           width: '800px',
@@ -221,7 +220,9 @@ export class TermCardComponent implements OnInit {
           data,
           type: 'multi-create'
         }
-        this.frameworkService.updateAfterAddOrEditSubject(responseData)
+        if(!(res && res.stopUpdate)){
+          this.frameworkService.updateAfterAddOrEditSubject(responseData)
+        }
       })
     }
   }
