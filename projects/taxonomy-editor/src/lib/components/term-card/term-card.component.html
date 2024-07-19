@@ -16,6 +16,11 @@
             <!-- <div class="id" [hidden]="true">{{data.children.code}}</div> -->
             <div class="term-card-content">
                 <div class="card-title">{{data.children.name}}</div>
+                <ng-container *ngIf="data?.children?.refId">
+                    <div class="refIdCard px-4">
+                        <span>{{data?.children?.refId}} </span>
+                    </div>
+                </ng-container>
                 <!-- <span>++{{data.children.selected}}+++</span>
                 <span>=={{data.children.status}}==</span>  -->
                 <div class="card-description">{{data.children.description}} </div>
