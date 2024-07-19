@@ -279,30 +279,6 @@ export class FrameworkService {
     return categoryConfig;
   }
 
-  getConfigOfCategoryConfigByFrameWorkId(code: string, frameworkId: string) {
-    let categoryConfig: any;
-    if(this.rootConfig && this.rootConfig[0]) {
-      this.rootConfig.forEach((config: any, index: number) => {
-        if(frameworkId == config.frameworkId) {
-          categoryConfig = config.config.find((obj: any) => obj.category == code);
-        }
-      });
-    }
-    return categoryConfig;
-  }
-
-  getConfigByFrameWorkId(frameworkId: string) {
-    let categoryConfig: any;
-    if(this.rootConfig && this.rootConfig[0]) {
-      this.rootConfig.forEach((config: any, index: number) => {
-        if(frameworkId == config.frameworkId) {
-          categoryConfig = config
-        }
-      });
-    }
-    return categoryConfig;
-  }
-
   getAllSelectedTerms() {
     const selectedTerms = []
     this.list.forEach(l => {
@@ -327,10 +303,8 @@ export class FrameworkService {
     return prevSelectedTerms
   }
 
-  
   getKcmSearchList(requestBody:any,category){
      let categoryItem
-    console.log('categoryItem',category);
     if(category === 'theme'){
       categoryItem = 'competencyTheme'
     }
@@ -349,6 +323,30 @@ export class FrameworkService {
     } else {
       return of({})
     }
+  }
+
+  getConfigOfCategoryConfigByFrameWorkId(code: string, frameworkId: string) {
+    let categoryConfig: any;
+    if(this.rootConfig && this.rootConfig[0]) {
+      this.rootConfig.forEach((config: any, index: number) => {
+        if(frameworkId == config.frameworkId) {
+          categoryConfig = config.config.find((obj: any) => obj.category == code);
+        }
+      });
+    }
+    return categoryConfig;
+  }
+
+  getConfigByFrameWorkId(frameworkId: string) {
+    let categoryConfig: any;
+    if(this.rootConfig && this.rootConfig[0]) {
+      this.rootConfig.forEach((config: any, index: number) => {
+        if(frameworkId == config.frameworkId) {
+          categoryConfig = config
+        }
+      });
+    }
+    return categoryConfig;
   }
 
 }
