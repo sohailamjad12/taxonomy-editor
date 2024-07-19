@@ -79,10 +79,10 @@
                                      {{data.columnInfo.config.categoryDisplayName}} Name
                                 </label>
                                 <mat-form-field appearance="outline" class="flex-1">
-                                    <mat-select placeholder="{{app_strings.name}}" formControlName="name" id="name" #name (selectionChange)="change($event,createThemeForm)">
+                                    <mat-select placeholder="{{app_strings?.name}}" formControlName="name" id="name" #name (selectionChange)="change($event,createThemeForm)">
                                         <!-- <input #search autocomplete="off" placeholder="Search" class="assigneeSearch"
                                           (keydown.space)="$event.stopPropagation()"  formControlName="assigneeText" matInput> -->
-                                        <mat-option *ngFor="let option of masterList"    (blur)="updateDname(option.title, createThemeForm)" [value]="option">{{option.title}}</mat-option>
+                                        <mat-option *ngFor="let option of masterList"    (blur)="updateDname(option?.title, createThemeForm)" [value]="option">{{option.title}}</mat-option>
                                         </mat-select>
 
                                     <!-- <input matInput formControlName="name" id="name" #name
@@ -171,7 +171,7 @@
                     class="margin-bottom-l" [formGroupName]="i" [expanded]="isFirst">
                         <mat-expansion-panel-header>
                             <mat-panel-title>
-                                {{expansionTitle}} 
+                                {{getExpansionTitle(field)}} 
                             </mat-panel-title>
                             <button mat-button type="button" *ngIf="data.mode === 'multi-create'"
                                     (click)="removeThemeFields(i)">
@@ -198,15 +198,15 @@
                                             {{option.name}}
                                         </mat-option>
                                         </mat-autocomplete> -->
-                                        <mat-select placeholder="{{app_strings.name}}" formControlName="name" id="name" #name (selectionChange)="change($event,createThemeFormMulti, i )">
+                                        <mat-select placeholder="{{app_strings?.name}}" formControlName="name" id="name" #name (selectionChange)="change($event,createThemeFormMulti, i )">
                                             <!-- <input #search autocomplete="off" placeholder="Search" class="assigneeSearch"
                                               (keydown.space)="$event.stopPropagation()"  formControlName="assigneeText" matInput> -->
-                                            <mat-option *ngFor="let option of masterList"    (blur)="updateDname(option.title, createThemeFormMulti, i)" [value]="option">{{option.title}}</mat-option>
+                                            <mat-option *ngFor="let option of masterList"    (blur)="updateDname(option?.title, createThemeFormMulti, i)" [value]="option">{{option.title}}</mat-option>
                                         
                                           </mat-select>
                                           
                                         </mat-form-field>
-                                        <mat-error *ngIf="isTermExist">{{app_strings.alreadyExist}}</mat-error>
+                                        <mat-error *ngIf="isTermExist">{{app_strings?.alreadyExist}}</mat-error>
                                     </div>
                                     <div class="flex-1 flex-col">
                                         <div class="flex">

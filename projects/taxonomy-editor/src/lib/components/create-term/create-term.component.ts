@@ -10,6 +10,7 @@ import * as appConstants from '../../constants/app-constant';
 import { labels } from '../../labels/strings';
 import { CardChecked, CardSelection, CardsCount, Card } from '../../models/variable-type.model';
 import { MatSnackBar } from '@angular/material';
+import * as _ from 'lodash'
 
 @Component({
   selector: 'lib-create-term',
@@ -46,7 +47,6 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
 
   ngOnInit() {
     this.termLists = this.data.columnInfo.children
-    console.log('configData',this.data);
     this.compLabeltext = this.data.columnInfo.config.labelName
     
     this.initTermForm()
@@ -64,7 +64,7 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
     })
     this.createThemeForm = this.fb.group({
       name: ['', [Validators.required]],
-      dname: ['', [Validators.required]],
+      dname: [{value: '', disabled: true}, [Validators.required]],
       description: ['']
     })
     // this.createThemeForm.controls['dname'].disable()
@@ -79,7 +79,14 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
     // this.initializeValueChanges()
     this.filtedTermLists = this.createTermForm.get('name').valueChanges.pipe(
       startWith(''),
-      map(value => this._filter(value || '')),
+      map(value => {
+        if (value && this.createTermForm.controls.dname) {
+          this.createTermForm.controls.dname.enable()
+        } else if (this.createTermForm.controls.dname) {
+          this.createTermForm.controls.dname.disable()
+        }
+        return this._filter(value || '')
+      }),
     );
 
     // if mode is "view" then check for which type of form has to be used and then append the values in form
@@ -149,7 +156,7 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
   createThemeFields(): FormGroup {
     return this.fb.group({
       name: ['', [Validators.required]],
-      dname: ['', [Validators.required]],
+      dname: [{value: '', disabled: true}, [Validators.required]],
       description: ['']
     });
   }
@@ -167,7 +174,6 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
     }
   }
   getCreateName(name: string): string {
-  console.log('createName',name);
    switch(name){
     case 'Theme':
     return `Add Competency ${name}`;
@@ -178,7 +184,6 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
   }
 
   getCategoryName(categoryName:any){
-    console.log('categoryName',categoryName);
 
     switch(categoryName){
       case 'competencyarea':
@@ -193,12 +198,10 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
 
 
   getName(item:any){
-  console.log('itemName',item);
   return item.toUpperCase()
   }
 
   getLabelName(labelName:string): string {
-    console.log('ssdsdd',labelName);
     
    switch(labelName){
     case 'Theme':
@@ -209,8 +212,6 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
   }
 
   updateFormView(form, data) {
-    console.log('view',data);
-    console.log('array',this.masterList);
     form.get('dname').patchValue(data.childrenData.displayName)
     form.get('description').patchValue(data.childrenData.description)
 
@@ -221,7 +222,6 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
         if (assignName) {
           form.controls['name'].setValue(assignName)
         }
-        console.log(assignName);
         
       }
   
@@ -238,7 +238,6 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
   }
 
   updateFormEdit(form, data) {
-    console.log('ddd',data);
     form.get('dname').patchValue(data.childrenData.displayName)
     form.get('description').patchValue(data.childrenData.description)
     if (data.childrenData.name && this.masterList.length) {
@@ -248,13 +247,13 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
       if (assignName) {
         form.controls['name'].setValue(assignName)
       }
-      console.log(assignName);
       
     }
     // form.get('name').patchValue(data.childrenData.name)
    
     setTimeout(() => {
       form.get('name').disable()
+      form.get('dname').enable()
     })
   }
 
@@ -269,7 +268,6 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
     pagesize: 200
     }
     this.frameWorkService.getKcmSearchList(requestObj,this.data.columnInfo.code).subscribe((response)=>{
-      console.log('response',response);
       if(response.data && response.data.length){
         this.masterList = response.data;
         setTimeout(()=>{
@@ -291,24 +289,19 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
   }
 
   multiCreate(form, data) {
-    console.log('inside multiCreate')
     this.disableMultiCreate = true
     let counter = 0
     let createdTerms = []
     if(form.valid) {
-      console.log('form.valid', form.valid)
-      console.log(form.value)
-      console.log('formValueTheme',form.value.themeFields);
       
       const themeFields = form && form.value && form.value.themeFields
-      console.log('form',form.value.themeFields);
       
       if(themeFields && themeFields.length) {
-        console.log('themeFields',themeFields)
+        // console.log('themeFields',themeFields)
         themeFields.forEach((val, i) =>{
           const term: NSFramework.ICreateTerm = {
             code: this.frameWorkService.getUuid(),
-            name: val.name.title,
+            name: _.get(val, 'name.title'),
             displayName:val.dname,
             description: val.description,
             category: this.data.columnInfo.code,
@@ -330,10 +323,10 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
           this.frameWorkService.createTerm(this.data.frameworkId, this.data.columnInfo.code, requestBody).subscribe((res: any) => {
             requestBody.request.term['identifier'] = res.result.node_id[0]
             createdTerms.push(requestBody.request.term)
-            console.log('createdTerms success',createdTerms)
+            // console.log('createdTerms success',createdTerms)
             
             counter++
-            console.log('counter :: ', counter, themeFields.length)
+            // console.log('counter :: ', counter, themeFields.length)
             if(counter === themeFields.length){
               this.updateTermAssociationsMulti(createdTerms)
               // this.dialogClose({ term: createdTerms, created: true, multi:true })
@@ -349,9 +342,9 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
     if(createdTerms && createdTerms.length) {
       let createdTermsCounter = 0
       for(let createdTerm of createdTerms) {
-        console.log('createdTerm loop', createdTerm)
+        // console.log('createdTerm loop', createdTerm)
         this.selectedTerm = createdTerm
-        console.log('this.selectedTerm', this.selectedTerm)
+        // console.log('this.selectedTerm', this.selectedTerm)
         let associations = []
         let temp
         let counter = 0
@@ -389,7 +382,7 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
         createdTermsCounter++
         if(createdTermsCounter === createdTerms.length) {
           this.dialogClose({ term: [this.selectedTerm], created: true, multi:true })
-          console.log('close dialog',createdTerms)
+          // console.log('close dialog',createdTerms)
           if(createdTerms[0].category === 'theme'){
             this._snackBar.open(`Competency ${createdTerms[0].category} created successfully.`)
           }
@@ -410,7 +403,7 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
           // this value is for selected term in case of create scenario, in case of edit scenario this won't be avaiable 
           // so term is set from childdata which is received from params in updateData
           const value = (this.selectedTerm && this.selectedTerm.identifier) ? this.selectedTerm : {}
-          console.log('value :: ', value)
+          // console.log('value :: ', value)
           const found = parent.children ? parent.children.find(c=> c.identifier === this.selectedTerm.identifier) : false
           if(!found) {
             parent.children ? parent.children.push(this.selectedTerm) : parent['children'] = [this.selectedTerm]
@@ -440,19 +433,31 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
     // }
   }
   change(event,form, i?){
-   if(this.data.mode === 'create'){
-    form.get('dname').patchValue(event.source.value.title)
-    this.expansionTitle = event.source.value.title
-    this.cdr.detectChanges()
+    if(this.data && this.data.mode) { 
+      if(this.data.mode === 'create'){
+        form.get('dname').patchValue(event.source.value.title)
+        this.expansionTitle = event.source.value.title
+        this.cdr.detectChanges()
 
-  }
-  if(this.data.mode === 'multi-create'){
-    form.controls.themeFields.controls[i].controls['dname'].patchValue(event.source.value.title)
-    console.log('Updated themeFields dname:', form.controls.themeFields.controls[i].controls['dname'].value);
-    this.expansionTitle = event.source.value.title
-    this.cdr.detectChanges()
-  }
+      }
+      if(this.data.mode === 'multi-create'){
+        const formToUpdate = form.controls.themeFields.controls[i]
+        formToUpdate.controls['dname'].patchValue(event.source.value.title)
+        this.expansionTitle = event.source.value.title
+        this.cdr.detectChanges()
+        if(formToUpdate.controls.name.valid && formToUpdate.controls.dname) {
+          formToUpdate.controls.dname.enable()
+        } else if(formToUpdate.controls.dname) {
+          formToUpdate.controls.dname.disable()
+        }
+      }
+    }
    
+  }
+
+  getExpansionTitle(form) {
+    const details = form.get('name').value
+    return _.get(details, 'title', '')
   }
   
 
@@ -483,7 +488,7 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
   saveTerm() {
     if (this._filter(this.createTermForm.value.name).length > 0) {
       this.isTermExist = true
-      console.log('Already exist')
+      // console.log('Already exist')
       return
     }
     if (this.createTermForm.valid) {
@@ -519,7 +524,7 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
     
     
     form.value.displayName = form.value.dname
-    console.log('formValue',form.value);
+    // console.log('formValue',form.value);
     this.disableUpdate = true
     const formData = {
       // use this if you need disabled field values : form.getRawValue()
@@ -552,7 +557,7 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
       } else {
         // associations.push({ identifier: this.selectedTerm.identifier, approvalStatus: appConstants.DRAFT })
         if(this.selectedTerm && this.selectedTerm.identifier) {
-          console.log('inside selected Term push')
+          // console.log('inside selected Term push')
           associations.push({ identifier: this.selectedTerm.identifier })
         }
         this.isTermExist = false
@@ -574,9 +579,9 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
             // this value is for selected term in case of create scenario, in case of edit scenario this won't be avaiable 
             // so term is set from childdata which is received from params in updateData
             const value = (this.selectedTerm && this.selectedTerm.identifier) ? this.selectedTerm : (updateData) ? {...updateData.updateTermData, ...updateData.formData} : {}
-            console.log('value :: ', value)
+            // console.log('value :: ', value)
             this.disableUpdate = false
-            console.log('selectedterms',value);
+            // console.log('selectedterms',value);
             
             this._snackBar.open(`Competency ${value.category} updated successfully`)
             this.dialogClose({ term: { ...value }, created: true })
@@ -591,7 +596,7 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
   saveThemeTerm() {
     if (this._filter(this.createThemeForm.value.name).length > 0) {
       this.isTermExist = true
-      console.log('Already exist')
+      // console.log('Already exist')
       return
     }
     if (this.createThemeForm.valid) {
