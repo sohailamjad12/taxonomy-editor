@@ -303,7 +303,6 @@ export class FrameworkService {
 
   getKcmSearchList(requestBody:any,category){
      let categoryItem
-    console.log('categoryItem',category);
     if(category === 'theme'){
       categoryItem = 'competencyTheme'
     }
