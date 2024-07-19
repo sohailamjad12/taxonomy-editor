@@ -46,6 +46,7 @@ import { PendingApprovalComponent } from './components/pending-approval/pending-
 import { ApproveViewComponent } from './components/approve-view/approve-view.component';
 import { OrderByPipe } from './pipes/order-by.pipe';
 import { DatePipe } from './pipes/date.pipe'
+import { OdcsService } from './services/odcs.service'
 
 @NgModule({
   declarations: [
@@ -101,6 +102,7 @@ import { DatePipe } from './pipes/date.pipe'
     FrameworkService,
     ConnectorService,
     LocalConnectionService,
+    OdcsService,
   ],
   exports: [
     TaxonomyEditorComponent,

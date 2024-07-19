@@ -56,7 +56,7 @@
     </div>
 </ng-template>
 
-<mat-menu #cardMenu="matMenu">
+<mat-menu #cardMenu="matMenu" class="menu-sec">
     <ng-template matMenuContent let-rowData="data" let-cardRef="cardRef">
         <!-- <div > -->
         <button *ngIf="data.columnInfo.config.enableView"  (click)="view(data, data.children, data.index)" mat-menu-item name="channel-analytics-button"
@@ -73,7 +73,7 @@
             mat-menu-item name="channel-analytics-button" class="ws-mat-primary-text" i18n-aria-label
             aria-label="Analytics">
             <mat-icon>add</mat-icon>
-            <span>Add {{getNextCatName(data)}}</span>
+            <span>Add</span>
         </button>
     </ng-template>
 </mat-menu>
