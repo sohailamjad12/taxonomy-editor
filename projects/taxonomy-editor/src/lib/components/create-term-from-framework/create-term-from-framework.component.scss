@@ -79,9 +79,9 @@
 }
 
 .dialogNew {
-    padding: 0 1rem ;
+    padding: 1rem ;
     .mat-dialog-title{
-        padding: 1em;
+        padding: 1em 0em;
         margin-bottom: 0;
         // background: $light-gray;
     }
@@ -100,7 +100,26 @@
         // padding:0 25px;
         margin-top:-10px;
     }
+     .learning-section {
+      padding: 10px !important;
+      border: 1px solid #0000002e;
+      border-radius: 4px;
+      margin-right: 8px;
+      &.active-btn {
+        border: 1px solid #1B4CA1 !important;
+      }
+  }
 
+}
+
+.learning-section.mat-radio-button .mat-radio-container .mat-radio-outer-circle {
+    border-color: #1B4CA1 !important;
+}
+::ng-deep .competency-group .learning-section .mat-radio-inner-circle {
+    background-color: #1B4CA1 !important;
+}
+::ng-deep .competency-group .learning-section .mat-radio-button.mat-accent .mat-radio-inner-circle {
+    background-color: #1B4CA1 !important;
 }
 
 .dialog-title {
@@ -641,13 +660,26 @@ input.mat-input-element {
   font-weight: 700;
   font-size: 14px;
   font-family: 'Lato';
-}                                                                                                                                                                                                                                                                                                                                                                                 
-::ng-deep .tooltip-sec {
-  background-color: 000000 !important;
-  font-size: 12px !important;
-  font-family: 500 !important;
-  color: white !important;
-  
 }
 
+::ng-deep .mat-option.mat-selected:not(.mat-option-disabled) {
+    color: rgba(0, 0, 0, 0.87) !important;
+  }
 
+::ng-deep .theme-igot.day-mode .mat-pseudo-checkbox-checked{
+    background: #0074b6 !important;
+}
+
+.comp-theme-fields {
+    background: #EEF1F7 !important;
+    border: 1px solid #DBE0E9 !important;
+}
+
+.create-accordion-btn {
+    color: #1B4CA1 !important;
+    padding: 0 !important;
+    mat-icon {
+        color: #1B4CA1;
+    }
+
+}

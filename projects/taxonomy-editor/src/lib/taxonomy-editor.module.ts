@@ -7,7 +7,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 import { MatFormFieldModule, MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field'
 import { MatButtonModule } from '@angular/material/button'
-import { MatExpansionModule, MatInputModule, MatMenuModule, MatRadioButton, MatRadioGroup, MatRadioModule, MatSelect, MatSelectModule } from '@angular/material'
+import { MatChipsModule, MatExpansionModule, MatInputModule, MatMenuModule, MatRadioButton, MatRadioGroup, MatRadioModule, MatSelect, MatSelectModule } from '@angular/material'
 import { MatIconModule } from '@angular/material/icon'
 import { MatCardModule } from '@angular/material/card';
 import { MatDialogModule } from '@angular/material/dialog'
@@ -45,7 +45,8 @@ import { ApprovalComponent } from './components/approval/approval.component';
 import { PendingApprovalComponent } from './components/pending-approval/pending-approval.component';
 import { ApproveViewComponent } from './components/approve-view/approve-view.component';
 import { OrderByPipe } from './pipes/order-by.pipe';
-import { DatePipe } from './pipes/date.pipe'
+import { DatePipe } from './pipes/date.pipe';
+import { CreateTermFromFrameworkComponent } from './components/create-term-from-framework/create-term-from-framework.component'
 import { OdcsService } from './services/odcs.service'
 
 @NgModule({
@@ -67,7 +68,8 @@ import { OdcsService } from './services/odcs.service'
     PendingApprovalComponent,
     ApproveViewComponent,
     OrderByPipe,
-    DatePipe
+    DatePipe,
+    CreateTermFromFrameworkComponent
   ],
   imports: [
     CommonModule,
@@ -89,6 +91,7 @@ import { OdcsService } from './services/odcs.service'
     MatSnackBarModule,
     MatTooltipModule,
     MatCheckboxModule,
+    MatChipsModule,
     MatTableModule,
     MatProgressSpinnerModule,
     MatExpansionModule,
@@ -115,6 +118,7 @@ import { OdcsService } from './services/odcs.service'
   entryComponents: [
     CreateTermComponent,
     ConnectorComponent,
+    CreateTermFromFrameworkComponent
   ]
 })
 export class TaxonomyEditorModule {
