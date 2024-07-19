@@ -47,6 +47,7 @@ import { ApproveViewComponent } from './components/approve-view/approve-view.com
 import { OrderByPipe } from './pipes/order-by.pipe';
 import { DatePipe } from './pipes/date.pipe';
 import { CreateTermFromFrameworkComponent } from './components/create-term-from-framework/create-term-from-framework.component'
+import { OdcsService } from './services/odcs.service'
 
 @NgModule({
   declarations: [
@@ -104,6 +105,7 @@ import { CreateTermFromFrameworkComponent } from './components/create-term-from-
     FrameworkService,
     ConnectorService,
     LocalConnectionService,
+    OdcsService,
   ],
   exports: [
     TaxonomyEditorComponent,

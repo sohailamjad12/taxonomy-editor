@@ -113,7 +113,7 @@
                               
                                 <mat-form-field appearance="outline" class="flex-1">
                                     <input matInput formControlName="dname" id="dname" #dname 
-                                        placeholder="Field automatically generated from the name field." maxlength="70" >
+                                        placeholder="Field automatically generated from the name field." maxlength="70" disabled="{{!name?.value.length}}">
                                     <!-- <input matInput formControlName="name" id="name" #name placeholder="{{app_strings.name}}"
                             [matAutocomplete]="auto"> -->
                                     <!-- <mat-autocomplete #auto="matAutocomplete"

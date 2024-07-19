@@ -12,10 +12,6 @@ import { LocalConnectionService } from './local-connection.service';
 import _ from 'lodash'
 /* tslint:enable */
 
-const API_END_POINTS = {
-  GET_FILTER_ENTITY: 'apis/proxies/v8/competency/v4/search',
-}
-
 @Injectable({
   providedIn: 'root'
 })
@@ -331,9 +327,6 @@ export class FrameworkService {
     return prevSelectedTerms
   }
 
-  getFilterEntity(filter: object): Observable<any> {
-    return this.http.post<any>(`${API_END_POINTS.GET_FILTER_ENTITY}`, filter).pipe(map(res => _.get(res, 'result.competency')))
-  }
   
   getKcmSearchList(requestBody:any,category){
      let categoryItem
@@ -353,7 +346,6 @@ export class FrameworkService {
       return this.http.get(`/${this.proxiesPath}/framework/v1/read/${frameWorkId}`, { withCredentials: true }).pipe(
         map((response: any) => _.get(response, 'result.framework'))
       )
-        
     } else {
       return of({})
     }
