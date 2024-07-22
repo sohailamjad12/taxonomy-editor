@@ -296,11 +296,15 @@ export class CreateTermFromFrameworkComponent implements OnInit {
               console.log('createdTerms success',createdTerms)
               counterTheme++
               console.log('counter :: ', counterTheme, themeFields.length)
-              await this.updateTermAssociationsMulti(createdTerms)
-              console.log(this.selectedTerm)
-              console.log(this.frameWorkService.selectionList)
+
               const parentColumn = this.frameWorkService.getPreviousCategory(this.data.columnInfo.code)
               let parentCol: any = this.frameWorkService.selectionList.get(parentColumn.code)
+  
+              await this.updateTermAssociationsMultiV2(createdTerms,parentCol)
+              // await this.updateTermAssociationsMulti(createdTerms)
+
+              console.log(this.selectedTerm)
+              console.log(this.frameWorkService.selectionList)
               console.log(parentColumn)
               console.log(parentCol)
               let data = {
@@ -357,7 +361,24 @@ export class CreateTermFromFrameworkComponent implements OnInit {
                 createdSubTheme.push(requestBody.request.term)
                 counterSubTheme++
                 if((counterSubTheme === objVal['competencySubTheme'].length)){
-                  await this.updateTermAssociationsMultiV2(createdSubTheme,false, index, themeFields.length)
+                  const parentColumnConfigData = this.frameWorkService.getPreviousCategory(this.data.nextColInfo.code)
+                  let parentCol: any = this.frameWorkService.selectionList.get(parentColumnConfigData.code)
+      
+                  await this.updateTermAssociationsMultiV2(createdSubTheme,parentCol, index, themeFields.length)
+                  if(index === themeFields.length - 1) {
+                    console.log('===========11111113',this.frameWorkService.list)
+                    this.frameWorkService.selectionList.delete('competency')
+                    this.dialogClose({ term: [this.selectedTerm], created: true, multi:true, callUpdate: false })
+                    this.disableMultiCreate = false
+                    console.log('close dialog',createdTerms)
+                    if(createdTerms[0].category === 'theme'){
+                    this._snackBar.open(`Competency ${createdTerms[0].category} created successfully.`)
+                    }
+                    if(createdTerms[0].category === 'subtheme'){         
+      
+                    this._snackBar.open(`Competency ${createdTerms[0].category} created successfully.`)
+                    }
+                }
                 }
                 // await this.frameWorkService.createTerm(this.data.frameworkId, this.data.nextColInfo.code, requestBody).toPromise().then(async (res: any) => {
                 //   requestBody.request.term['identifier'] = res.result.node_id[0]
@@ -480,13 +501,16 @@ export class CreateTermFromFrameworkComponent implements OnInit {
               }
             }
           }
-          await this.callUpdateAssociationsV2(counter, parent, reguestBody)
+          return await this.callUpdateAssociationsV2(counter, parent, reguestBody)
 
-          this.dialogClose({ term: [this.selectedTerm], created: true, multi:true, stopUpdate: false })
+          // if(createdTermsCounter === this.frameWorkService.selectionList.size) {
+          
+          // }
+          // this.dialogClose({ term: [this.selectedTerm], created: true, multi:true, stopUpdate: false })
           this.disableMultiCreate = false
-          if(createdTerms[0].category === 'subtheme'){   
-            this._snackBar.open(`Competency ${createdTerms[0].category} created successfully.`)
-          }
+          // if(createdTerms[0].category === 'subtheme'){   
+          //   this._snackBar.open(`Competency ${createdTerms[0].category} created successfully.`)
+          // }
       }
     }
   }
