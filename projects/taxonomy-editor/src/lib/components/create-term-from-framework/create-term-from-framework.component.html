@@ -23,7 +23,7 @@
                 </label>
                 <div class="mt-5">
                     <mat-radio-group class="competency-group" aria-label="Select an option" formControlName="compArea">
-                        <mat-radio-button  [disabled]="data?.columnInfo?.code === 'subtheme'"class="learning-section" [ngClass]="{'active-btn':item?.code === seletedCompetencyArea?.code}"
+                        <mat-radio-button  [disabled]="data?.columnInfo?.code === 'subtheme'" class="learning-section" [ngClass]="{'active-btn':item?.code === seletedCompetencyArea?.code}"
                          *ngFor="let item of competencyArea?.children" [value]="item" [checked]="item?.code === seletedCompetencyArea?.code" (change)="onSelectionArea(item)">{{item.name}}</mat-radio-button>
                     </mat-radio-group>
                 </div>
@@ -59,8 +59,13 @@
                                             </label>
                                             <mat-form-field appearance="outline" class="flex-1">
                                                 <mat-select [disabled]="data?.columnInfo?.code === 'subtheme'" placeholder="Choose the Competency Theme" formControlName="competencyTheme">
-                                                    <mat-option *ngFor="let option of filteredallCompetencyTheme" [value]="option"
-                                                     (onSelectionChange)="OnThemeSelection($event, i, option)"  >{{option.name}}</mat-option>
+                                                    <mat-option *ngFor="let option of filteredallCompetencyTheme" [value]="option" [disabled]="onDisableTheme(option)" 
+                                                     (onSelectionChange)="OnThemeSelection($event, i, option)"  >{{option.name}} {{onDisableTheme(option)}}
+                                                    
+                                                   <ng-container *ngIf="option.refId">
+                                                    <span class="ref-id">{{option.refId}}</span>
+                                                   </ng-container>
+                                                    </mat-option>
                                                 </mat-select>
                                             </mat-form-field>
                                             <mat-error *ngIf="isTermExist">{{app_strings.alreadyExist}}</mat-error>
@@ -106,7 +111,11 @@
                                               <!-- <mat-option *ngFor="let option of requestObjData.preferredProvider" [value]="option.providerName">{{option.providerName}}</mat-option> -->
                                               <ng-container *ngFor="let option of competencyForm?.get('compThemeFields')['controls'][i]['controls']?.competencyTheme?.value?.children">
                                                 <mat-option 
-                                                   [value]="option">{{option.name}}</mat-option>
+                                                   [value]="option">{{option.name}}
+                                                   <ng-container *ngIf="option.refId">
+                                                    <span class="ref-id">{{option.refId}}</span>
+                                                   </ng-container>
+                                                </mat-option>
                                               </ng-container>
                             
                                             </mat-select>
@@ -129,13 +138,13 @@
                         <ng-container *ngIf="data?.mode === 'multi-create'">
                             <ng-container *ngIf="data?.columnInfo?.code !== 'subtheme'">
                                 <button mat-raised-button color="primary" type="button" cdkFocusInitial
-                                [disabled]="competencyForm.invalid" *ngIf="!disableCreate" (click)="multiCreate(competencyForm, data)">
-                                {{app_strings.create}} hiiii
+                                [disabled]="competencyForm.invalid || disableMultiCreate" *ngIf="!disableCreate" (click)="multiCreate(competencyForm, data)">
+                                {{app_strings.create}}
                                 </button>
                             </ng-container>
                             <ng-container *ngIf="data?.columnInfo?.code === 'subtheme'">
                                 <button mat-raised-button color="primary" type="button" cdkFocusInitial
-                                [disabled]="competencyForm.invalid" *ngIf="!disableCreate" (click)="multiCreateSubTheme(competencyForm, data)">
+                                [disabled]="competencyForm.invalid || disableMultiCreate" *ngIf="!disableCreate" (click)="multiCreateSubTheme(competencyForm, data)">
                                 {{app_strings.create}} {{data?.columnInfo?.name}}
                                 </button>
                             </ng-container>
