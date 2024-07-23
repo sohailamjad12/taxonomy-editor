@@ -157,7 +157,7 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
     return this.fb.group({
       name: ['', [Validators.required]],
       dname: [{value: '', disabled: true}, [Validators.required]],
-      description: ['']
+      description: ['',]
     });
   }
 
@@ -212,12 +212,12 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
   }
 
   updateFormView(form, data) {
-    form.get('dname').patchValue(data.childrenData.displayName)
-    form.get('description').patchValue(data.childrenData.description)
-
+    form.get('dname').patchValue(data.childrenData.additionalProperties.displayName)
+    form.get('description').patchValue(data.childrenData.description)    
+    
       if (data.childrenData.name && this.masterList.length) {
         const assignName = this.masterList.find(option =>
-          data.childrenData.name === option.title
+          data.childrenData.refId === option.id
         )
         if (assignName) {
           form.controls['name'].setValue(assignName)
@@ -238,7 +238,7 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
   }
 
   updateFormEdit(form, data) {
-    form.get('dname').patchValue(data.childrenData.displayName)
+    form.get('dname').patchValue(data.childrenData.additionalProperties.displayName)
     form.get('description').patchValue(data.childrenData.description)
     if (data.childrenData.name && this.masterList.length) {
       const assignName = this.masterList.find(option =>
@@ -297,22 +297,23 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
       const themeFields = form && form.value && form.value.themeFields
       
       if(themeFields && themeFields.length) {
-        // console.log('themeFields',themeFields)
         themeFields.forEach((val, i) =>{
           const term: NSFramework.ICreateTerm = {
             code: this.frameWorkService.getUuid(),
             name: _.get(val, 'name.title'),
-            displayName:val.dname,
             description: val.description,
             category: this.data.columnInfo.code,
             status: appConstants.LIVE,
             refId:val.name.id,
             refType:this.data.columnInfo.code,
+            // framework:this.data.frameworkId,
             // approvalStatus:appConstants.DRAFT,
             parents: [
               { identifier: `${this.data.frameworkId}_${this.data.columnInfo.code}` }
             ],
-            additionalProperties: {}
+            additionalProperties: {
+              displayName:val.dname
+            }
           }
           const requestBody = {
             request: {
@@ -323,10 +324,9 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
           this.frameWorkService.createTerm(this.data.frameworkId, this.data.columnInfo.code, requestBody).subscribe((res: any) => {
             requestBody.request.term['identifier'] = res.result.node_id[0]
             createdTerms.push(requestBody.request.term)
-            // console.log('createdTerms success',createdTerms)
             
             counter++
-            // console.log('counter :: ', counter, themeFields.length)
+            
             if(counter === themeFields.length){
               this.updateTermAssociationsMulti(createdTerms)
               // this.dialogClose({ term: createdTerms, created: true, multi:true })
@@ -342,9 +342,7 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
     if(createdTerms && createdTerms.length) {
       let createdTermsCounter = 0
       for(let createdTerm of createdTerms) {
-        // console.log('createdTerm loop', createdTerm)
         this.selectedTerm = createdTerm
-        // console.log('this.selectedTerm', this.selectedTerm)
         let associations = []
         let temp
         let counter = 0
@@ -371,8 +369,6 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
                     }
                   }
                 }
-                // console.log('this.selectedTerm', this.selectedTerm)
-                // console.log('(this.selectedTerm && this.selectedTerm.identifier) ? this.selectedTerm : (updateData) ? updateData.updateTermData : {}', (this.selectedTerm && this.selectedTerm.identifier) ? this.selectedTerm : (updateData) ? updateData.updateTermData : {})
                 // this.dialogClose({ term: this.selectedTerm, created: true })
                 await this.callUpdateAssociations(counter, parent, reguestBody)
                 
@@ -382,7 +378,6 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
         createdTermsCounter++
         if(createdTermsCounter === createdTerms.length) {
           this.dialogClose({ term: [this.selectedTerm], created: true, multi:true })
-          // console.log('close dialog',createdTerms)
           if(createdTerms[0].category === 'theme'){
             this._snackBar.open(`Competency ${createdTerms[0].category} created successfully.`)
           }
@@ -403,7 +398,6 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
           // this value is for selected term in case of create scenario, in case of edit scenario this won't be avaiable 
           // so term is set from childdata which is received from params in updateData
           const value = (this.selectedTerm && this.selectedTerm.identifier) ? this.selectedTerm : {}
-          // console.log('value :: ', value)
           const found = parent.children ? parent.children.find(c=> c.identifier === this.selectedTerm.identifier) : false
           if(!found) {
             parent.children ? parent.children.push(this.selectedTerm) : parent['children'] = [this.selectedTerm]
@@ -496,14 +490,16 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
         code: this.frameWorkService.getUuid(),
         name: this.createTermForm.value.name,
         description: this.createTermForm.value.description,
-        displayName:this.createTermForm.value.dname,
         category: this.data.columnInfo.code,
         status: appConstants.LIVE,
+        // framework:this.data.frameworkId,
         // approvalStatus:appConstants.DRAFT,
         parents: [
           { identifier: `${this.data.frameworkId}_${this.data.columnInfo.code}` }
         ],
-        additionalProperties: {}
+        additionalProperties: {
+          displayName: this.createTermForm.value.dname
+        }
       }
       const requestBody = {
         request: {
@@ -521,7 +517,10 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
   }
 
   updateTermData(form, data) {
-    
+    const additionalProperties = {
+      displayName: this.createThemeForm.value.dname,
+    }
+    form.value.additionalProperties = additionalProperties
     
     form.value.displayName = form.value.dname
     // console.log('formValue',form.value);
@@ -604,14 +603,16 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
         code: this.frameWorkService.getUuid(),
         name: this.createThemeForm.value.name,
         description: this.createThemeForm.value.description,
-        displayName: this.createThemeForm.value.dname,
+       
         category: this.data.columnInfo.code,
         status: appConstants.LIVE,
         // approvalStatus:appConstants.DRAFT,
         parents: [
           { identifier: `${this.data.frameworkId}_${this.data.columnInfo.code}` }
         ],
-        additionalProperties: {}
+        additionalProperties: {
+          displayName:this.createTermForm.value.dname
+        }
       }
       const requestBody = {
         request: {
