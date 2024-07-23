@@ -67,7 +67,65 @@
 }
 
 .refIdCard {
-    height: 25px;
-    border-radius: 12px;width: fit-content;
+    border-radius: 12px;
+    width: -moz-fit-content;
+    width: fit-content;
     border: 1px solid #bbb;
+    padding: 4px 8px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
 }
+.comp-area {
+    font-family: Inter;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 16px;
+    text-align: left;
+    padding: 8px;
+    border-radius: 12px;
+    &.functional {
+        background: #E24577;
+        color: #fff;
+    }
+    
+    &.domain {
+        background: #7B47A4;
+
+        color: #fff;
+    }
+    
+    &.behavioural {
+        background: #F9BF71;
+    }
+}
+
+/* HTML: <div class="ribbon">Your text content</div> */
+.ribbon {
+    font-size: 8px;
+    font-weight: bold;
+    color: #fff;
+  }
+  .ribbon {
+    --f: .5em; /* control the folded part*/
+    --r: .8em; /* control the ribbon shape */
+    
+    position: absolute;
+    top: 8px;
+    right: calc(-1*var(--f));
+    padding-inline: .25em;
+    padding-right: 8px;
+    line-height: 1.8;
+    background: #FA6900;
+    border-bottom: var(--f) solid #0005;
+    border-left: var(--r) solid #0000;
+    clip-path: 
+      polygon(var(--r) 0,100% 0,100% calc(100% - var(--f)),calc(100% - var(--f)) 100%,
+        calc(100% - var(--f)) calc(100% - var(--f)),var(--r) calc(100% - var(--f)),
+        0 calc(50% - var(--f)/2));
+  }
+
+.refId-card {
+    font-size: 10px;
+}
+

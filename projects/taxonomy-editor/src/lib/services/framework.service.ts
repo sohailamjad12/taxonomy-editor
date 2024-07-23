@@ -82,6 +82,10 @@ export class FrameworkService {
  }
 
 
+  retireTerm(frameworkId: any, categoryId: any, categoryTermCode: any) {
+    return this.http.delete(`/${this.proxiesPath}/framework/v1/term/retire/${categoryTermCode}?framework=${frameworkId}&category=${categoryId}`)
+  }
+
   updateTerm(frameworkId, categoryId, categoryTermCode, reguestBody) {
     return this.http.patch(`/${this.proxiesPath}/framework/v1/term/update/${categoryTermCode}?framework=${frameworkId}&category=${categoryId}`, reguestBody)
   }
