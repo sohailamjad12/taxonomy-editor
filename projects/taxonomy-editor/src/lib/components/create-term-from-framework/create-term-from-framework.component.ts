@@ -301,27 +301,28 @@ export class CreateTermFromFrameworkComponent implements OnInit {
               let parentCol: any = this.frameWorkService.selectionList.get(parentColumn.code)
   
               await this.updateTermAssociationsMultiV2(createdTerms,parentCol)
-              // await this.updateTermAssociationsMulti(createdTerms)
+              // // await this.updateTermAssociationsMulti(createdTerms)
 
-              console.log(this.selectedTerm)
-              console.log(this.frameWorkService.selectionList)
-              console.log(parentColumn)
-              console.log(parentCol)
-              let data = {
-                "selected": false,
-                "category": parentColumn.code,
-                "cardSubType": "minimal",
-                "isViewOnly": false,
-                "index": parentColumn.index,
-                "columnInfo": this.data.cardColInfo
-              }
-              const responseData12 = {
-                res: { term: [this.selectedTerm], created: true, multi:true },
-                index: this.data.columnInfo.index,
-                data: data,
-                type: 'multi-create'
-              }
-              this.frameWorkService.updateAfterAddOrEditSubject(responseData12)
+                  let parentThemeCol: any = this.frameWorkService.selectionList.get(parentColumn.code)
+                  console.log(this.selectedTerm)
+                  console.log(this.frameWorkService.selectionList)
+                  console.log(parentColumn)
+                  console.log(parentThemeCol)
+                  let data = {
+                    "selected": false,
+                    "category": parentColumn.code,
+                    "cardSubType": "minimal",
+                    "isViewOnly": false,
+                    "index": parentColumn.index,
+                    "columnInfo": this.data.cardColInfo
+                  }
+                  const responseData12 = {
+                    res: { term: [this.selectedTerm], created: true, multi:true },
+                    index: this.data.columnInfo.index,
+                    data: data,
+                    type: 'multi-create'
+                  }
+                  this.frameWorkService.updateAfterAddOrEditSubject(responseData12)
 
             })
           }
@@ -365,10 +366,16 @@ export class CreateTermFromFrameworkComponent implements OnInit {
                   let parentCol: any = this.frameWorkService.selectionList.get(parentColumnConfigData.code)
       
                   await this.updateTermAssociationsMultiV2(createdSubTheme,parentCol, index, themeFields.length)
+
+             
+  
+                  
+
+
                   if(index === themeFields.length - 1) {
                     console.log('===========11111113',this.frameWorkService.list)
                     this.frameWorkService.selectionList.delete('competency')
-                    this.dialogClose({ term: [this.selectedTerm], created: true, multi:true, callUpdate: false })
+                    this.dialogClose({ term: this.selectedTermArray, created: true, multi:false, callUpdate: false })
                     this.disableMultiCreate = false
                     console.log('close dialog',createdTerms)
                     if(createdTerms[0].category === 'theme'){
@@ -743,33 +750,39 @@ export class CreateTermFromFrameworkComponent implements OnInit {
           
           counterSubTheme++
           console.log('counter :: ', counterSubTheme, newlyAdded.length)
-          if(counterSubTheme === newlyAdded.length){
-            this.updateTermAssociationsMultiV2(createdSubTheme, parentCol)
-          }
+            if(counterSubTheme === newlyAdded.length){
+              await this.updateTermAssociationsMultiV2(createdSubTheme, parentCol)
+              this.dialogClose({ term: this.selectedTermArray, created: true, multi:true, callUpdate: false })
+              this.disableMultiCreate = false
+              if(createdSubTheme[0].category === 'subtheme'){         
+                this._snackBar.open(`Competency ${createdSubTheme[0].category} created successfully.`)
+              }
+            }
+          })
         })
-      })
     }
+  
 
-    if(removedExisting && removedExisting.length) {
-      removedExisting.forEach(async (val, i) =>{
-        const parentColumnConfigData = this.frameWorkService.getPreviousCategory(this.data.columnInfo.code)
-        let parentCol: any = this.frameWorkService.selectionList.get(parentColumnConfigData.code)
-        console.log(this.data.frameworkId, this.data.columnInfo.code, val.code,'requestBody')
-        await this.frameWorkService.retireTerm(this.data.frameworkId, this.data.columnInfo.code, val.code).toPromise().then(async (res: any) => {
-          // requestBody.request.term['identifier'] = res.result.node_id[0]
-          // createdSubTheme.push(requestBody.request.term)
-          // console.log('createdTerms success',createdSubTheme)
-          // this.this.selectedTerm = 
-          counterRetireSubTheme++
-          // console.log('counter :: ', counterSubTheme, newlyAdded.length)
-          if(counterSubTheme === removedExisting.length){
-            this.dialogClose({ term: [], created: true, multi:true, callUpdate: false })
-          }
-        })
-      })
-    }
+    // if(removedExisting && removedExisting.length) {
+    //   removedExisting.forEach(async (val, i) =>{
+    //     const parentColumnConfigData = this.frameWorkService.getPreviousCategory(this.data.columnInfo.code)
+    //     let parentCol: any = this.frameWorkService.selectionList.get(parentColumnConfigData.code)
+    //     console.log(this.data.frameworkId, this.data.columnInfo.code, val.code,'requestBody')
+    //     await this.frameWorkService.retireTerm(this.data.frameworkId, this.data.columnInfo.code, val.code).toPromise().then(async (res: any) => {
+    //       // requestBody.request.term['identifier'] = res.result.node_id[0]
+    //       // createdSubTheme.push(requestBody.request.term)
+    //       // console.log('createdTerms success',createdSubTheme)
+    //       // this.this.selectedTerm = 
+    //       counterRetireSubTheme++
+    //       // console.log('counter :: ', counterSubTheme, newlyAdded.length)
+    //       if(counterSubTheme === removedExisting.length){
+    //         this.dialogClose({ term: [], created: true, multi:true, callUpdate: false })
+    //       }
+    //     })
+    //   })
+    // }
 
-    this.disableMultiCreate = false
+    // this.disableMultiCreate = false
   }
 
   onDisableTheme(option: any){

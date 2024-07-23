@@ -44,10 +44,12 @@
                                 <mat-panel-title>
                                     {{competencyForm?.get('compThemeFields')['controls'][i]['controls']?.competencyTheme?.value?.name}} 
                                 </mat-panel-title>
-                                <button mat-button type="button" *ngIf="data.mode === 'multi-create'"
-                                        (click)="removeCompFields(i)">
-                                        <mat-icon class="mat-icon-custom ">delete</mat-icon>
-                                </button>
+                                <ng-container *ngIf="data?.columnInfo?.code !== 'subtheme'">
+                                    <button mat-button type="button" *ngIf="data.mode === 'multi-create'"
+                                    (click)="removeCompFields(i)">
+                                    <mat-icon class="mat-icon-custom ">delete</mat-icon>
+                                    </button>
+                                </ng-container>
                             </mat-expansion-panel-header>
                             <div class="input-column">
                                 <div class="input-wrapper margin-top-s">
@@ -60,7 +62,7 @@
                                             <mat-form-field appearance="outline" class="flex-1">
                                                 <mat-select [disabled]="data?.columnInfo?.code === 'subtheme'" placeholder="Choose the Competency Theme" formControlName="competencyTheme">
                                                     <mat-option *ngFor="let option of filteredallCompetencyTheme" [value]="option" [disabled]="onDisableTheme(option)" 
-                                                     (onSelectionChange)="OnThemeSelection($event, i, option)"  >{{option.name}} {{onDisableTheme(option)}}
+                                                     (onSelectionChange)="OnThemeSelection($event, i, option)"  >{{option.name}}
                                                     
                                                    <ng-container *ngIf="option.refId">
                                                     <span class="ref-id">{{option.refId}}</span>

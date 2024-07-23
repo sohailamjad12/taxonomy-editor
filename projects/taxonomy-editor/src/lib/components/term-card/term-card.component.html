@@ -47,10 +47,12 @@
         <!-- *ngIf="!data.isViewOnly && data.children.approvalStatus === 'Draft' && isApprovalRequired" -->
 
         <!-- (click)="$event.stopPropagation();" -->
-        <button type="button" mat-icon-button i18n-aria-label aria-label="action items"
+         <ng-container *ngIf="data.columnInfo.config.enableThreeDot" >
+            <button type="button" mat-icon-button i18n-aria-label aria-label="action items"
             [matMenuTriggerFor]="cardMenu" [matMenuTriggerData]="{'data':data, 'cardRef': cardRef}" class="action-btn">
             <mat-icon>more_vert</mat-icon>
-        </button>
+            </button>
+         </ng-container>
         <!-- <div class="term-card-checkbox">
             <mat-checkbox color="primary" *ngIf="data.children.approvalStatus === 'Draft' && isApprovalRequired && !approvalList.length || 
             data.children.associationProperties?.approvalStatus === 'Draft' && isApprovalRequired && !approvalList.length ||
