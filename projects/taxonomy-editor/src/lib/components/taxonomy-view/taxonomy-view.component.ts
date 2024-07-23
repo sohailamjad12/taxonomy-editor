@@ -13,6 +13,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { defaultConfig, headerLineConfig } from '../../constants/app-constant';
 import { labels } from '../../labels/strings';
 import { Card } from '../../models/variable-type.model';
+import { CreateTermFromFrameworkComponent } from '../create-term-from-framework/create-term-from-framework.component';
 
 declare var LeaderLine: any;
 @Component({
@@ -178,39 +179,68 @@ export class TaxonomyViewComponent implements OnInit, OnDestroy {
   isEnabled(columnCode: string): boolean {
     return !!this.frameworkService.selectionList.get(columnCode)
   }
-  openCreateTermDialog(column, colIndex) {  
+  openCreateTermDialog(column, colIndex) {
     if (!this.isEnabled(column.code)) {
       const selectedTerms = this.frameworkService.getPreviousSelectedTerms(column.index)
-      const dialog = this.dialog.open(CreateTermComponent, {
-        data: {
-          mode:'create',
-          columnInfo: column,
-          frameworkId: this.frameworkService.getFrameworkId(),
-          selectedparents: this.heightLighted,
-          colIndex: colIndex,
-          selectedParentTerms: selectedTerms
-        },
-        width: '800px',
-        panelClass: 'custom-dialog-container'
-      })
-      dialog.afterClosed().subscribe(res => {
-        if(!res) {
-          return;
+      const nextCat = column.code
+      const nextNextCat = this.frameworkService.getNextCategory(nextCat)
+      if(nextCat) {
+        const selectedTerms = this.frameworkService.getPreviousSelectedTerms(nextCat)
+        const colInfo = Array.from(this.frameworkService.list.values()).filter(l => l.code === nextCat )
+        let nextColInfo = []
+        if(nextNextCat && nextNextCat.code) {
+          nextColInfo = Array.from(this.frameworkService.list.values()).filter(l => l.code === nextNextCat.code )
         }
-        if (res && res.created) {
-          this.showPublish = true
+        let dialog: any
+        if(this.environment && this.environment.frameworkType === 'MDO_DESIGNATION'){
+          dialog = this.dialog.open(CreateTermFromFrameworkComponent, {
+            data: { 
+              mode:'multi-create',
+              // cardColInfo: this.data.columnInfo,
+              columnInfo: colInfo && colInfo.length ? colInfo[0] : [],
+              nextColInfo: nextColInfo && nextColInfo.length ? nextColInfo[0] : [],
+              frameworkId: this.frameworkService.getFrameworkId(),
+              selectedparents: this.heightLighted,
+              colIndex: nextCat.index,
+              // childrenData: data.children,
+              selectedParentTerms: selectedTerms
+            },
+            width: '800px',
+            panelClass: 'custom-dialog-container'
+          })
+        } else {
+          dialog = this.dialog.open(CreateTermComponent, {
+            data: {
+              mode:'create',
+              columnInfo: column,
+              frameworkId: this.frameworkService.getFrameworkId(),
+              selectedparents: this.heightLighted,
+              colIndex: colIndex,
+              selectedParentTerms: selectedTerms
+            },
+            width: '800px',
+            panelClass: 'custom-dialog-container'
+          })
         }
-        this.loaded[res.term.category] = false
-        // wait
-        const parentColumn = this.frameworkService.getPreviousCategory(res.term.category)
-        res.parent = null
-        if (parentColumn) {
-          res.parent = this.frameworkService.selectionList.get(parentColumn.code)
-          res.parent.children? res.parent.children.push(res.term) :res.parent['children'] = [res.term]
-        }
-        // console.log('calling  updateFinalList from create dialogue close event')
-        this.updateFinalList({ selectedTerm: res.term, isSelected: false, parentData: res.parent, colIndex:colIndex })
-      })
+        dialog.afterClosed().subscribe(res => {
+          if(!res) {
+            return;
+          }
+          if (res && res.created) {
+            this.showPublish = true
+          }
+          this.loaded[res.term.category] = false
+          // wait
+          const parentColumn = this.frameworkService.getPreviousCategory(res.term.category)
+          res.parent = null
+          if (parentColumn) {
+            res.parent = this.frameworkService.selectionList.get(parentColumn.code)
+            res.parent.children? res.parent.children.push(res.term) :res.parent['children'] = [res.term]
+          }
+          // console.log('calling  updateFinalList from create dialogue close event')
+          this.updateFinalList({ selectedTerm: res.term, isSelected: false, parentData: res.parent, colIndex:colIndex })
+        })
+      }
     }
   }
 
@@ -312,5 +342,10 @@ export class TaxonomyViewComponent implements OnInit, OnDestroy {
       this.frameworkService.removeOldLine();
   }
 
-  
+  getNextCat(data) {
+    if(data  && data.code){
+      const nextCat = this.frameworkService.getNextCategory(data.code)
+      return nextCat
+    }
+  }
 }
