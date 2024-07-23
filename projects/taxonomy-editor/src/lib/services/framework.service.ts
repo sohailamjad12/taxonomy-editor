@@ -68,6 +68,19 @@ export class FrameworkService {
   createTerm(frameworkId, categoryId, requestBody) {
     return this.http.post(`/${this.proxiesPath}/framework/v1/term/create?framework=${frameworkId}&category=${categoryId}`, requestBody)
   }
+ 
+  createTermsWrapper(category,requestBody:any,){
+    let categoryItem
+   if(category === 'theme'){
+     categoryItem = 'competencyTheme'
+   }
+   else {
+     categoryItem = 'competencySubTheme'
+   }
+   
+   return this.http.post(`/${this.proxiesPath}/${categoryItem}/create/term`, requestBody).pipe(map(res => _.get(res, 'result')))
+ }
+
 
   updateTerm(frameworkId, categoryId, categoryTermCode, reguestBody) {
     return this.http.patch(`/${this.proxiesPath}/framework/v1/term/update/${categoryTermCode}?framework=${frameworkId}&category=${categoryId}`, reguestBody)

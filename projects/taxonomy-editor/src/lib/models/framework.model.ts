@@ -114,7 +114,8 @@ export namespace NSFramework {
         parents?: ParentsElements[] | null;
         additionalProperties: AdditionalProperties;
         refId?:string;
-        refType?:string
+        refType?:string;
+        framework?:string
     }
 }
 
