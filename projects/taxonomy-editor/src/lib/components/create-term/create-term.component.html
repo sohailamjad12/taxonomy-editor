@@ -13,9 +13,9 @@
     <ng-container *ngIf="data?.mode === 'create' || data?.mode === 'multi-create'">
         <div class="dialog-title" mat-dialog-title>Add {{data.columnInfo.config.categoryDisplayName || data.columnInfo.name }} </div>
     </ng-container>
-    <!-- <ng-container *ngIf="data?.mode === 'view'">
-        <div class="dialog-title" mat-dialog-title>View {{data.columnInfo.name}}</div>
-    </ng-container> -->
+    <ng-container *ngIf="data?.mode === 'view'">
+        <div class="dialog-title" mat-dialog-title></div>
+    </ng-container>
     <ng-container *ngIf="data?.mode === 'edit'">
         <div class="dialog-title" mat-dialog-title>{{app_strings.edit}} {{data.columnInfo.config.categoryDisplayName || data.columnInfo.name}}</div>
     </ng-container>
@@ -31,7 +31,7 @@
                 <input matInput formControlName="name" placeholder="{{app_strings.name}}" [matAutocomplete]="auto">
                 <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onSelect($event.option, createTermForm)">
                     <mat-option *ngFor="let option of filtedTermLists | async" [value]="option">
-                        {{option.name}}
+                        {{option.name }}
                     </mat-option>
                 </mat-autocomplete>
                 <mat-error *ngIf="isTermExist">{{app_strings.alreadyExist}}</mat-error>
@@ -110,7 +110,8 @@
                                    {{data.columnInfo.config.categoryDisplayName}} Display Name
                                 </label>
                                         <mat-icon class="info-icon cursor-pointer" [matTooltip]="'You can customize this display name for learners to see'" 
-                                        matTooltipClass="tooltip-sec">info</mat-icon>
+                                        matTooltipClass="tooltip-sec">info_outline</mat-icon>
+                
                                 </div>
                               
                                 <mat-form-field appearance="outline" class="flex-1">
@@ -218,10 +219,13 @@
                                         </label>
         
                                         
-                                            <mat-icon class="info-icon cursor-pointer" [matTooltip]="'You can customize this display name for learners to see'" 
-                                            matTooltipClass="tooltip-sec">info</mat-icon>
-                    
-                                        
+                                            <mat-icon class="info-icon cursor-pointer"  [matTooltip]="'You can customize this display name for learners to see'" 
+                                            matTooltipClass="tooltip-sec">info_outline</mat-icon>
+                                          
+                                                
+                                            
+                                            
+                                            
                                         </div>
                                         <mat-form-field appearance="outline" class="flex-1">
                                             <input matInput formControlName="dname" id="dname" #dname
