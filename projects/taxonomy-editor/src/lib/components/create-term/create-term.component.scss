@@ -550,6 +550,8 @@ input.mat-input-element {
 .info-icon {
   color: rgba(0, 0, 0, 0.6);
   font-size: 19px;
+  position: relative;
+  top: 3px;
 }
 ::ng-deep .tooltip-sec {
   background-color: 000000 !important;
