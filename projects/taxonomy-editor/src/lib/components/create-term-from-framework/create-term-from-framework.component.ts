@@ -384,46 +384,7 @@ export class CreateTermFromFrameworkComponent implements OnInit {
                     }
                 }
                 }
-                // await this.frameWorkService.createTerm(this.data.frameworkId, this.data.nextColInfo.code, requestBody).toPromise().then(async (res: any) => {
-                //   requestBody.request.term['identifier'] = res.result.node_id[0]
-                //   createdSubTheme.push(requestBody.request.term)
-                //   console.log('createdTerms success',createdTerms)
-                  
-                //   counterSubTheme++
-                //   console.log('counter :: ', counterSubTheme, themeFields.length)
-                //   if((counterSubTheme === objVal['competencySubTheme'].length)){
-                //     await this.updateTermAssociationsMultiV2(createdSubTheme)
-                //     // const parentColumn = this.frameWorkService.getPreviousCategory(this.data.nextColInfo.code)
-                //     // let parentCol: any = this.frameWorkService.selectionList.get(parentColumn.code)
-                //     // let data = {
-                //     //   "selected": false,
-                //     //   "category": parentColumn.code,
-                //     //   "cardSubType": "minimal",
-                //     //   "isViewOnly": false,
-                //     //   "index": parentColumn.index,
-                //     //   "columnInfo": this.data.columnInfo
-                //     // }
-                //     // const responseData12 = {
-                //     //   res: { term: [this.selectedTerm], created: true, multi:true },
-                //     //   index: this.data.columnInfo.index,
-                //     //   data: data,
-                //     //   type: 'multi-create'
-                //     // }
-                //     // debugger
-                //     // console.log(this.data)
-                //     // this.frameWorkService.selectionList.delete('competency')
-                //     // console.log('===========11111112',this.frameWorkService.list)
-                //     // this.frameWorkService.updateAfterAddOrEditSubject(responseData12)
-
-                    
-                //     // return  new Promise((resolve, reject) => {
-                //     //   resolve(true)
-                //     // });
-                //   }
-                 
-
-                  
-                // })
+                
               }
             }
           }
@@ -583,6 +544,8 @@ export class CreateTermFromFrameworkComponent implements OnInit {
             }
           }) 
         console.log(this.frameWorkService.list,'-----------this.frameWorkService.list3')
+        // let selectedCardInfo = this.frameWorkService.selectionList.get(this.data.cardColInfo.code)
+        // this.frameWorkService.currentSelection.next({ type: selectedCardInfo.code, data:selectedCardInfo, cardRef:selectedCardInfo.cardRef, isUpdate: true})
         if (counter === this.frameWorkService.selectionList.size) {
           // this value is for selected term in case of create scenario, in case of edit scenario this won't be avaiable 
           // so term is set from childdata which is received from params in updateData
