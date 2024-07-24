@@ -1,0 +1,69 @@
+.dialog-container {
+
+    .success-icon {
+        position: absolute;
+        color: white;
+        top: 9px;
+        left: 7px;
+        font-weight: 900;
+    }
+
+    .fail-icon {
+        position: absolute;
+        color: white;
+        top: 9px;
+        left: 7.4px;
+    }
+
+    .warning-icon {
+        color: #F3962F;
+        font-size: 40px;
+    }
+
+    .header {
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    .description {
+        font-size: 14px;
+    }
+}
+.footer {
+    height: 60px;
+
+    .btn-full-success {
+        min-width: 80px;
+        border: none;
+        background-color: #045dad;
+        color: white;
+        border-radius: 5px;
+        font-size: 15px;
+        cursor: pointer;
+    }
+
+    .btn-full-red {
+        min-width: 80px;
+        border: none;
+        background-color: red;
+        color: white;
+        border-radius: 5px;
+        font-size: 15px;
+        cursor: pointer;
+    }
+
+    .btn-outline {
+        min-width: 80px;
+        background-color: white;
+        color: #045dad;
+        border: 2px solid #045dad;
+        border-radius: 5px;
+        font-size: 15px;
+        cursor: pointer;
+    }
+}
+
+.textBold {
+    font-size: 14px;
+    font-weight: 700;
+}

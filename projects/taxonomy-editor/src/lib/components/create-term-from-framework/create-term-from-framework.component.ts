@@ -1,6 +1,6 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { MAT_DIALOG_DATA, MatDialogRef, MatSnackBar } from '@angular/material';
+import { MAT_DIALOG_DATA, MatDialog, MatDialogRef, MatSnackBar } from '@angular/material';
 import { labels } from '../../labels/strings';
 import { FrameworkService } from '../../services/framework.service';
 import { NSFramework } from '../../models/framework.model';
@@ -9,6 +9,7 @@ import { Card } from '../../models/variable-type.model';
 /* tslint:disable */
 import _ from 'lodash'
 import { resolve } from 'url';
+import { ConforamtionPopupComponent } from '../conforamtion-popup/conforamtion-popup.component';
 /* tslint:enable */
 
 @Component({
@@ -51,6 +52,7 @@ export class CreateTermFromFrameworkComponent implements OnInit {
   constructor(
     public dialogRef: MatDialogRef<CreateTermFromFrameworkComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
+    private dialog: MatDialog,
     private frameWorkService: FrameworkService,
     private fb: FormBuilder,
     private _snackBar: MatSnackBar,
@@ -137,6 +139,73 @@ export class CreateTermFromFrameworkComponent implements OnInit {
       }
   }
 
+  clearSelectedThemes(option:any){
+    if(this.isThemeSelected) {
+      this.openConforamtionPopup(option)
+    } else {
+      this.onSelectionArea(option)
+    }
+  }
+
+  get isThemeSelected () {
+    let hasValue = false
+    if (this.competencyForm.get('compThemeFields')) {
+      this.competencyForm.get('compThemeFields')['controls'].forEach(element => {
+        if(element.get('competencyTheme').value || element.get('competencySubTheme').value) {
+          hasValue = true
+          return true
+        }
+      });
+    }
+    return hasValue
+  }
+
+  openConforamtionPopup(option) {
+    const dialogData = {
+      dialogType: 'warning',
+      descriptions: [
+        {
+          header: '',
+          messages: [
+            {
+              msgClass: '',
+              msg: `Change of Area will result in loss of added data`,
+            },
+          ],
+        },
+      ],
+      footerClass: 'items-center justify-center',
+      buttons: [
+        {
+          btnText: 'Change',
+          btnClass: 'btn-full-red',
+          response: true,
+        },
+        {
+          btnText: 'Cancel',
+          btnClass: '',
+          response: false,
+        },
+      ],
+    }
+    const dialogRef = this.dialog.open(ConforamtionPopupComponent, {
+      data: dialogData,
+      autoFocus: false,
+      width: '500px',
+      maxWidth: '80vw',
+      maxHeight: '90vh',
+      disableClose: true,
+    })
+    dialogRef.afterClosed().subscribe((res: any) => {
+      if (res) {
+        this.onSelectionArea(option)
+      } else {
+        this.competencyForm.get('compArea').setValue(this.seletedCompetencyArea)
+        this.competencyForm.get('compArea').updateValueAndValidity()
+      }
+    })
+  }
+
   onSelectionArea(option:any){
     this.competencyForm.reset()
     while(this.compThemeFields.length !== 0) {
@@ -145,6 +214,8 @@ export class CreateTermFromFrameworkComponent implements OnInit {
     this.compThemeFields.push(this.createCompThemeFields());
     if('theme' === this.kcmConfigData.config[1].category){
       this.seletedCompetencyArea = option
+      this.competencyForm.get('compArea').patchValue(option)
+      this.competencyForm.get('compArea').updateValueAndValidity()
       this.filteredallCompetencyTheme = []
       this.allCompetencyTheme = []
       if(option &&  option.children &&  option.children.length){
