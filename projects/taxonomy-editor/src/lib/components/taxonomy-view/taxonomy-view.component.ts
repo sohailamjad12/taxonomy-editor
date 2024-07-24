@@ -210,12 +210,21 @@ export class TaxonomyViewComponent implements OnInit, OnDestroy {
           })
         } else {
           dialog = this.dialog.open(CreateTermComponent, {
-            data: {
-              mode:'create',
-              columnInfo: column,
+            // data: {
+            //   mode:'create',
+            //   columnInfo: column,
+            //   frameworkId: this.frameworkService.getFrameworkId(),
+            //   selectedparents: this.heightLighted,
+            //   colIndex: colIndex,
+            //   selectedParentTerms: selectedTerms
+            // },
+            data: { 
+              mode:'multi-create',
+              columnInfo: colInfo && colInfo.length ? colInfo[0] : [],
               frameworkId: this.frameworkService.getFrameworkId(),
               selectedparents: this.heightLighted,
-              colIndex: colIndex,
+              colIndex: nextCat.index,
+              // childrenData: data.children,
               selectedParentTerms: selectedTerms
             },
             width: '800px',
@@ -226,19 +235,35 @@ export class TaxonomyViewComponent implements OnInit, OnDestroy {
           if(!res) {
             return;
           }
+
           if (res && res.created) {
             this.showPublish = true
           }
+       console.log('create',column);
+         const data  = this.frameworkService.cardClkData
+         console.log('cData',data);
+         
+          const responseData = {
+            res,
+            index: nextCat.index,
+            data,
+            type: 'multi-create'
+          }
+          if(!(res && res.stopUpdate)){
+            this.frameworkService.updateAfterAddOrEditSubject(responseData)
+          }
+          
+          
           this.loaded[res.term.category] = false
           // wait
-          const parentColumn = this.frameworkService.getPreviousCategory(res.term.category)
+          const parentColumn = this.frameworkService.getPreviousCategory(res.term[0].category)
           res.parent = null
           if (parentColumn) {
             res.parent = this.frameworkService.selectionList.get(parentColumn.code)
-            res.parent.children? res.parent.children.push(res.term) :res.parent['children'] = [res.term]
+            res.parent.children? res.parent.children.push(res.term[0]) :res.parent['children'] = [res.term[0]]
           }
           // console.log('calling  updateFinalList from create dialogue close event')
-          this.updateFinalList({ selectedTerm: res.term, isSelected: false, parentData: res.parent, colIndex:colIndex })
+          this.updateFinalList({ selectedTerm: res.term[0], isSelected: false, parentData: res.parent, colIndex:colIndex })
         })
       }
     }
