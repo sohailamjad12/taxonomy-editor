@@ -686,3 +686,17 @@ input.mat-input-element {
 .ref-id {
     font-size: 10px;
 }
+
+.loader-bg {
+    background: rgb(255 255 255 / 81%);
+    left: 0;
+    right: 0;
+    transform: translate(-50% -50%);
+    bottom: 0;
+    top: 0;
+    pointer-events: unset;
+    z-index: 999999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
