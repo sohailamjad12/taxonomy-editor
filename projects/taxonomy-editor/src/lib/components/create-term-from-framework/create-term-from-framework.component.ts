@@ -369,9 +369,6 @@ export class CreateTermFromFrameworkComponent implements OnInit {
 
              
   
-                  
-
-
                   if(index === themeFields.length - 1) {
                     console.log('===========11111113',this.frameWorkService.list)
                     this.frameWorkService.selectionList.delete('competency')
@@ -569,7 +566,23 @@ export class CreateTermFromFrameworkComponent implements OnInit {
     return new Promise(async (resolve) => {
        this.frameWorkService.updateTerm(this.data.frameworkId, parent.category, parent.code, reguestBody).subscribe(async (res: any) => {
         parent['children'] = parent && parent.children ?[...parent.children, ...this.selectedTermArray]:this.selectedTermArray
+          let listData : any = this.frameWorkService.list.get(this.data.columnInfo.code)
+          let differenceData = []
+          if(listData && listData.children && listData.children.length) {
+            differenceData  = _.differenceBy(this.selectedTermArray,listData.children, 'identifier');
+          } else {
+            differenceData = this.selectedTermArray
+          }
+          listData['associations'] = listData && listData.associations ?[...listData.associations, ...differenceData]:differenceData
+          listData['children'] = listData && listData.children ?[...listData.children, ...differenceData]:differenceData
 
+          this.frameWorkService.selectionList.forEach((selectedData: any)=> {
+            let listData : any = this.frameWorkService.list.get(selectedData.category)
+            if(listData && listData.children && listData.children.length) {
+              this.updateLocalList(listData,parent)
+            }
+          }) 
+        console.log(this.frameWorkService.list,'-----------this.frameWorkService.list3')
         if (counter === this.frameWorkService.selectionList.size) {
           // this value is for selected term in case of create scenario, in case of edit scenario this won't be avaiable 
           // so term is set from childdata which is received from params in updateData
@@ -796,6 +809,28 @@ export class CreateTermFromFrameworkComponent implements OnInit {
     // 
     // console.log(this.seletedCompetencyArea)
     return result >= 0 ? true: false
+  }
+
+
+  updateLocalList(item: any, parent: any) {
+    if(item && item.children && item.children.length) {
+      item.children.forEach((itmData: any) => {
+        if(itmData.identifier === parent.identifier) {
+          let differenceData = []
+          if(itmData && itmData.children && itmData.children.length) {
+            differenceData  = _.differenceBy(this.selectedTermArray,itmData.children, 'identifier');
+          } else {
+            differenceData = this.selectedTermArray
+          }
+          // differenceData = this.selectedTermArray
+          itmData['associations'] = itmData && itmData.associations ?[...itmData.associations, ...differenceData]:differenceData
+          itmData['children'] = itmData && itmData.children ?[...itmData.children, ...differenceData]:differenceData
+        }
+        if(itmData.children) {
+          this.updateLocalList(itmData, parent)
+        }
+      })
+    }
   }
   // getter methods
 
