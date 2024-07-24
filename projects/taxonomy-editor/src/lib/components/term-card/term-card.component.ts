@@ -65,6 +65,14 @@ export class TermCardComponent implements OnInit {
   }
 
   cardClicked(data: any, cardRef: any) {
+    if(data.category!='subtheme'){
+      this.frameworkService.cardClkData = data;
+      console.log('this.frameworkService.cardClkData',this.frameworkService.cardClkData);
+    }
+    
+
+   
+    
     // this.data.selected = true
     console.log('card clikc method')
     if(this.frameworkService.isLastColumn(this.data.category)){
@@ -273,6 +281,8 @@ export class TermCardComponent implements OnInit {
         if(!res) {
           return;
         }
+        console.log('data',data);
+        
         const responseData = {
           res,
           index: nextCat.index,
