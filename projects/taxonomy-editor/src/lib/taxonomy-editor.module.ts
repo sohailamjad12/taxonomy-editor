@@ -47,7 +47,8 @@ import { ApproveViewComponent } from './components/approve-view/approve-view.com
 import { OrderByPipe } from './pipes/order-by.pipe';
 import { DatePipe } from './pipes/date.pipe';
 import { CreateTermFromFrameworkComponent } from './components/create-term-from-framework/create-term-from-framework.component'
-import { OdcsService } from './services/odcs.service'
+import { OdcsService } from './services/odcs.service';
+import { ConforamtionPopupComponent } from './components/conforamtion-popup/conforamtion-popup.component'
 
 @NgModule({
   declarations: [
@@ -69,7 +70,8 @@ import { OdcsService } from './services/odcs.service'
     ApproveViewComponent,
     OrderByPipe,
     DatePipe,
-    CreateTermFromFrameworkComponent
+    ConforamtionPopupComponent,
+    CreateTermFromFrameworkComponent,
   ],
   imports: [
     CommonModule,
@@ -118,7 +120,8 @@ import { OdcsService } from './services/odcs.service'
   entryComponents: [
     CreateTermComponent,
     ConnectorComponent,
-    CreateTermFromFrameworkComponent
+    ConforamtionPopupComponent,
+    CreateTermFromFrameworkComponent,
   ]
 })
 export class TaxonomyEditorModule {
