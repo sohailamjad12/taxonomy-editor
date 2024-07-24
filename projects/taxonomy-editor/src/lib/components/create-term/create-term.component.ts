@@ -326,7 +326,7 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
     },
     requestedFields: [],
     pageNumber: 0,
-    pagesize: 200
+    pageSize:1000
     }
     this.frameWorkService.getKcmSearchList(requestObj,this.data.columnInfo.code).subscribe((response)=>{
       if(response.data && response.data.length){
