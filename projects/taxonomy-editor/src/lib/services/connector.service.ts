@@ -91,7 +91,7 @@ export class ConnectorService {
 
     _line.endPlugOutline = true;
     _line.startPlugOutline = true;
-    // _line.positionByWindowResize = false;
+    _line.positionByWindowResize = true;
     _line.setOptions(options);
     _line.show('draw');
     // this.elmWrapper.appendChild(document.querySelector('.leader-line:last-of-type'));
