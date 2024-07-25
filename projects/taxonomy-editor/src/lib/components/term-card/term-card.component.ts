@@ -232,6 +232,9 @@ export class TermCardComponent implements OnInit {
           cardRef: cardRef
         }
         this.frameworkService.updateAfterAddOrEditSubject(responseData)
+        setTimeout(() => {
+          window.dispatchEvent(new Event('resize'))
+        }, 100)
       })
     }
   }
@@ -292,6 +295,9 @@ export class TermCardComponent implements OnInit {
         if(!(res && res.stopUpdate)){
           this.frameworkService.updateAfterAddOrEditSubject(responseData)
         }
+        setTimeout(() => {
+          window.dispatchEvent(new Event('resize'))
+        }, 100)
       })
     }
   }

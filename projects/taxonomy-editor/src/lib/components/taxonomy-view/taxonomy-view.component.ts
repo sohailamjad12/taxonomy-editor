@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, Output, EventEmitter, OnDestroy } from '@angular/core';
+import { Component, Input, OnInit, Output, EventEmitter, OnDestroy, HostListener } from '@angular/core';
 import { FrameworkService } from '../../services/framework.service';
 import { MatDialog } from '@angular/material/dialog';
 import { CreateTermComponent } from '../create-term/create-term.component';
@@ -27,7 +27,6 @@ export class TaxonomyViewComponent implements OnInit, OnDestroy {
   @Input() workFlowStatus: string;
   @Input() environment:any;
   @Input() taxonomyConfig: any;
-
   @Output() sentForApprove = new EventEmitter<any>()
   mapping = {};
   heightLighted = []
