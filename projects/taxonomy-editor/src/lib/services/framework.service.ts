@@ -24,13 +24,14 @@ export class FrameworkService {
   termSubject: BehaviorSubject<any> = new BehaviorSubject<any>(null)
   afterAddOrEditSubject: BehaviorSubject<any> = new BehaviorSubject<any>(null)
   list = new Map<string, NSFramework.IColumnView>();
-  selectionList = new Map<string, NSFramework.IColumnView>();
+  selectionList = new Map<string, any>();
   insertUpdateDeleteNotifier: BehaviorSubject<{ type: 'select' | 'insert' | 'update' | 'delete', action: string, data: any }> = new BehaviorSubject<{ type: 'select' | 'insert' | 'update' | 'delete', action: string, data: any }>(null)
   environment
   libConfig: IConnection
   frameworkId: string;
   rootConfig: any;
   proxiesPath = 'apis/proxies/v8'
+  cardClkData:any;
   constructor(
     private http: HttpClient,
     public localConfig: LocalConnectionService
@@ -81,6 +82,10 @@ export class FrameworkService {
    return this.http.post(`/${this.proxiesPath}/${categoryItem}/create/term`, requestBody).pipe(map(res => _.get(res, 'result')))
  }
 
+
+  retireTerm(frameworkId: any, categoryId: any, categoryTermCode: any) {
+    return this.http.delete(`/${this.proxiesPath}/framework/v1/term/retire/${categoryTermCode}?framework=${frameworkId}&category=${categoryId}`)
+  }
 
   updateTerm(frameworkId, categoryId, categoryTermCode, reguestBody) {
     return this.http.patch(`/${this.proxiesPath}/framework/v1/term/update/${categoryTermCode}?framework=${frameworkId}&category=${categoryId}`, reguestBody)
@@ -326,6 +331,80 @@ export class FrameworkService {
     }
     
     return this.http.post(`/${this.proxiesPath}/${categoryItem}/search`, requestBody).pipe(map(res => _.get(res, 'result.result')))
+  }
+
+  updateLocalList(item: any, parent: any,selectedTermArray:any) {
+    if(item && item.children && item.children.length) {
+      item.children.forEach((itmData: any) => {
+        if(itmData.identifier === parent.identifier) {
+          let differenceData = []
+          if(itmData && itmData.children && itmData.children.length) {
+            differenceData  = _.differenceBy(selectedTermArray,itmData.children, 'identifier');
+          } else {
+            differenceData = selectedTermArray
+          }
+          // differenceData = this.selectedTermArray
+          itmData['associations'] = itmData && itmData.associations ?[...itmData.associations, ...differenceData]:differenceData
+          itmData['children'] = itmData && itmData.children ?[...itmData.children, ...differenceData]:differenceData
+        }
+        if(itmData.children) {
+          this.updateLocalList(itmData, parent,selectedTermArray)
+        }
+      })
+    }
+  }
+
+  updateFrameworkList(columnCode, parentData, selectedTermArray){
+    let listData : any = this.list.get(columnCode)
+          let differenceData = []
+          if(listData && listData.children && listData.children.length) {
+            differenceData  = _.differenceBy(selectedTermArray,listData.children, 'identifier');
+          } else {
+            differenceData = selectedTermArray
+          }
+          listData['associations'] = listData && listData.associations ?[...listData.associations, ...differenceData]:differenceData
+          listData['children'] = listData && listData.children ?[...listData.children, ...differenceData]:differenceData
+
+          this.selectionList.forEach((selectedData: any)=> {
+            let listData : any = this.list.get(selectedData.category)
+            if(listData && listData.children && listData.children.length) {
+              this.updateLocalList(listData,parentData, selectedTermArray)
+            }
+          }) 
+  }
+
+  getFrameworkRead(frameWorkId: any): Observable<any> {
+    if (this.localConfig.connectionType === 'online') {
+      return this.http.get(`/${this.proxiesPath}/framework/v1/read/${frameWorkId}`, { withCredentials: true }).pipe(
+        map((response: any) => _.get(response, 'result.framework'))
+      )
+    } else {
+      return of({})
+    }
+  }
+
+  getConfigOfCategoryConfigByFrameWorkId(code: string, frameworkId: string) {
+    let categoryConfig: any;
+    if(this.rootConfig && this.rootConfig[0]) {
+      this.rootConfig.forEach((config: any, index: number) => {
+        if(frameworkId == config.frameworkId) {
+          categoryConfig = config.config.find((obj: any) => obj.category == code);
+        }
+      });
+    }
+    return categoryConfig;
+  }
+
+  getConfigByFrameWorkId(frameworkId: string) {
+    let categoryConfig: any;
+    if(this.rootConfig && this.rootConfig[0]) {
+      this.rootConfig.forEach((config: any, index: number) => {
+        if(frameworkId == config.frameworkId) {
+          categoryConfig = config
+        }
+      });
+    }
+    return categoryConfig;
   }
 
 }

@@ -78,13 +78,17 @@
                             <div class="flex-1 flex-col">
                                 <label for="name" class="margin-remove-bottom form-label required"
                                     aria-label="First name label">
-                                     {{data.columnInfo.config.categoryDisplayName}} Name
+                                     Name
                                 </label>
+                                
                                 <mat-form-field appearance="outline" class="flex-1">
                                     <mat-select placeholder="{{app_strings?.name}}" formControlName="name" id="name" #name (selectionChange)="change($event,createThemeForm)">
-                                        <!-- <input #search autocomplete="off" placeholder="Search" class="assigneeSearch"
-                                          (keydown.space)="$event.stopPropagation()"  formControlName="assigneeText" matInput> -->
-                                        <mat-option *ngFor="let option of masterList"    (blur)="updateDname(option?.title, createThemeForm)" [value]="option">{{option.title}}</mat-option>
+                                        <input #search autocomplete="off" placeholder="Search" class="assigneeSearch"
+                                          (keydown.space)="$event.stopPropagation()"  (keyup)="onKey($event)" matInput>
+                                        <mat-option *ngFor="let option of filteredMasterList"    (blur)="updateDname(option?.title, createThemeForm)" [value]="option">{{option.title}}</mat-option>
+                                        <mat-option *ngIf="filteredMasterList.length === 0" disabled>
+                                            No results found!
+                                          </mat-option>
                                         </mat-select>
 
                                     <!-- <input matInput formControlName="name" id="name" #name
@@ -107,9 +111,9 @@
 
                                     <label for="name" class="margin-remove-bottom form-label required"
                                     aria-label="First name label">
-                                   {{data.columnInfo.config.categoryDisplayName}} Display Name
+                                    Display Name
                                 </label>
-                                        <mat-icon class="info-icon cursor-pointer" [matTooltip]="'You can customize this display name for learners to see'" 
+                                        <mat-icon class="info-icon cursor-pointer" [matTooltip]="toolTipText" 
                                         matTooltipClass="tooltip-sec">info_outline</mat-icon>
                 
                                 </div>
@@ -166,7 +170,7 @@
                 <div class="flex flex-end mb-4">
                     <button type="button" class="mat-button flex items-center " *ngIf="data.mode === 'multi-create'" (click)="addThemeFields()">
                         <mat-icon class="mr-2 mat-icon-custom ">add_circle_outline</mat-icon>
-                        Add {{ data.columnInfo.config.categoryDisplayName || data.columnInfo.name}}
+                        Add more
                     </button>
                 </div>
                 <mat-accordion formArrayName="themeFields">
@@ -187,7 +191,7 @@
                                     <div class="flex-1 flex-col">
                                         <label for="name" class="margin-remove-bottom form-label required"
                                             aria-label="First name label">
-                                             {{data.columnInfo.config.categoryDisplayName}} Name
+                                             Name
                                         </label>
                                         <mat-form-field appearance="outline" class="flex-1">
                                             <!-- <input matInput formControlName="name" id="name" #name
@@ -202,9 +206,12 @@
                                         </mat-option>
                                         </mat-autocomplete> -->
                                         <mat-select placeholder="{{app_strings?.name}}" formControlName="name" id="name" #name (selectionChange)="change($event,createThemeFormMulti, i )">
-                                            <!-- <input #search autocomplete="off" placeholder="Search" class="assigneeSearch"
-                                              (keydown.space)="$event.stopPropagation()"  formControlName="assigneeText" matInput> -->
-                                            <mat-option *ngFor="let option of masterList"    (blur)="updateDname(option?.title, createThemeFormMulti, i)" [value]="option">{{option.title}}</mat-option>
+                                            <input #search autocomplete="off" placeholder="Search" class="assigneeSearch"
+                                              (keydown.space)="$event.stopPropagation()"   (keyup)="onKey($event)" matInput>
+                                            <mat-option *ngFor="let option of filteredMasterList"    (blur)="updateDname(option?.title, createThemeFormMulti, i)" [value]="option">{{option.title}}</mat-option>
+                                            <mat-option *ngIf="filteredMasterList.length === 0" disabled>
+                                                No results found!
+                                              </mat-option>
                                         
                                           </mat-select>
                                           
@@ -215,11 +222,11 @@
                                         <div class="flex">
                                             <label for="name" class="margin-remove-bottom form-label required"
                                             aria-label="First name label">
-                                            {{data.columnInfo.config.categoryDisplayName}} Display Name
+                                             Display Name
                                         </label>
         
                                         
-                                            <mat-icon class="info-icon cursor-pointer"  [matTooltip]="'You can customize this display name for learners to see'" 
+                                            <mat-icon class="info-icon cursor-pointer" [matTooltip]="toolTipText" 
                                             matTooltipClass="tooltip-sec">info_outline</mat-icon>
                                           
                                                 

@@ -1,7 +1,7 @@
 import { AfterViewInit, ChangeDetectorRef, Component, Inject, OnInit } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { FrameworkService } from '../../services/framework.service';
-import { startWith, map } from 'rxjs/operators';
+import { startWith, map, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { FormArray, FormControl, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Observable } from 'rxjs/internal/Observable';
 import { Identifiers } from '@angular/compiler';
@@ -46,7 +46,12 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
    competencyForm: FormGroup
   compLabeltext:string = ''
   masterList:any[]=[];
+  filteredMasterList:any[]=[];
   expansionTitle:string = ''
+  private debounceTimeout: any;
+  private debounceDelay: number = 500;
+  values= ''
+  toolTipText = `You can customize this display name for learners to see, as it's what they will view.`
   constructor(
     public dialogRef: MatDialogRef<CreateTermComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
@@ -318,6 +323,26 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
     })
   }
 
+  onKey(event:any){
+    //  this.values = event.target.value.toLowerCase();
+    //  this.filteredMasterList = this.filterOrgValues(this.values, this.masterList)
+
+     clearTimeout(this.debounceTimeout);
+    
+     // Set the new timeout
+     this.debounceTimeout = setTimeout(() => {
+       this.values = event.target.value.toLowerCase();
+       this.filteredMasterList = this.filterOrgValues(this.values, this.masterList);
+     }, this.debounceDelay);
+  }
+
+ 
+
+  filterOrgValues(searchValue: string, array: any) {
+    return array.filter((value: any) =>
+      value.title.toLowerCase().includes(searchValue.toLowerCase()))
+  }
+
   getKcmSearch(){
     const requestObj = {
       filterCriteriaMap: {
@@ -326,11 +351,12 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
     },
     requestedFields: [],
     pageNumber: 0,
-    pagesize: 200
+    pageSize:1000
     }
     this.frameWorkService.getKcmSearchList(requestObj,this.data.columnInfo.code).subscribe((response)=>{
       if(response.data && response.data.length){
         this.masterList = response.data;
+        this.filteredMasterList = [...this.masterList]
         setTimeout(()=>{
           if(this.data &&
             (this.data.mode === 'edit')){
@@ -400,6 +426,7 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
   }
 
   async updateTermAssociationsMulti(createdTerms: any[]) {
+     let parent
     if(createdTerms && createdTerms.length) {
       let createdTermsCounter = 0
       for(let createdTerm of createdTerms) {
@@ -409,7 +436,7 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
         let counter = 0
         let localIsExist = false
         for(const [key, value] of this.frameWorkService.selectionList){
-          const parent = value
+           parent = value
           counter++
           temp = parent.children ? parent.children.filter(child => child.identifier === this.selectedTerm.identifier) : null
           associations = parent.children ? parent.children.map(c => {
@@ -438,6 +465,7 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
         }
         createdTermsCounter++
         if(createdTermsCounter === createdTerms.length) {
+          this.frameWorkService.updateFrameworkList(this.data.columnInfo.code, parent, createdTerms )
           this.dialogClose({ term: [this.selectedTerm], created: true, multi:true })
           if(createdTerms[0].category === 'theme'){
             this._snackBar.open(`Competency ${createdTerms[0].category} created successfully.`)
@@ -453,6 +481,8 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
   callUpdateAssociations(counter, parent, reguestBody ): Promise<any>{
     return new Promise((resolve) => {
       this.frameWorkService.updateTerm(this.data.frameworkId, parent.category, parent.code, reguestBody).subscribe((res: any) => {
+        parent['children'] = parent && parent.children ?[...parent.children, ...[this.selectedTerm]]:[this.selectedTerm]
+
         if (counter === this.frameWorkService.selectionList.size) {
           // this.selectedTerm['associationProperties']['approvalStatus'] = 'Draft';
   
@@ -460,9 +490,9 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
           // so term is set from childdata which is received from params in updateData
           const value = (this.selectedTerm && this.selectedTerm.identifier) ? this.selectedTerm : {}
           const found = parent.children ? parent.children.find(c=> c.identifier === this.selectedTerm.identifier) : false
-          if(!found) {
-            parent.children ? parent.children.push(this.selectedTerm) : parent['children'] = [this.selectedTerm]
-          }
+          // if(!found) {
+          //   parent.children ? parent.children.push(this.selectedTerm) : parent['children'] = [this.selectedTerm]
+          // }
           this.disableUpdate = false
           // this.frameWorkService.publishFramework().subscribe(res => {
           //   // this.dialogRef.close(term)

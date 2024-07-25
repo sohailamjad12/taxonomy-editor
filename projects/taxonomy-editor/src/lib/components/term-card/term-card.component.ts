@@ -7,6 +7,7 @@ import { labels } from '../../labels/strings';
 import { CardSelection, CardChecked, Card } from '../../models/variable-type.model';
 import { MatDialog } from '@angular/material';
 import { CreateTermComponent } from '../create-term/create-term.component';
+import { CreateTermFromFrameworkComponent } from './../create-term-from-framework/create-term-from-framework.component';
 
 @Component({
   selector: 'lib-term-card',
@@ -23,6 +24,7 @@ export class TermCardComponent implements OnInit {
   app_strings: any = labels;
   loaded: any = {}
   isCompetencyArea:any;
+  environment: any
   @Input()
   set data(value: any) {
     this._data = value;
@@ -55,12 +57,22 @@ export class TermCardComponent implements OnInit {
       if(e){
        this.isCompetencyArea = e.action
       }
-      
-      
     })
+
+
+    this.environment = this.frameworkService.getEnviroment()
+    
   }
 
   cardClicked(data: any, cardRef: any) {
+    if(data.category!='subtheme'){
+      this.frameworkService.cardClkData = data;
+      console.log('this.frameworkService.cardClkData',this.frameworkService.cardClkData);
+    }
+    
+
+   
+    
     // this.data.selected = true
     console.log('card clikc method')
     if(this.frameworkService.isLastColumn(this.data.category)){
@@ -103,19 +115,48 @@ export class TermCardComponent implements OnInit {
 
   view(data: any, childrenData: any, index: any){
     const selectedTerms = this.frameworkService.getPreviousSelectedTerms(data.columnInfo.code)
-      const dialog = this.dialog.open(CreateTermComponent, {
-        data: { 
-          mode:'view',
-          columnInfo: data.columnInfo,
-          frameworkId: this.frameworkService.getFrameworkId(),
-          selectedparents: this.heightLighted,
-          colIndex: index,
-          childrenData: childrenData,
-          selectedParentTerms: selectedTerms
-        },
-        width: '800px',
-        panelClass: 'custom-dialog-container'
-      })
+    const nextCat = this.getNextCat(data)
+    const nextNextCat = this.frameworkService.getNextCategory(nextCat.code)
+    if(nextCat) {
+      const selectedTerms = this.frameworkService.getPreviousSelectedTerms(nextCat.code)
+      const colInfo = Array.from(this.frameworkService.list.values()).filter(l => l.code === nextCat.code )
+      let nextColInfo = []
+      if(nextNextCat && nextNextCat.code) {
+        nextColInfo = Array.from(this.frameworkService.list.values()).filter(l => l.code === nextNextCat.code )
+      }
+      let dialog: any
+      if(this.environment && this.environment.frameworkType === 'MDO_DESIGNATION'){
+        dialog = this.dialog.open(CreateTermFromFrameworkComponent, {
+          data: { 
+            mode:'multi-create',
+            openMode: 'view',
+            cardColInfo: this.data.columnInfo,
+            columnInfo: colInfo && colInfo.length ? colInfo[0] : [],
+            nextColInfo: nextColInfo && nextColInfo.length ? nextColInfo[0] : [],
+            frameworkId: this.frameworkService.getFrameworkId(),
+            selectedparents: this.heightLighted,
+            colIndex: nextCat.index,
+            childrenData: data.children,
+            selectedParentTerms: selectedTerms
+          },
+          width: '800px',
+          panelClass: 'custom-dialog-container'
+        })
+      } else {
+        dialog = this.dialog.open(CreateTermComponent, {
+          data: { 
+            mode:'view',
+            columnInfo: data.columnInfo,
+            frameworkId: this.frameworkService.getFrameworkId(),
+            selectedparents: this.heightLighted,
+            colIndex: index,
+            childrenData: childrenData,
+            selectedParentTerms: selectedTerms
+          },
+          width: '800px',
+          panelClass: 'custom-dialog-container'
+        })
+      }
       dialog.afterClosed().subscribe(res => {
         if(!res) {
           return;
@@ -133,66 +174,124 @@ export class TermCardComponent implements OnInit {
         // }
         // this.updateFinalList({ selectedTerm: res.term, isSelected: false, parentData: res.parent, colIndex:colIndex })
       })
+    }
   }
   edit(data: any, childrenData: any, index: any, cardRef: any){
     const selectedTerms = this.frameworkService.getPreviousSelectedTerms(data.columnInfo.code)
-    const dialog = this.dialog.open(CreateTermComponent, {
-      data: { 
-        mode:'edit',
-        columnInfo: data.columnInfo,
-        frameworkId: this.frameworkService.getFrameworkId(),
-        selectedparents: this.heightLighted,
-        colIndex: index,
-        childrenData: childrenData,
-        selectedParentTerms: selectedTerms,
-        cardRef: cardRef
-      },
-      width: '800px',
-      panelClass: 'custom-dialog-container'
-    })
-    dialog.afterClosed().subscribe(res => {
-      if(!res) {
-        return;
-      }
-      const responseData = {
-        res,
-        index: index.index,
-        data,
-        type: 'update',
-        cardRef: cardRef
-      }
-      this.frameworkService.updateAfterAddOrEditSubject(responseData)
-    })
-  }
-  create(data: any){
     const nextCat = this.getNextCat(data)
+    const nextNextCat = this.frameworkService.getNextCategory(nextCat.code)
     if(nextCat) {
       const selectedTerms = this.frameworkService.getPreviousSelectedTerms(nextCat.code)
       const colInfo = Array.from(this.frameworkService.list.values()).filter(l => l.code === nextCat.code )
-      const dialog = this.dialog.open(CreateTermComponent, {
-        data: { 
-          mode:'multi-create',
-          columnInfo: colInfo && colInfo.length ? colInfo[0] : [],
-          frameworkId: this.frameworkService.getFrameworkId(),
-          selectedparents: this.heightLighted,
-          colIndex: nextCat.index,
-          childrenData: data.childrenData,
-          selectedParentTerms: selectedTerms
-        },
-        width: '800px',
-        panelClass: 'custom-dialog-container'
-      })
+      let nextColInfo = []
+      if(nextNextCat && nextNextCat.code) {
+        nextColInfo = Array.from(this.frameworkService.list.values()).filter(l => l.code === nextNextCat.code )
+      }
+      let dialog: any
+      if(this.environment && this.environment.frameworkType === 'MDO_DESIGNATION'){
+        dialog = this.dialog.open(CreateTermFromFrameworkComponent, {
+          data: { 
+            mode:'multi-create',
+            cardColInfo: this.data.columnInfo,
+            columnInfo: colInfo && colInfo.length ? colInfo[0] : [],
+            nextColInfo: nextColInfo && nextColInfo.length ? nextColInfo[0] : [],
+            frameworkId: this.frameworkService.getFrameworkId(),
+            selectedparents: this.heightLighted,
+            colIndex: nextCat.index,
+            childrenData: data.children,
+            selectedParentTerms: selectedTerms
+          },
+          width: '800px',
+          panelClass: 'custom-dialog-container'
+        })
+      } else {
+        dialog = this.dialog.open(CreateTermComponent, {
+          data: { 
+            mode:'edit',
+            columnInfo: data.columnInfo,
+            frameworkId: this.frameworkService.getFrameworkId(),
+            selectedparents: this.heightLighted,
+            colIndex: index,
+            childrenData: childrenData,
+            selectedParentTerms: selectedTerms,
+            cardRef: cardRef
+          },
+          width: '800px',
+          panelClass: 'custom-dialog-container'
+        })
+      }
       dialog.afterClosed().subscribe(res => {
         if(!res) {
           return;
         }
         const responseData = {
           res,
+          index: index.index,
+          data,
+          type: 'update',
+          cardRef: cardRef
+        }
+        this.frameworkService.updateAfterAddOrEditSubject(responseData)
+      })
+    }
+  }
+  create(data: any){
+    const nextCat = this.getNextCat(data)
+    const nextNextCat = this.frameworkService.getNextCategory(nextCat.code)
+    if(nextCat) {
+      const selectedTerms = this.frameworkService.getPreviousSelectedTerms(nextCat.code)
+      const colInfo = Array.from(this.frameworkService.list.values()).filter(l => l.code === nextCat.code )
+      let nextColInfo = []
+      if(nextNextCat && nextNextCat.code) {
+        nextColInfo = Array.from(this.frameworkService.list.values()).filter(l => l.code === nextNextCat.code )
+      }
+      let dialog: any
+      if(this.environment && this.environment.frameworkType === 'MDO_DESIGNATION'){
+        dialog = this.dialog.open(CreateTermFromFrameworkComponent, {
+          data: { 
+            mode:'multi-create',
+            cardColInfo: this.data.columnInfo,
+            columnInfo: colInfo && colInfo.length ? colInfo[0] : [],
+            nextColInfo: nextColInfo && nextColInfo.length ? nextColInfo[0] : [],
+            frameworkId: this.frameworkService.getFrameworkId(),
+            selectedparents: this.heightLighted,
+            colIndex: nextCat.index,
+            childrenData: data.children,
+            selectedParentTerms: selectedTerms
+          },
+          width: '800px',
+          panelClass: 'custom-dialog-container'
+        })
+      } else {
+        dialog = this.dialog.open(CreateTermComponent, {
+          data: { 
+            mode:'multi-create',
+            columnInfo: colInfo && colInfo.length ? colInfo[0] : [],
+            frameworkId: this.frameworkService.getFrameworkId(),
+            selectedparents: this.heightLighted,
+            colIndex: nextCat.index,
+            childrenData: data.children,
+            selectedParentTerms: selectedTerms
+          },
+          width: '800px',
+          panelClass: 'custom-dialog-container'
+        })
+      }
+      dialog.afterClosed().subscribe(res => {
+        if(!res) {
+          return;
+        }
+        console.log('data',data);
+        
+        const responseData = {
+          res,
           index: nextCat.index,
           data,
           type: 'multi-create'
         }
-        this.frameworkService.updateAfterAddOrEditSubject(responseData)
+        if(!(res && res.stopUpdate)){
+          this.frameworkService.updateAfterAddOrEditSubject(responseData)
+        }
       })
     }
   }
