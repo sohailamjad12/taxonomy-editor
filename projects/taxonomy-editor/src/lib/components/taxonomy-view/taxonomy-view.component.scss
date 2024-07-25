@@ -32,6 +32,15 @@
             align-items: center;
         }
     }
+    .button-enabled {
+        opacity: 1;
+        pointer-events: auto;
+      }
+      
+      .button-disabled {
+        opacity: 0.5;
+        pointer-events: none;
+      }
     &.addCardButtonNew {
         padding: 8px 12px;
         text-align: center;

@@ -32,6 +32,7 @@ export class FrameworkService {
   rootConfig: any;
   proxiesPath = 'apis/proxies/v8'
   cardClkData:any;
+  CurrentCardClk:Subject<any>=new Subject()
   constructor(
     private http: HttpClient,
     public localConfig: LocalConnectionService
