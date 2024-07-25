@@ -37,7 +37,8 @@ export interface LLOptions {
     path?: pathType,
     startSocket?: string,
     endSocket?: string,
-    dash?: any
+    dash?: any,
+    positionByWindowResize?: boolean
   };
   
 export const defaultConfig: LLOptions = {
@@ -53,7 +54,8 @@ export const defaultConfig: LLOptions = {
     size: 1,
     path: 'grid',
     startSocket: 'right', endSocket: 'left',
-    dash: {len: 6, gap: 3}
+    dash: {len: 6, gap: 3},
+    positionByWindowResize: true
   }
 
 export const headerLineConfig = {

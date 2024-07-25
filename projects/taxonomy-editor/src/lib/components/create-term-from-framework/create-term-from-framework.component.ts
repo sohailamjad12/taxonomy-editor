@@ -835,11 +835,15 @@ export class CreateTermFromFrameworkComponent implements OnInit {
   onDisableTheme(option: any){
     const parentColumnConfigData = this.frameWorkService.getPreviousCategory(this.data.columnInfo.code)
     let parentCol: any = this.frameWorkService.selectionList.get(parentColumnConfigData.code)
-    const result = parentCol.children.findIndex((ele: any) => {
-      if( (ele.refType === 'theme')  && (this.seletedCompetencyArea.code === ele.additionalProperties.competencyArea.code)) {
-      return  ele.refId === option.refId
-      }
-    })
+    let result = -1
+    if(parentCol && parentCol.children && parentCol.children.length){
+      result = parentCol.children.findIndex((ele: any) => {
+        if( (ele.refType === 'theme')  && (this.seletedCompetencyArea.code === ele.additionalProperties.competencyArea.code)) {
+        return  ele.refId === option.refId
+        }
+      })
+      return result >= 0 ? true: false
+    }
     // 
     // console.log(this.seletedCompetencyArea)
     return result >= 0 ? true: false

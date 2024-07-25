@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, Output, EventEmitter, OnDestroy } from '@angular/core';
+import { Component, Input, OnInit, Output, EventEmitter, OnDestroy, HostListener } from '@angular/core';
 import { FrameworkService } from '../../services/framework.service';
 import { MatDialog } from '@angular/material/dialog';
 import { CreateTermComponent } from '../create-term/create-term.component';
@@ -27,7 +27,6 @@ export class TaxonomyViewComponent implements OnInit, OnDestroy {
   @Input() workFlowStatus: string;
   @Input() environment:any;
   @Input() taxonomyConfig: any;
-
   @Output() sentForApprove = new EventEmitter<any>()
   mapping = {};
   heightLighted = []
@@ -41,6 +40,10 @@ export class TaxonomyViewComponent implements OnInit, OnDestroy {
   isLoading: boolean = false;
   categoryList:any = [];
   app_strings: any = labels;
+  isHideBtnEna:boolean =true;
+  columnId:string = '';
+  configCodeBtn:any;
+  dataConfig:any
   constructor(private frameworkService: FrameworkService, 
     private localSvc: LocalConnectionService, 
     public dialog: MatDialog, 
@@ -57,6 +60,7 @@ export class TaxonomyViewComponent implements OnInit, OnDestroy {
         this.refreshData(responseData)
       }
     })
+    this.isEnableds()
   }
 
   ngOnChanges() {
@@ -177,8 +181,39 @@ export class TaxonomyViewComponent implements OnInit, OnDestroy {
 
   }
   isEnabled(columnCode: string): boolean {
+    // console.log('enable',!!this.frameworkService.selectionList.get(columnCode));
+    
     return !!this.frameworkService.selectionList.get(columnCode)
   }
+
+  isEnableds() {
+  //  console.log('frameworkData',this.frameworkService.cardClkData)
+  //  return this.frameworkService.cardClkData
+  if(this.frameworkService.CurrentCardClk){
+    this.frameworkService.CurrentCardClk.subscribe((item)=>{
+      // console.log('itemmmmm',item);
+
+     const dataCode = this.frameworkService.getNextCategory(item)
+    //  console.log('dataCode',dataCode);
+
+      this.dataConfig = this.frameworkService.getConfig(dataCode.code)
+      //  console.log('dataCode',this.dataConfig);
+
+     if(dataCode.code === this.dataConfig.category){
+      this.configCodeBtn = dataCode.code
+     }
+      
+     })
+  }
+  
+  
+  }
+
+  // getbtnEnableFn(){
+
+  // }
+
+
   openCreateTermDialog(column, colIndex) {
     if (!this.isEnabled(column.code)) {
       const selectedTerms = this.frameworkService.getPreviousSelectedTerms(column.index)
@@ -239,9 +274,9 @@ export class TaxonomyViewComponent implements OnInit, OnDestroy {
           if (res && res.created) {
             this.showPublish = true
           }
-       console.log('create',column);
+      //  console.log('create',column);
          const data  = this.frameworkService.cardClkData
-         console.log('cData',data);
+        //  console.log('cData',data);
          
           const responseData = {
             res,
