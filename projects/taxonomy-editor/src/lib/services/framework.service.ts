@@ -19,13 +19,13 @@ export class FrameworkService {
   categoriesHash: BehaviorSubject<NSFramework.ICategory[] | []> = new BehaviorSubject<NSFramework.ICategory[] | []>([])
   // termsByCategory: BehaviorSubject<NSFramework.ITermsByCategory[] | []> = new BehaviorSubject<NSFramework.ITermsByCategory[] | []>([])
   isDataUpdated: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false)
-  currentSelection: BehaviorSubject<{ type: string, data: any, cardRef?: any, isUpdate?:boolean } | null> = 
-    new BehaviorSubject<{ type: string, data: any, cardRef?: any, isUpdate?:boolean } | null>(null)
+  currentSelection: Subject<{ type: string, data: any, cardRef?: any, isUpdate?:boolean } | null> = 
+    new Subject<{ type: string, data: any, cardRef?: any, isUpdate?:boolean } | null>()
   termSubject: BehaviorSubject<any> = new BehaviorSubject<any>(null)
   afterAddOrEditSubject: BehaviorSubject<any> = new BehaviorSubject<any>(null)
   list = new Map<string, NSFramework.IColumnView>();
   selectionList = new Map<string, any>();
-  insertUpdateDeleteNotifier: BehaviorSubject<{ type: 'select' | 'insert' | 'update' | 'delete', action: string, data: any }> = new BehaviorSubject<{ type: 'select' | 'insert' | 'update' | 'delete', action: string, data: any }>(null)
+  insertUpdateDeleteNotifier: Subject<{ type: 'select' | 'insert' | 'update' | 'delete', action: string, data: any }> = new Subject<{ type: 'select' | 'insert' | 'update' | 'delete', action: string, data: any }>()
   environment
   libConfig: IConnection
   frameworkId: string;
@@ -138,6 +138,7 @@ export class FrameworkService {
   resetAll() {
     this.categoriesHash.next([])
     this.currentSelection.next(null)
+    this.selectionList.clear()
     this.list.clear()
   }
   isLastColumn(colCode) {

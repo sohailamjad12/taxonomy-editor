@@ -347,6 +347,9 @@ export class TaxonomyColumnViewComponent implements OnInit, OnDestroy, OnChanges
     if (this.childSubscription) {
       this.childSubscription.unsubscribe()
     }
+    if(this.newTermSubscription) {
+      this.newTermSubscription.unsubscribe()
+    }
   }
   
 }
