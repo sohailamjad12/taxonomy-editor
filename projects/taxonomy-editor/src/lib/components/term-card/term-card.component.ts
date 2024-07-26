@@ -71,10 +71,6 @@ export class TermCardComponent implements OnInit, OnDestroy {
       this.frameworkService.CurrentCardClk.next(data.category)
       console.log('this.frameworkService.cardClkData',this.frameworkService.cardClkData);
     }
-    
-
-   
-    
     // this.data.selected = true
     console.log('card clikc method')
     if(this.frameworkService.isLastColumn(this.data.category)){
@@ -239,7 +235,7 @@ export class TermCardComponent implements OnInit, OnDestroy {
         cardRef: cardRef
       }
       
-      this.frameworkService.updateAfterAddOrEditSubject(responseData)
+      // this.frameworkService.updateAfterAddOrEditSubject(responseData)
       setTimeout(() => {
         window.dispatchEvent(new Event('resize'))
       }, 100)

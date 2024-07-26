@@ -753,9 +753,53 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
       formData,
       updateTermData: data.childrenData
     }
-    this.updateTermAssociations(updateData)
+    this.updateTermDataAssociations(updateData)
   }
 
+
+  updateTermDataAssociations(updateData) {
+    let selectionData = this.frameWorkService.selectionList.get(this.data.columnInfo.code)
+    if(!selectionData ) {
+      selectionData = this.data.childrenData
+    }
+    const listThme = this.frameWorkService.list.get(this.data.columnInfo.code)
+    let themAssociations
+    if(listThme && listThme.children && listThme.children.length) {
+      const data = listThme.children.find((c) => c.identifier === selectionData.identifier)
+      themAssociations = data.associations ? data.associations.map(c => {
+        // return { identifier: c.identifier, approvalStatus: c.associationProperties?c.associationProperties.approvalStatus: 'Draft' }
+        return c.identifier ?  { identifier: c.identifier } : null
+      }) : []
+    }
+    const reguestBody = {
+      request: {
+        term: {
+          ...updateData.formData,
+          ...(themAssociations && themAssociations.length) ? {associations: themAssociations} : null,
+        }
+      }
+    }
+    this.frameWorkService.updateTerm(this.data.frameworkId, selectionData.category, selectionData.code, reguestBody).subscribe((res: any) => {
+        // this.selectedTerm['associationProperties']['approvalStatus'] = 'Draft';
+
+        // this value is for selected term in case of create scenario, in case of edit scenario this won't be avaiable 
+        // so term is set from childdata which is received from params in updateData
+        const value = (this.selectedTerm && this.selectedTerm.identifier) ? this.selectedTerm : (updateData) ? {...updateData.updateTermData, ...updateData.formData} : {}
+        // console.log('value :: ', value)
+        this.disableUpdate = false
+        // console.log('selectedterms',value);
+        
+        // const selectionData = this.frameWorkService.selectionList.get(this.data.columnInfo.code)
+        selectionData['description'] = reguestBody.request.term.description
+        selectionData['associations'] = themAssociations
+
+        this._snackBar.open(`Competency ${value.category} updated successfully`)
+        this.dialogClose({ term: { ...value }, created: true })
+        this.frameWorkService.updateFullTermDataLocalMap(this.data.columnInfo.code, selectionData)
+    }, (err: any) => {
+      console.error(`Edit ${this.data.columnInfo.name} failed, please try again later`)
+    })
+  }
 
   updateTermAssociations(updateData?: any) {
     let associations = []
@@ -800,7 +844,6 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
             // console.log('value :: ', value)
             this.disableUpdate = false
             // console.log('selectedterms',value);
-            
             this._snackBar.open(`Competency ${value.category} updated successfully`)
             this.dialogClose({ term: { ...value }, created: true })
           }

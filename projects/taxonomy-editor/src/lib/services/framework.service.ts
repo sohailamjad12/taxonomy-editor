@@ -19,13 +19,13 @@ export class FrameworkService {
   categoriesHash: BehaviorSubject<NSFramework.ICategory[] | []> = new BehaviorSubject<NSFramework.ICategory[] | []>([])
   // termsByCategory: BehaviorSubject<NSFramework.ITermsByCategory[] | []> = new BehaviorSubject<NSFramework.ITermsByCategory[] | []>([])
   isDataUpdated: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false)
-  currentSelection: Subject<{ type: string, data: any, cardRef?: any, isUpdate?:boolean } | null> = 
-    new Subject<{ type: string, data: any, cardRef?: any, isUpdate?:boolean } | null>()
+  currentSelection: BehaviorSubject<{ type: string, data: any, cardRef?: any, isUpdate?:boolean } | null> = 
+    new BehaviorSubject<{ type: string, data: any, cardRef?: any, isUpdate?:boolean } | null>(null)
   termSubject: BehaviorSubject<any> = new BehaviorSubject<any>(null)
   afterAddOrEditSubject: BehaviorSubject<any> = new BehaviorSubject<any>(null)
   list = new Map<string, NSFramework.IColumnView>();
   selectionList = new Map<string, any>();
-  insertUpdateDeleteNotifier: Subject<{ type: 'select' | 'insert' | 'update' | 'delete', action: string, data: any }> = new Subject<{ type: 'select' | 'insert' | 'update' | 'delete', action: string, data: any }>()
+  insertUpdateDeleteNotifier: BehaviorSubject<{ type: 'select' | 'insert' | 'update' | 'delete', action: string, data: any }> = new BehaviorSubject<{ type: 'select' | 'insert' | 'update' | 'delete', action: string, data: any }>(null)
   environment
   libConfig: IConnection
   frameworkId: string;
@@ -407,6 +407,35 @@ export class FrameworkService {
       });
     }
     return categoryConfig;
+  }
+
+  updateFullTermDataLocalMap(columnCode: any, parentData: any ) {
+    let listData : any = this.list.get(columnCode)
+    let differenceData = []
+
+    // const sectionListchildrenList: any = _.differenceWith(listData.children, [newTermData], (a:any, b: any) => a.identifier === b.identifier);
+    // listData['children'] = [...sectionListchildrenList, [newTermData]]
+ 
+    this.selectionList.forEach((selectedData: any)=> {
+      let listData : any = this.list.get(selectedData.category)
+      if(listData && listData.children && listData.children.length) {
+        this.updateLocalListTerm(listData,parentData)
+      }
+    }) 
+  }
+  updateLocalListTerm(item: any, parent: any) {
+    if(item && item.children && item.children.length) {
+      item.children.forEach((itmData: any) => {
+        if(itmData.identifier === parent.identifier) {
+          const sectionListchildrenList: any = _.differenceWith(item.children, [parent], (a:any, b: any) => a.identifier === b.identifier);
+          itmData['description'] = parent['description']
+          itmData['additionalProperties'] = parent['additionalProperties']
+        }
+        if(itmData.children) {
+          this.updateLocalListTerm(itmData, parent)
+        }
+      })
+    }
   }
 
 }
