@@ -400,6 +400,9 @@ export class TaxonomyViewComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(){
       this.frameworkService.removeOldLine();
+      // this.environment = null
+      // this.frameworkService.resetAll()
+      this.connectorSvc.updateConnectorsMap({})
   }
 
   getNextCat(data) {
