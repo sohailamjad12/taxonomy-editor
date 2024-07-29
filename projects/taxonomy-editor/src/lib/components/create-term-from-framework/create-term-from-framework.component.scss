@@ -700,3 +700,9 @@ input.mat-input-element {
     align-items: center;
     justify-content: center;
 }
+
+::ng-deep .mat-chip.mat-standard-chip.mat-chip-disabled {
+  opacity: .8 !important;
+  cursor: none;
+  filter: brightness(90%);
+}

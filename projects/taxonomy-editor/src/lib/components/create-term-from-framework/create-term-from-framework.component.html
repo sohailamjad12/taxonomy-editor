@@ -95,15 +95,16 @@
                                             </mat-form-field> -->
                                             <!-- {{competencyForm?.get('compThemeFields')['controls'][i]['controls']?.competencySubTheme?.value |json}} -->
                                             <mat-form-field appearance="outline" class="w-full field-height" >
-                                                <mat-select class=" placeholder-text" placeholder="Choose the provider"
+                                                <mat-select class=" placeholder-text" placeholder="Choose the Competency Sub-Theme"
                                                   formControlName="competencySubTheme" multiple [disabled]="data.openMode ==='view'">
                                                   <!-- [ngClass]="{'disbaledSelect':isHideData}" -->
                                                   <mat-select-trigger >
                                                     <mat-chip-list>
                                                         <!-- -->
                                                       <mat-chip *ngFor="let item of competencyForm?.get('compThemeFields')['controls'][i]['controls']?.competencySubTheme?.value" 
-                                                      (removed)="onTermRemove(item, i)"  [removable]="true">
-                                                        {{ item.name }}
+                                                      (removed)="onTermRemove(item, i)" [disabled]="data.openMode ==='view'"
+                                                      [ngClass]="{'sub-theme-disable': data?.openMode ==='view'}"  [removable]="data?.openMode ==='view'? false: true">
+                                                        <span >{{ item.name }}</span>
                                                         <mat-icon matChipRemove>cancel</mat-icon>
                                                       </mat-chip>
                                                     </mat-chip-list>

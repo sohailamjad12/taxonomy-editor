@@ -114,7 +114,8 @@ export class TermCardComponent implements OnInit, OnDestroy {
   view(data: any, childrenData: any, index: any){
     let dialog: any
     const selectedTerms = this.frameworkService.getPreviousSelectedTerms(data.columnInfo.code)
-    const nextCat = this.getNextCat(data)
+    const nexColInfo = this.getNextCat(data)
+    const nextCat = nexColInfo || data.columnInfo
     if(nextCat && this.environment && this.environment.frameworkType === 'MDO_DESIGNATION') {
       const nextNextCat = this.frameworkService.getNextCategory(nextCat.code)
       const selectedTerms = this.frameworkService.getPreviousSelectedTerms(nextCat.code)
@@ -179,7 +180,8 @@ export class TermCardComponent implements OnInit, OnDestroy {
     let dialog: any
     const selectedTerms = this.frameworkService.getPreviousSelectedTerms(data.columnInfo.code)
     
-    const nextCat = this.getNextCat(data)
+    const nexColInfo = this.getNextCat(data)
+    const nextCat = nexColInfo || data.columnInfo
    
     if(nextCat && this.environment && this.environment.frameworkType === 'MDO_DESIGNATION') {
       const nextNextCat = this.frameworkService.getNextCategory(nextCat.code)
@@ -242,7 +244,8 @@ export class TermCardComponent implements OnInit, OnDestroy {
     })
   }
   create(data: any){
-    const nextCat = this.getNextCat(data)
+    const nexColInfo = this.getNextCat(data)
+    const nextCat = nexColInfo || data.columnInfo
     const nextNextCat = this.frameworkService.getNextCategory(nextCat.code)
     if(nextCat) {
       const selectedTerms = this.frameworkService.getPreviousSelectedTerms(nextCat.code)

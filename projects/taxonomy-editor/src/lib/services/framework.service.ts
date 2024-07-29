@@ -83,9 +83,13 @@ export class FrameworkService {
    return this.http.post(`/${this.proxiesPath}/${categoryItem}/create/term`, requestBody).pipe(map(res => _.get(res, 'result')))
  }
 
-
+//  https://spv.karmayogi.nic.in/apis/proxies/v8/framework/v1/term/retire?framework=kcm_fw&category=theme
   retireTerm(frameworkId: any, categoryId: any, categoryTermCode: any) {
     return this.http.delete(`/${this.proxiesPath}/framework/v1/term/retire/${categoryTermCode}?framework=${frameworkId}&category=${categoryId}`)
+  }
+
+  retireMultipleTerm(frameworkId: any, categoryId: any, requestBody: any) {
+    return this.http.post(`/${this.proxiesPath}/framework/v1/term/retire?framework=${frameworkId}&category=${categoryId}`, requestBody )
   }
 
   updateTerm(frameworkId, categoryId, categoryTermCode, reguestBody) {
@@ -335,44 +339,85 @@ export class FrameworkService {
     return this.http.post(`/${this.proxiesPath}/${categoryItem}/search`, requestBody).pipe(map(res => _.get(res, 'result.result')))
   }
 
-  updateLocalList(item: any, parent: any,selectedTermArray:any) {
+  updateLocalList(item: any, parent: any,selectedTermArray:any, updateType: any) {
     if(item && item.children && item.children.length) {
-      item.children.forEach((itmData: any) => {
-        if(itmData.identifier === parent.identifier) {
-          let differenceData = []
-          if(itmData && itmData.children && itmData.children.length) {
-            differenceData  = _.differenceBy(selectedTermArray,itmData.children, 'identifier');
-          } else {
-            differenceData = selectedTermArray
+      if(updateType === 'delete'){
+        item.children.forEach((itmData: any) => {
+          if(itmData.identifier === parent.identifier) {
+            let differenceData = []
+            // if(itmData && itmData.children && itmData.children.length) {
+            //   differenceData  = _.differenceBy(itmData.children,selectedTermArray, 'identifier');
+            // } else {
+            //   differenceData = selectedTermArray
+            // }
+            // differenceData = this.selectedTermArray
+            const associationList: any = _.differenceWith(itmData.associations, selectedTermArray, (a:any, b: any) => a.identifier === b.identifier);
+            const childrenList: any = _.differenceWith(itmData.children, selectedTermArray, (a:any, b: any) => a.identifier === b.identifier);
+            itmData['associations'] = associationList
+            itmData['children'] = childrenList
           }
-          // differenceData = this.selectedTermArray
-          itmData['associations'] = itmData && itmData.associations ?[...itmData.associations, ...differenceData]:differenceData
-          itmData['children'] = itmData && itmData.children ?[...itmData.children, ...differenceData]:differenceData
-        }
-        if(itmData.children) {
-          this.updateLocalList(itmData, parent,selectedTermArray)
-        }
-      })
+          if(itmData.children) {
+            this.updateLocalList(itmData, parent,selectedTermArray, updateType)
+          }
+        })
+      } else {
+        item.children.forEach((itmData: any) => {
+          if(itmData.identifier === parent.identifier) {
+            let differenceData = []
+            if(itmData && itmData.children && itmData.children.length) {
+              differenceData  = _.differenceBy(selectedTermArray,itmData.children, 'identifier');
+            } else {
+              differenceData = selectedTermArray
+            }
+            // differenceData = this.selectedTermArray
+            itmData['associations'] = itmData && itmData.associations ?[...itmData.associations, ...differenceData]:differenceData
+            itmData['children'] = itmData && itmData.children ?[...itmData.children, ...differenceData]:differenceData
+          }
+          if(itmData.children) {
+            this.updateLocalList(itmData, parent,selectedTermArray, updateType)
+          }
+        })
+      }
     }
   }
 
-  updateFrameworkList(columnCode, parentData, selectedTermArray){
+  updateFrameworkList(columnCode: any, parentData: any, selectedTermArray:any , updateType?:string){
     let listData : any = this.list.get(columnCode)
-          let differenceData = []
-          if(listData && listData.children && listData.children.length) {
-            differenceData  = _.differenceBy(selectedTermArray,listData.children, 'identifier');
-          } else {
-            differenceData = selectedTermArray
-          }
-          listData['associations'] = listData && listData.associations ?[...listData.associations, ...differenceData]:differenceData
-          listData['children'] = listData && listData.children ?[...listData.children, ...differenceData]:differenceData
+    if(updateType === 'delete') {
+      let differenceData = []
+      // if(listData && listData.children && listData.children.length) {
+      //   differenceData  = _.differenceBy(selectedTermArray,listData.children, 'identifier');
+      // } else {
+      //   differenceData = selectedTermArray
+      // }
+      const associationList: any = _.differenceWith(listData.associations, selectedTermArray, (a:any, b: any) => a.identifier === b.identifier);
+      const childrenList: any = _.differenceWith(listData.children, selectedTermArray, (a:any, b: any) => a.identifier === b.identifier);
+      listData['associations'] = associationList
+      listData['children'] = childrenList
 
-          this.selectionList.forEach((selectedData: any)=> {
-            let listData : any = this.list.get(selectedData.category)
-            if(listData && listData.children && listData.children.length) {
-              this.updateLocalList(listData,parentData, selectedTermArray)
-            }
-          }) 
+      this.selectionList.forEach((selectedData: any)=> {
+        let listData : any = this.list.get(selectedData.category)
+        if(listData && listData.children && listData.children.length) {
+          this.updateLocalList(listData,parentData, selectedTermArray, updateType)
+        }
+      })
+    } else {
+      let differenceData = []
+      if(listData && listData.children && listData.children.length) {
+        differenceData  = _.differenceBy(selectedTermArray,listData.children, 'identifier');
+      } else {
+        differenceData = selectedTermArray
+      }
+      listData['associations'] = listData && listData.associations ?[...listData.associations, ...differenceData]:differenceData
+      listData['children'] = listData && listData.children ?[...listData.children, ...differenceData]:differenceData
+
+      this.selectionList.forEach((selectedData: any)=> {
+        let listData : any = this.list.get(selectedData.category)
+        if(listData && listData.children && listData.children.length) {
+          this.updateLocalList(listData,parentData, selectedTermArray, updateType)
+        }
+      }) 
+    }
   }
 
   getFrameworkRead(frameWorkId: any): Observable<any> {
@@ -439,3 +484,4 @@ export class FrameworkService {
   }
 
 }
+
