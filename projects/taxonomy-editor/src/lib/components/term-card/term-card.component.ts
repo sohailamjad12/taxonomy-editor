@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output, SimpleChange } from '@angular/core'
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core'
 import { NSFramework } from '../../models/framework.model'
 import { ApprovalService } from '../../services/approval.service';
 import { FrameworkService } from '../../services/framework.service'
@@ -14,7 +14,7 @@ import { CreateTermFromFrameworkComponent } from './../create-term-from-framewor
   templateUrl: './term-card.component.html',
   styleUrls: ['./term-card.component.scss']
 })
-export class TermCardComponent implements OnInit {
+export class TermCardComponent implements OnInit, OnDestroy {
   // @Input() data!: NSFramework.ITermCard
 
   private _data: NSFramework.ITermCard;
@@ -25,6 +25,7 @@ export class TermCardComponent implements OnInit {
   loaded: any = {}
   isCompetencyArea:any;
   environment: any
+  subscription :any
   @Input()
   set data(value: any) {
     this._data = value;
@@ -52,7 +53,7 @@ export class TermCardComponent implements OnInit {
     // console.log(this._data)
     this.updateApprovalStatus()
     console.log('dataaaa',this.data)
-    this.frameworkService.insertUpdateDeleteNotifier.subscribe((e)=>{
+    this.subscription = this.frameworkService.insertUpdateDeleteNotifier.subscribe((e)=>{
       console.log('termCard',e);
       if(e){
        this.isCompetencyArea = e.action
@@ -70,10 +71,6 @@ export class TermCardComponent implements OnInit {
       this.frameworkService.CurrentCardClk.next(data.category)
       console.log('this.frameworkService.cardClkData',this.frameworkService.cardClkData);
     }
-    
-
-   
-    
     // this.data.selected = true
     console.log('card clikc method')
     if(this.frameworkService.isLastColumn(this.data.category)){
@@ -238,7 +235,7 @@ export class TermCardComponent implements OnInit {
         cardRef: cardRef
       }
       
-      this.frameworkService.updateAfterAddOrEditSubject(responseData)
+      // this.frameworkService.updateAfterAddOrEditSubject(responseData)
       setTimeout(() => {
         window.dispatchEvent(new Event('resize'))
       }, 100)
@@ -322,6 +319,12 @@ export class TermCardComponent implements OnInit {
     if(data && data.columnInfo && data.columnInfo.code){
       const nextCat = this.frameworkService.getNextCategory(data.columnInfo.code)
       return nextCat
+    }
+  }
+
+  ngOnDestroy(): void {
+    if(this.subscription){
+      this.subscription.unsubscribe()
     }
   }
 }

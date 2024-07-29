@@ -138,6 +138,7 @@ export class FrameworkService {
   resetAll() {
     this.categoriesHash.next([])
     this.currentSelection.next(null)
+    this.selectionList.clear()
     this.list.clear()
   }
   isLastColumn(colCode) {
@@ -406,6 +407,35 @@ export class FrameworkService {
       });
     }
     return categoryConfig;
+  }
+
+  updateFullTermDataLocalMap(columnCode: any, parentData: any ) {
+    let listData : any = this.list.get(columnCode)
+    let differenceData = []
+
+    // const sectionListchildrenList: any = _.differenceWith(listData.children, [newTermData], (a:any, b: any) => a.identifier === b.identifier);
+    // listData['children'] = [...sectionListchildrenList, [newTermData]]
+ 
+    this.selectionList.forEach((selectedData: any)=> {
+      let listData : any = this.list.get(selectedData.category)
+      if(listData && listData.children && listData.children.length) {
+        this.updateLocalListTerm(listData,parentData)
+      }
+    }) 
+  }
+  updateLocalListTerm(item: any, parent: any) {
+    if(item && item.children && item.children.length) {
+      item.children.forEach((itmData: any) => {
+        if(itmData.identifier === parent.identifier) {
+          const sectionListchildrenList: any = _.differenceWith(item.children, [parent], (a:any, b: any) => a.identifier === b.identifier);
+          itmData['description'] = parent['description']
+          itmData['additionalProperties'] = parent['additionalProperties']
+        }
+        if(itmData.children) {
+          this.updateLocalListTerm(itmData, parent)
+        }
+      })
+    }
   }
 
 }
