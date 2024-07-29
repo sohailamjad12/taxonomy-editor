@@ -1,33 +1,44 @@
+// .conformation-popup {
+//   height: 300px;
+//   max-height: 80vh;
+
+//   .msgDescription {
+//     font-size: 14px;
+//   }
+
+// }
+
+// .remove {
+//   background-color: red !important;
+//   color: #ffffff !important;
+// }
+
 .dialog-container {
-
-    .success-icon {
-        position: absolute;
-        color: white;
-        top: 9px;
-        left: 7px;
-        font-weight: 900;
-    }
-
-    .fail-icon {
-        position: absolute;
-        color: white;
-        top: 9px;
-        left: 7.4px;
-    }
 
     .warning-icon {
         color: #F3962F;
-        font-size: 40px;
+        font-size: 45px;
+        height: 45px;
+        width: 45px;
     }
 
-    .header {
-      font-size: 20px;
-      font-weight: 600;
-    }
+    // .success-icon {
+    //     color: green;
+    //     font-size: 40px;
+    //     height: 40px;
+    // }
+
+    // .fail-icon {
+    //     color: red;
+    //     font-size: 40px;
+    //     height: 40px;
+    // }
 
     .description {
         font-size: 14px;
     }
+
+
 }
 .footer {
     height: 60px;
@@ -64,6 +75,10 @@
 }
 
 .textBold {
-    font-size: 14px;
     font-weight: 700;
+}
+
+.text-blue {
+    font-size: 16px !important;
+    color: #1B4CA1 !important;
 }
