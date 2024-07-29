@@ -77,6 +77,7 @@ export class CreateTermFromFrameworkComponent implements OnInit {
       // to do: change getting selectedParentTerms to dynamic
       if(this.data && this.data.selectedParentTerms) {
         this.data.selectedParentTerms.forEach((ele: any) => {
+          ele['label'] = this.getLabels(ele.category)
           if(ele.category === "competency") {
             this.selectedCardCompThemeData = ele
             let option = this.selectedCardCompThemeData.additionalProperties.competencyArea
@@ -111,12 +112,25 @@ export class CreateTermFromFrameworkComponent implements OnInit {
       }
     });
     this.kcmList.forEach((a: any) => {
-      if(a.code === this.kcmConfigData.config[0].category){
+      if(a.code === _.get(this.kcmConfigData, 'config[0].category')){
         this.competencyArea = a
       }
     })
     
 
+  }
+
+  getLabels(labelToModify: string): string {
+    switch(labelToModify) {
+      case 'org':
+        return 'Organistaion'
+      case 'designation':
+        return 'Designation'
+      case 'competency':
+        return 'Competency'
+      default: 
+        return labelToModify
+    }
   }
 
   createCompThemeFields():FormGroup {
@@ -135,7 +149,7 @@ export class CreateTermFromFrameworkComponent implements OnInit {
         case 'Sub Theme':
         return `Add Competency ${name}`
         case 'Competency':
-        return `Add Competency ${name}`
+        return `Create Competency Mapping`
       }
   }
 
@@ -165,11 +179,12 @@ export class CreateTermFromFrameworkComponent implements OnInit {
       dialogType: 'warning',
       descriptions: [
         {
-          header: '',
+          header: 'Are you sure you want to alter the competency area?',
+          headerClass: 'flex items-center justify-center text-blue textBold',
           messages: [
             {
               msgClass: '',
-              msg: `Change of Area will result in loss of added data`,
+              msg: `This action will result in the loss of your currently added data`,
             },
           ],
         },
@@ -177,21 +192,21 @@ export class CreateTermFromFrameworkComponent implements OnInit {
       footerClass: 'items-center justify-center',
       buttons: [
         {
-          btnText: 'Change',
-          btnClass: 'btn-full-red',
-          response: true,
+          btnText: 'Cancel',
+          btnClass: 'btn-outline',
+          response: false,
         },
         {
-          btnText: 'Cancel',
-          btnClass: '',
-          response: false,
+          btnText: 'Confirm',
+          btnClass: 'btn-full-success',
+          response: true,
         },
       ],
     }
     const dialogRef = this.dialog.open(ConforamtionPopupComponent, {
       data: dialogData,
       autoFocus: false,
-      width: '500px',
+      width: '600px',
       maxWidth: '80vw',
       maxHeight: '90vh',
       disableClose: true,

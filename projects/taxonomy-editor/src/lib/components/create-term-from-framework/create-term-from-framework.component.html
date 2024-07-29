@@ -12,7 +12,7 @@
             <ng-container *ngFor="let term of data?.selectedParentTerms">
                 <div class="flex-1 flex-col">
                     <label for="name" class="margin-remove-bottom form-label" aria-label="First name label">
-                        {{term.category}}
+                        {{term.label}}
                     </label>
                     <mat-form-field appearance="outline" class="flex-1">
                         <input matInput name="name" id="name" #name placeholder="{{app_strings.name}}"
