@@ -268,7 +268,7 @@ export class CreateTermFromFrameworkComponent implements OnInit {
   }
 
   OnThemeSelection(event: any, _indexValue: any, optionData:any) {
-    if (event.isUserInput) {   
+    if (event.isUserInput || this.data.openMode === 'view') {   
     console.log(event);
     const selectedTheme = event.source.value
     this.kcmList.forEach(ele => {
@@ -466,7 +466,7 @@ export class CreateTermFromFrameworkComponent implements OnInit {
   }
 
 
-  crateTerm(frameworkId: any, colCode: any, requestBody: any){
+  async crateTerm(frameworkId: any, colCode: any, requestBody: any){
     return new Promise(async (resolve)=>{
       this.frameWorkService.createTerm(frameworkId, colCode, requestBody).subscribe((res: any)=>{
         resolve(res)
@@ -611,7 +611,7 @@ export class CreateTermFromFrameworkComponent implements OnInit {
           this.frameWorkService.selectionList.forEach((selectedData: any)=> {
             let listData : any = this.frameWorkService.list.get(selectedData.category)
             if(listData && listData.children && listData.children.length) {
-              this.updateLocalList(listData,parent)
+              this.updateLocalList(listData,parent, this.selectedTermArray)
             }
           }) 
         console.log(this.frameWorkService.list,'-----------this.frameWorkService.list3')
@@ -747,7 +747,7 @@ export class CreateTermFromFrameworkComponent implements OnInit {
 
 
 
-  multiCreateSubTheme(form: any, data: any) {
+  async multiCreateSubTheme(form: any, data: any) {
     this.disableMultiCreate = true
     let formArray = this.competencyForm.get('compThemeFields') as FormArray;
     let selectedFormData = formArray.at(0).get('competencySubTheme').value
@@ -765,8 +765,9 @@ export class CreateTermFromFrameworkComponent implements OnInit {
     console.log(removedExisting,'-------------removedExisting') 
     if(newlyAdded && newlyAdded.length) {
         console.log('themeFields',newlyAdded)
-        newlyAdded.forEach(async (val, i) =>{
-        const term: NSFramework.ICreateTerm = {
+        // newlyAdded.forEach(async (val, i) =>{
+        for(let val of newlyAdded){
+          const term: NSFramework.ICreateTerm = {
           code: this.frameWorkService.getUuid(),
           name: val.name,
           description: val.description,
@@ -779,57 +780,75 @@ export class CreateTermFromFrameworkComponent implements OnInit {
             { identifier: `${this.data.frameworkId}_${this.data.columnInfo.code}` }
           ],
           additionalProperties: {}
-        }
-        const requestBody = {
-          request: {
-            term: term
           }
-        }
+          const requestBody = {
+            request: {
+              term: term
+            }
+          }
 
-        const parentColumnConfigData = this.frameWorkService.getPreviousCategory(this.data.columnInfo.code)
-        let parentCol: any = this.frameWorkService.selectionList.get(parentColumnConfigData.code)
-      
-        console.log(requestBody,'requestBody')
-        await this.frameWorkService.createTerm(this.data.frameworkId, this.data.columnInfo.code, requestBody).toPromise().then(async (res: any) => {
-          requestBody.request.term['identifier'] = res.result.node_id[0]
+          const parentColumnConfigData = this.frameWorkService.getPreviousCategory(this.data.columnInfo.code)
+          let parentCol: any = this.frameWorkService.selectionList.get(parentColumnConfigData.code)
+        
+          console.log(requestBody,'requestBody')
+            
+          let responseData: any = await this.crateTerm(this.data.frameworkId, this.data.columnInfo.code, requestBody)
+          console.log(responseData,'responseData')
+          requestBody.request.term['identifier'] = responseData.result.node_id[0]
           createdSubTheme.push(requestBody.request.term)
-          console.log('createdTerms success',createdSubTheme)
-          
           counterSubTheme++
-          console.log('counter :: ', counterSubTheme, newlyAdded.length)
-            if(counterSubTheme === newlyAdded.length){
-              await this.updateTermAssociationsMultiV2(createdSubTheme, parentCol)
+          if(counterSubTheme === newlyAdded.length){
+            await this.updateTermAssociationsMultiV2(createdSubTheme, parentCol)
+
+            this.frameWorkService.updateFrameworkList(this.data.columnInfo.code, parentCol, createdSubTheme, 'create')
+            if(!(removedExisting && removedExisting.length)) {
               this.dialogClose({ term: this.selectedTermArray, created: true, multi:true, callUpdate: false })
               this.disableMultiCreate = false
-              if(createdSubTheme[0].category === 'subtheme'){         
-                this._snackBar.open(`Competency ${createdSubTheme[0].category} created successfully.`)
-              }
             }
-          })
-        })
+            if(createdSubTheme[0].category === 'subtheme'){         
+              this._snackBar.open(`Competency ${createdSubTheme[0].category} created successfully.`)
+            }
+          }
+        }
     }
   
+    if(removedExisting && removedExisting.length) {
+      let removedTermsCollection = []
+      for(let removedTerm of removedExisting) {
+        removedTermsCollection.push(removedTerm.code)
+      }
+        // console.log(parentCol1, parentCol,'requestBody')
+        let subThemeRequest ={
+          "request": { 
+            "contentIds": removedTermsCollection 
+          }
+        }
+        
+        await this.frameWorkService.retireMultipleTerm(this.data.frameworkId, this.data.columnInfo.code, subThemeRequest).toPromise().then(async (res: any) => {
 
-    // if(removedExisting && removedExisting.length) {
-    //   removedExisting.forEach(async (val, i) =>{
-    //     const parentColumnConfigData = this.frameWorkService.getPreviousCategory(this.data.columnInfo.code)
-    //     let parentCol: any = this.frameWorkService.selectionList.get(parentColumnConfigData.code)
-    //     console.log(this.data.frameworkId, this.data.columnInfo.code, val.code,'requestBody')
-    //     await this.frameWorkService.retireTerm(this.data.frameworkId, this.data.columnInfo.code, val.code).toPromise().then(async (res: any) => {
-    //       // requestBody.request.term['identifier'] = res.result.node_id[0]
-    //       // createdSubTheme.push(requestBody.request.term)
-    //       // console.log('createdTerms success',createdSubTheme)
-    //       // this.this.selectedTerm = 
-    //       counterRetireSubTheme++
-    //       // console.log('counter :: ', counterSubTheme, newlyAdded.length)
-    //       if(counterSubTheme === removedExisting.length){
-    //         this.dialogClose({ term: [], created: true, multi:true, callUpdate: false })
-    //       }
-    //     })
-    //   })
-    // }
+          counterRetireSubTheme++
+          const parentColumnConfigData = this.frameWorkService.getPreviousCategory(this.data.columnInfo.code)
+          let parentCol: any = this.frameWorkService.selectionList.get(parentColumnConfigData.code)
 
-    // this.disableMultiCreate = false
+          // let sectionList = this.frameWorkService.selectionList.get(parentColumnConfigData.code)
+          
+          const sectionListchildrenList: any = _.differenceWith(parentCol.children, removedExisting, (a:any, b: any) => a.identifier === b.identifier);
+          const sectionListAssociationList: any = _.differenceWith(parentCol.associations, removedExisting, (a:any, b: any) => a.identifier === b.identifier);
+         
+          parentCol['children'] = sectionListchildrenList
+          parentCol['associations'] = sectionListAssociationList
+    
+
+          this.frameWorkService.updateFrameworkList(this.data.columnInfo.code, parentCol, removedExisting, 'delete')
+
+          this.dialogClose({ term: [], created: true, multi:true, callUpdate: false })
+          this.frameWorkService.currentSelection.next({ type: parentColumnConfigData.code, data: parentCol, cardRef: parentCol.cardRef });
+          this.disableMultiCreate = false
+
+        })
+    }
+
+    this.disableMultiCreate = false
   }
 
   onDisableTheme(option: any){
@@ -850,24 +869,45 @@ export class CreateTermFromFrameworkComponent implements OnInit {
   }
 
 
-  updateLocalList(item: any, parent: any) {
+  updateLocalList(item: any, parent: any,selectedTermArray: any, updateType?:any) {
     if(item && item.children && item.children.length) {
-      item.children.forEach((itmData: any) => {
-        if(itmData.identifier === parent.identifier) {
-          let differenceData = []
-          if(itmData && itmData.children && itmData.children.length) {
-            differenceData  = _.differenceBy(this.selectedTermArray,itmData.children, 'identifier');
-          } else {
-            differenceData = this.selectedTermArray
+      if(updateType === 'delete'){
+        item.children.forEach((itmData: any) => {
+          if(itmData.identifier === parent.identifier) {
+            let differenceData = []
+            // if(itmData && itmData.children && itmData.children.length) {
+            //   differenceData  = _.differenceBy(itmData.children,selectedTermArray, 'identifier');
+            // } else {
+            //   differenceData = selectedTermArray
+            // }
+            // differenceData = this.selectedTermArray
+            const associationList: any = _.differenceWith(itmData.associations,selectedTermArray, (a:any, b: any) => a.identifier === b.identifier);
+            const childrenList: any = _.differenceWith(itmData.children, selectedTermArray, (a:any, b: any) => a.identifier === b.identifier);
+            itmData['associations'] = associationList
+            itmData['children'] = childrenList
           }
-          // differenceData = this.selectedTermArray
-          itmData['associations'] = itmData && itmData.associations ?[...itmData.associations, ...differenceData]:differenceData
-          itmData['children'] = itmData && itmData.children ?[...itmData.children, ...differenceData]:differenceData
-        }
-        if(itmData.children) {
-          this.updateLocalList(itmData, parent)
-        }
-      })
+          if(itmData.children) {
+            this.updateLocalList(itmData, parent,selectedTermArray,updateType)
+          }
+        })
+      } else {
+        item.children.forEach((itmData: any) => {
+          if(itmData.identifier === parent.identifier) {
+            let differenceData = []
+            if(itmData && itmData.children && itmData.children.length) {
+              differenceData  = _.differenceBy(selectedTermArray,itmData.children, 'identifier');
+            } else {
+              differenceData = selectedTermArray
+            }
+            // differenceData = this.selectedTermArray
+            itmData['associations'] = itmData && itmData.associations ?[...itmData.associations, ...differenceData]:differenceData
+            itmData['children'] = itmData && itmData.children ?[...itmData.children, ...differenceData]:differenceData
+          }
+          if(itmData.children) {
+            this.updateLocalList(itmData, parent, selectedTermArray)
+          }
+        })
+      }
     }
   }
   // getter methods
