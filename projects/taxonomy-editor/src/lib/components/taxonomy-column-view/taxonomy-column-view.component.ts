@@ -4,6 +4,7 @@ import { Subscription } from 'rxjs';
 import { ConnectorService } from '../../services/connector.service';
 import { ApprovalService } from '../../services/approval.service';
 import { CardChecked, CardSelection, CardsCount, Card } from '../../models/variable-type.model';
+import * as _ from 'lodash'
 declare var LeaderLine: any;
 @Component({
   selector: 'lib-taxonomy-column-view',
@@ -22,6 +23,7 @@ export class TaxonomyColumnViewComponent implements OnInit, OnDestroy, OnChanges
   newTermSubscription: Subscription = null;
   approvalTerm: any;
   termshafall: Array<Card> = [];
+  searchValue: string = ''
   constructor(
     private frameworkService: FrameworkService,
     private connectorService: ConnectorService,
@@ -241,7 +243,13 @@ export class TaxonomyColumnViewComponent implements OnInit, OnDestroy, OnChanges
     //   })
     //   return data
     // } else {
-    return this.columnData
+    const filteredColumnData = this.columnData.filter((child: any) => {
+      if(child.name.toLowerCase().includes(this.searchValue) || 
+      _.get(child, 'refId').toLowerCase().includes(this.searchValue)) {
+        return child
+      }
+    })
+    return filteredColumnData
     // }
   }
 
