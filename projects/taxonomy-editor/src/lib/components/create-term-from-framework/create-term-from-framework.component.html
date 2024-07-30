@@ -10,15 +10,17 @@
         <ng-container [ngTemplateOutlet]="modalTitle"></ng-container>
         <div class="flex gap-4">
             <ng-container *ngFor="let term of data?.selectedParentTerms">
-                <div class="flex-1 flex-col">
-                    <label for="name" class="margin-remove-bottom form-label" aria-label="First name label">
-                        {{term.category}}
-                    </label>
-                    <mat-form-field appearance="outline" class="flex-1">
-                        <input matInput name="name" id="name" #name placeholder="{{app_strings.name}}"
-                            [value]="term.name" disabled>
-                    </mat-form-field>
-                </div>
+                <ng-container *ngIf="term.category !== 'competency'">
+                    <div class="flex-1 flex-col">
+                        <label for="name" class="margin-remove-bottom form-label" aria-label="First name label">
+                            {{frameWorkService.getConfig(term.category).labelName}} Name
+                        </label>
+                        <mat-form-field appearance="outline" class="flex-1">
+                            <input matInput name="name" id="name" #name placeholder="{{app_strings.name}}"
+                                [value]="term.name" disabled>
+                        </mat-form-field>
+                    </div>
+                </ng-container>
             </ng-container>
         </div>
         <div class="row-divider"></div>
@@ -65,7 +67,7 @@
                                             <div class="flex-1 flex-col">
                                                 <label for="name" class="margin-remove-bottom form-label required"
                                                     aria-label="First name label">
-                                                    Select Competency Theme
+                                                    {{data.openMode !== 'view'? 'Select Competency Theme': 'Competency Theme Name'}}
                                                 </label>
                                                 <mat-form-field appearance="outline" class="flex-1">
                                                     <mat-select [disabled]="data?.columnInfo?.code === 'subtheme' || data.openMode ==='view'" placeholder="Choose the Competency Theme" formControlName="competencyTheme">
@@ -73,7 +75,7 @@
                                                          (onSelectionChange)="OnThemeSelection($event, i, option)"  >{{option.name}}
                                                         
                                                        <ng-container *ngIf="option.refId">
-                                                        <span class="ref-id">{{option.refId}}</span>
+                                                        <span class="ml-2 ref-id">({{option.refId}})</span>
                                                        </ng-container>
                                                         </mat-option>
                                                     </mat-select>
@@ -86,7 +88,9 @@
                                             <label for="fname" class="margin-remove-bottom form-label required"
                                                 i18n="First Name label|Label which explains the user to enter first name"
                                                 i18n-aria-label aria-label="First name label">
-                                                Select Competency Sub-Theme
+
+                                                {{data.openMode !== 'view'? 'Select Competency Sub-Theme': 'Competency Sub-Theme Name'}}
+                                                
                                             </label>
                                             <!-- <mat-form-field appearance="outline" class="flex-1">
                                                 <mat-select placeholder="Choose the Competency Theme" formControlName="competencySubTheme">
@@ -124,7 +128,7 @@
                                                     <mat-option 
                                                        [value]="option">{{option.name}}
                                                        <ng-container *ngIf="option.refId">
-                                                        <span class="ref-id">{{option.refId}}</span>
+                                                        <span class="ml-2 ref-id">({{option.refId}})</span>
                                                        </ng-container>
                                                     </mat-option>
                                                   </ng-container>
@@ -154,10 +158,19 @@
                                     </button>
                                 </ng-container>
                                 <ng-container *ngIf="data?.columnInfo?.code === 'subtheme'">
-                                    <button mat-raised-button color="primary" type="button" cdkFocusInitial
-                                    [disabled]="competencyForm.invalid || disableMultiCreate" *ngIf="!disableCreate" (click)="multiCreateSubTheme(competencyForm, data)">
-                                    {{app_strings.create}} {{data?.columnInfo?.name}}
-                                    </button>
+                                    <!-- <ng-container *ngIf="competencyForm?.get('compThemeFields')['controls'][0]['controls']?.competencySubTheme?.value?.length;else updateBtn"> -->
+                                        <button mat-raised-button color="primary" type="button" cdkFocusInitial
+                                        [disabled]="competencyForm.invalid || disableMultiCreate" *ngIf="!disableCreate" (click)="multiCreateSubTheme(competencyForm, data)">
+                                        {{app_strings.update}}
+                                        </button>
+                                    <!-- </ng-container> -->
+                                    
+                                    <!-- <ng-template #updateBtn>
+                                        <button mat-raised-button color="primary" type="button" cdkFocusInitial
+                                        [disabled]="competencyForm.invalid || disableMultiCreate" *ngIf="!disableCreate" (click)="multiCreateSubTheme(competencyForm, data)">
+                                        {{app_strings.delete}}
+                                        </button>
+                                    </ng-template> -->
                                 </ng-container>
                             </ng-container>
                             <ng-container *ngIf="data?.mode === 'edit' && data.openMode !=='view'">
@@ -181,7 +194,7 @@
         </ng-container> -->
         <!-- {{data |json}} -->
         <ng-container *ngIf="data?.mode === 'create' || data?.mode === 'multi-create'">
-            <div class="dialog-title" mat-dialog-title>{{getCreateName(data.columnInfo.name)}}</div>
+            <div class="dialog-title" mat-dialog-title>{{getCreateName(data)}}</div>
         </ng-container>
         <!-- <ng-container *ngIf="data?.mode === 'view'">
             <div class="dialog-title" mat-dialog-title>View {{data.columnInfo.name}}</div>

@@ -98,5 +98,11 @@
             <mat-icon>add</mat-icon>
             <span>Add</span>
         </button>
+        <button *ngIf="data.columnInfo.config.enableDelete" (click)="delete(data)"
+            mat-menu-item name="channel-analytics-button" class="ws-mat-primary-text" i18n-aria-label
+            aria-label="Analytics">
+            <mat-icon>delete</mat-icon>
+            <span>Delete</span>
+        </button>
     </ng-template>
 </mat-menu>

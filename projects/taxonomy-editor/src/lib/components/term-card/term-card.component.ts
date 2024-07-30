@@ -8,6 +8,7 @@ import { CardSelection, CardChecked, Card } from '../../models/variable-type.mod
 import { MatDialog } from '@angular/material';
 import { CreateTermComponent } from '../create-term/create-term.component';
 import { CreateTermFromFrameworkComponent } from './../create-term-from-framework/create-term-from-framework.component';
+import { ConforamtionPopupComponent } from '../conforamtion-popup/conforamtion-popup.component';
 
 @Component({
   selector: 'lib-term-card',
@@ -194,6 +195,7 @@ export class TermCardComponent implements OnInit, OnDestroy {
         dialog = this.dialog.open(CreateTermFromFrameworkComponent, {
           data: { 
             mode:'multi-create',
+            openMode: 'edit',
             cardColInfo: this.data.columnInfo,
             columnInfo: colInfo && colInfo.length ? colInfo[0] : [],
             nextColInfo: nextColInfo && nextColInfo.length ? nextColInfo[0] : [],
@@ -259,6 +261,7 @@ export class TermCardComponent implements OnInit, OnDestroy {
         dialog = this.dialog.open(CreateTermFromFrameworkComponent, {
           data: { 
             mode:'multi-create',
+            openMode: 'add',
             cardColInfo: this.data.columnInfo,
             columnInfo: colInfo && colInfo.length ? colInfo[0] : [],
             nextColInfo: nextColInfo && nextColInfo.length ? nextColInfo[0] : [],
@@ -330,4 +333,50 @@ export class TermCardComponent implements OnInit, OnDestroy {
       this.subscription.unsubscribe()
     }
   }
+  delete(data: any) {
+    const dialogData = {
+      dialogType: 'warning',
+      dialogAction: 'retire',
+      descriptions: [
+        {
+          header: '',
+          messages: [
+            {
+              msgClass: '',
+              msg: `On removing your competency ${data.category ==="subtheme"? 'sub-theme': 'theme'} will be delinked.`,
+            },
+          ],
+        },
+      ],
+      footerClass: 'items-center justify-center',
+      buttons: [
+        {
+          btnText: 'Yes',
+          btnClass: 'btn-full-red',
+          response: true,
+        },
+        {
+          btnText: 'No',
+          btnClass: '',
+          response: false,
+        },
+      ],
+      cardInfo: data
+    }
+    let dialog = this.dialog.open(ConforamtionPopupComponent, {
+          data: dialogData,
+          autoFocus: false,
+          width: '500px',
+          maxWidth: '80vw',
+          maxHeight: '90vh',
+          disableClose: true,
+          panelClass: 'custom-dialog-container'
+        })
+        dialog.afterClosed().subscribe(_res => {
+         
+        })
+      
+    
+    }
+  
 }

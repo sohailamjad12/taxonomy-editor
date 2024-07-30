@@ -33,5 +33,6 @@ export const labels = {
     name: "Select Name",
     description: "Enter Description",
     addCompetency:"Add Competency",
-    add_btn:"Add"
+    add_btn:"Add",
+    delete: "Delete"
 }

@@ -53,7 +53,7 @@ export class CreateTermFromFrameworkComponent implements OnInit {
     public dialogRef: MatDialogRef<CreateTermFromFrameworkComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
     private dialog: MatDialog,
-    private frameWorkService: FrameworkService,
+    public frameWorkService: FrameworkService,
     private fb: FormBuilder,
     private _snackBar: MatSnackBar,
   ) { }
@@ -127,15 +127,23 @@ export class CreateTermFromFrameworkComponent implements OnInit {
   }
 
 
-  getCreateName(name: string): string {
-      console.log('createName',name);
-      switch(name){
-        case 'Theme':
-        return `Add Competency ${name}`;
+  getCreateName(data: any) {
+      let popUpCategory = data.cardColInfo.name
+      switch(popUpCategory){
+        case 'Designation':
+        return `Add Competency Theme`;
         case 'Sub Theme':
-        return `Add Competency ${name}`
+          if(data.openMode === 'view') {
+            return `View Competency ${popUpCategory}`
+          }
+        return `Add Competency ${popUpCategory}`
         case 'Competency':
-        return `Add Competency ${name}`
+          if(data.openMode === 'edit') {
+            return `Edit Competency Theme`
+          } else if(data.openMode === 'view') {
+            return `View Competency Theme`
+          }
+          return `Add Competency Theme`
       }
   }
 
@@ -306,6 +314,13 @@ export class CreateTermFromFrameworkComponent implements OnInit {
         }
       }
     }
+    
+  }
+
+  OnSubThemeSelection(event: any, indexValue: number, option: any){
+    let formArray = this.competencyForm.get('compThemeFields') as FormArray;
+    const compThemeControl = formArray.at(indexValue).get('competencySubTheme') as FormControl | null
+    
   }
 
   // add form
