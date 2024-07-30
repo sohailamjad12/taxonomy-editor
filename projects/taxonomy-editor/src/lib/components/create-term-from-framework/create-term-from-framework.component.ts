@@ -111,13 +111,14 @@ export class CreateTermFromFrameworkComponent implements OnInit {
       }
     });
     this.kcmList.forEach((a: any) => {
-      if(a.code === this.kcmConfigData.config[0].category){
+      if(a.code === _.get(this.kcmConfigData, 'config[0].category')){
         this.competencyArea = a
       }
     })
     
 
   }
+
 
   createCompThemeFields():FormGroup {
     return this.fb.group({
@@ -131,7 +132,7 @@ export class CreateTermFromFrameworkComponent implements OnInit {
       let popUpCategory = data.cardColInfo.name
       switch(popUpCategory){
         case 'Designation':
-        return `Add Competency Theme`;
+        return `Create Competency Mapping`;
         case 'Sub Theme':
           if(data.openMode === 'view') {
             return `View Competency ${popUpCategory}`
@@ -143,7 +144,7 @@ export class CreateTermFromFrameworkComponent implements OnInit {
           } else if(data.openMode === 'view') {
             return `View Competency Theme`
           }
-          return `Add Competency Theme`
+          return `Create Competency Mapping`
       }
   }
 
@@ -173,11 +174,12 @@ export class CreateTermFromFrameworkComponent implements OnInit {
       dialogType: 'warning',
       descriptions: [
         {
-          header: '',
+          header: 'Are you sure you want to alter the competency area?',
+          headerClass: 'flex items-center justify-center text-blue textBold',
           messages: [
             {
               msgClass: '',
-              msg: `Change of Area will result in loss of added data`,
+              msg: `This action will result in the loss of your currently added data`,
             },
           ],
         },
@@ -185,21 +187,21 @@ export class CreateTermFromFrameworkComponent implements OnInit {
       footerClass: 'items-center justify-center',
       buttons: [
         {
-          btnText: 'Change',
-          btnClass: 'btn-full-red',
-          response: true,
+          btnText: 'Cancel',
+          btnClass: 'btn-outline',
+          response: false,
         },
         {
-          btnText: 'Cancel',
-          btnClass: '',
-          response: false,
+          btnText: 'Confirm',
+          btnClass: 'btn-full-success',
+          response: true,
         },
       ],
     }
     const dialogRef = this.dialog.open(ConforamtionPopupComponent, {
       data: dialogData,
       autoFocus: false,
-      width: '500px',
+      width: '600px',
       maxWidth: '80vw',
       maxHeight: '90vh',
       disableClose: true,
