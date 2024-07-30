@@ -77,6 +77,25 @@
 .textBold {
     font-weight: 700;
 }
+.loader-bg {
+    background: rgb(255 255 255 / 81%);
+    left: 0;
+    right: 0;
+    transform: translate(-50% -50%);
+    bottom: 0;
+    top: 0;
+    pointer-events: unset;
+    z-index: 999999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+::ng-deep .mat-chip.mat-standard-chip.mat-chip-disabled {
+  opacity: .8 !important;
+  cursor: none;
+  filter: brightness(90%);
+}
 
 .text-blue {
     font-size: 16px !important;

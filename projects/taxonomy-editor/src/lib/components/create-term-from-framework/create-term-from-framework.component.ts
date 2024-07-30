@@ -53,7 +53,7 @@ export class CreateTermFromFrameworkComponent implements OnInit {
     public dialogRef: MatDialogRef<CreateTermFromFrameworkComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
     private dialog: MatDialog,
-    private frameWorkService: FrameworkService,
+    public frameWorkService: FrameworkService,
     private fb: FormBuilder,
     private _snackBar: MatSnackBar,
   ) { }
@@ -77,7 +77,6 @@ export class CreateTermFromFrameworkComponent implements OnInit {
       // to do: change getting selectedParentTerms to dynamic
       if(this.data && this.data.selectedParentTerms) {
         this.data.selectedParentTerms.forEach((ele: any) => {
-          ele['label'] = this.getLabels(ele.category)
           if(ele.category === "competency") {
             this.selectedCardCompThemeData = ele
             let option = this.selectedCardCompThemeData.additionalProperties.competencyArea
@@ -120,18 +119,6 @@ export class CreateTermFromFrameworkComponent implements OnInit {
 
   }
 
-  getLabels(labelToModify: string): string {
-    switch(labelToModify) {
-      case 'org':
-        return 'Organistaion'
-      case 'designation':
-        return 'Designation'
-      case 'competency':
-        return 'Competency'
-      default: 
-        return labelToModify
-    }
-  }
 
   createCompThemeFields():FormGroup {
     return this.fb.group({
@@ -141,15 +128,23 @@ export class CreateTermFromFrameworkComponent implements OnInit {
   }
 
 
-  getCreateName(name: string): string {
-      console.log('createName',name);
-      switch(name){
-        case 'Theme':
-        return `Add Competency ${name}`;
+  getCreateName(data: any) {
+      let popUpCategory = data.cardColInfo.name
+      switch(popUpCategory){
+        case 'Designation':
+        return `Create Competency Mapping`;
         case 'Sub Theme':
-        return `Add Competency ${name}`
+          if(data.openMode === 'view') {
+            return `View Competency ${popUpCategory}`
+          }
+        return `Add Competency ${popUpCategory}`
         case 'Competency':
-        return `Create Competency Mapping`
+          if(data.openMode === 'edit') {
+            return `Edit Competency Theme`
+          } else if(data.openMode === 'view') {
+            return `View Competency Theme`
+          }
+          return `Create Competency Mapping`
       }
   }
 
@@ -321,6 +316,13 @@ export class CreateTermFromFrameworkComponent implements OnInit {
         }
       }
     }
+    
+  }
+
+  OnSubThemeSelection(event: any, indexValue: number, option: any){
+    let formArray = this.competencyForm.get('compThemeFields') as FormArray;
+    const compThemeControl = formArray.at(indexValue).get('competencySubTheme') as FormControl | null
+    
   }
 
   // add form
