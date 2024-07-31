@@ -13,7 +13,7 @@
                 <ng-container *ngIf="term.category !== 'competency'">
                     <div class="flex-1 flex-col">
                         <label for="name" class="margin-remove-bottom form-label" aria-label="First name label">
-                            {{frameWorkService.getConfig(term.category).labelName}} Name
+                            {{frameWorkService.getConfig(term.category).labelName}}
                         </label>
                         <mat-form-field appearance="outline" class="flex-1">
                             <input matInput name="name" id="name" #name placeholder="{{app_strings.name}}"

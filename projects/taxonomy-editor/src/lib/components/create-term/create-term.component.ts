@@ -52,6 +52,12 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
   private debounceDelay: number = 500;
   values= ''
   toolTipText = `You can customize this display name for learners to see, as it's what they will view.`
+  previousCategoryCode:string = '';
+  previousTermCode:string = '';
+  previousCatCode:string = '';
+  previousTermCatCode:string=''
+
+
   constructor(
     public dialogRef: MatDialogRef<CreateTermComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
@@ -65,6 +71,7 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit() {
+    console.log('this.data.columnInfo.config',this.data.columnInfo.config);
     this.termLists = this.data.columnInfo.children
     this.compLabeltext = this.data.columnInfo.config.labelName
     
@@ -218,8 +225,12 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
   
   }
 
-  getCategoryName(categoryName:any){
-
+  getCategoryName(categoryName:any, term:any){
+    console.log('Categoryand term',term);
+    console.log('this.this.data', this.data);
+    this.previousCategoryCode = categoryName;
+    this.previousTermCode = term.code
+    
     switch(categoryName){
       case 'competencyarea':
       return 'Competency Area';
@@ -373,6 +384,34 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
 
       }
     })
+   
+    
+  }
+
+  onDisableTheme(option: any){
+    const parentColumnConfigData = this.frameWorkService.getPreviousCategory(this.data.columnInfo.code)
+    let parentCol: any = this.frameWorkService.selectionList.get(parentColumnConfigData.code)
+    let result = -1
+    if(parentCol && parentCol.children && parentCol.children.length){
+      result = parentCol.children.findIndex((ele: any) => {
+        if( (ele.refType === 'theme') ) {
+        return  ele.name.toLowerCase() === option.title.toLowerCase()
+        }
+      })
+       if(result < 0){
+        let formArray = this.createThemeFormMulti.get('themeFields') as FormArray;
+        result = formArray.value.findIndex((formEle: any) => {
+          if(formEle.name && formEle.name.id){
+            return  formEle.name.id === option.id
+          }
+        });
+       }
+   
+      return result >= 0 ? true: false
+    }
+    //
+    // console.log(this.seletedCompetencyArea)
+    return result >= 0 ? true: false
   }
 
   multiCreate(form, data) {
@@ -467,6 +506,7 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
         if(createdTermsCounter === createdTerms.length) {
           this.frameWorkService.updateFrameworkList(this.data.columnInfo.code, parent, createdTerms )
           this.dialogClose({ term: [this.selectedTerm], created: true, multi:true })
+          this.disableMultiCreate =false;
           if(createdTerms[0].category === 'theme'){
             this._snackBar.open(`Competency ${createdTerms[0].category} created successfully.`)
           }
@@ -758,6 +798,7 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
 
 
   updateTermDataAssociations(updateData) {
+    this.disableMultiCreate = true
     let selectionData = this.frameWorkService.selectionList.get(this.data.columnInfo.code)
     if(!selectionData ) {
       selectionData = this.data.childrenData
@@ -791,10 +832,13 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
         
         // const selectionData = this.frameWorkService.selectionList.get(this.data.columnInfo.code)
         selectionData['description'] = reguestBody.request.term.description
+        selectionData['additionalProperties'] = reguestBody.request.term.additionalProperties
         selectionData['associations'] = themAssociations
+        
 
         this._snackBar.open(`Competency ${value.category} updated successfully`)
         this.dialogClose({ term: { ...value }, created: true })
+        this.disableMultiCreate = false;
         this.frameWorkService.updateFullTermDataLocalMap(this.data.columnInfo.code, selectionData)
     }, (err: any) => {
       console.error(`Edit ${this.data.columnInfo.name} failed, please try again later`)
