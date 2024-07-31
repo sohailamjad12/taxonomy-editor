@@ -215,7 +215,7 @@
                                         <mat-select placeholder="{{app_strings?.name}}" formControlName="name" id="name" #name (selectionChange)="change($event,createThemeFormMulti, i )">
                                             <input #search autocomplete="off" placeholder="Search" class="assigneeSearch"
                                               (keydown.space)="$event.stopPropagation()"   (keyup)="onKey($event)" matInput>
-                                            <mat-option *ngFor="let option of filteredMasterList"    (blur)="updateDname(option?.title, createThemeFormMulti, i)" [disabled]="onDisableTheme(option)"  [value]="option">{{option.title}} {{onDisableTheme(option)}}</mat-option>
+                                            <mat-option *ngFor="let option of filteredMasterList"    (blur)="updateDname(option?.title, createThemeFormMulti, i)" [disabled]="onDisableTheme(option)"  [value]="option">{{option.title}} </mat-option>
                                             <mat-option *ngIf="filteredMasterList.length === 0" disabled>
                                                 No results found!
                                               </mat-option>
