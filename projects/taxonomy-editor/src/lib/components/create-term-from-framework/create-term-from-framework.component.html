@@ -81,7 +81,6 @@
                                                             <ng-container >
                                                                 <mat-option *ngFor="let option of filteredallCompetencyTheme"  [value]="option" [disabled]="onDisableTheme(option) || data.openMode ==='view'" 
                                                                 (onSelectionChange)="OnThemeSelection($event, i, option)"  >{{option.name}}
-                                                                {{onDisableTheme(option)}}
                                                                 <ng-container *ngIf="option.refId">
                                                                 <span class="ml-2 ref-id">({{option.refId}})</span>
                                                                 </ng-container>
@@ -172,7 +171,7 @@
                                     <!-- <ng-container *ngIf="competencyForm?.get('compThemeFields')['controls'][0]['controls']?.competencySubTheme?.value?.length;else updateBtn"> -->
                                         <button mat-raised-button color="primary" type="button" cdkFocusInitial
                                         [disabled]="competencyForm.invalid || disableMultiCreate" *ngIf="!disableCreate" (click)="multiCreateSubTheme(competencyForm, data)">
-                                        {{app_strings.update}} jmdjgjmfg
+                                        {{app_strings.update}}
                                         </button>
                                     <!-- </ng-container> -->
                                     
