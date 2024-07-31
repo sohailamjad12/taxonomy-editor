@@ -1,11 +1,15 @@
-<div class="w-full">
-    <div class="search mb-2">
-        <div class=rsearch>
-          <mat-icon class="color-60 search-icon">search</mat-icon>
-          <input [(ngModel)]="searchValue" class="sinput color-60" placeholder="Search">
+<ng-container *ngIf="column?.config?.showSearch">
+    <div class="w-full">
+        <div class="search mb-2">
+            <div class=rsearch>
+                <!-- <ng-container *ngIf="column?.config?.showSearch"> -->
+                    <mat-icon class="color-60 search-icon">search</mat-icon>
+                    <input [(ngModel)]="searchValue" class="sinput color-60" placeholder="Search">
+                <!-- </ng-container> -->
+            </div>
         </div>
-      </div>
-</div>
+    </div>
+</ng-container>
 <ng-container *ngIf="columnItems && columnItems.length > 0; else noDataTemplate;">
     <ng-container *ngFor="let child of columnItems; let j = index">
         <div #cardEle id="{{column.code}}Card{{j+1}}" >
