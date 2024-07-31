@@ -180,36 +180,35 @@ export class TermCardComponent implements OnInit, OnDestroy {
   edit(data: any, childrenData: any, index: any, cardRef: any){
     let dialog: any
     const selectedTerms = this.frameworkService.getPreviousSelectedTerms(data.columnInfo.code)
-    
     const nexColInfo = this.getNextCat(data)
     const nextCat = nexColInfo || data.columnInfo
    
     if(nextCat && this.environment && this.environment.frameworkType === 'MDO_DESIGNATION') {
-      const nextNextCat = this.frameworkService.getNextCategory(nextCat.code)
-      const selectedTerms = this.frameworkService.getPreviousSelectedTerms(nextCat.code)
-      const colInfo = Array.from(this.frameworkService.list.values()).filter(l => l.code === nextCat.code )
-      let nextColInfo = []
-      if(nextNextCat && nextNextCat.code) {
-        nextColInfo = Array.from(this.frameworkService.list.values()).filter(l => l.code === nextNextCat.code )
-      }
-        dialog = this.dialog.open(CreateTermFromFrameworkComponent, {
-          data: { 
-            mode:'multi-create',
-            openMode: 'edit',
-            cardColInfo: this.data.columnInfo,
-            columnInfo: colInfo && colInfo.length ? colInfo[0] : [],
-            nextColInfo: nextColInfo && nextColInfo.length ? nextColInfo[0] : [],
-            frameworkId: this.frameworkService.getFrameworkId(),
-            selectedparents: this.heightLighted,
-            colIndex: nextCat.index,
-            childrenData: data.children,
-            selectedParentTerms: selectedTerms
-          },
-          width: '800px',
-          panelClass: 'custom-dialog-container'
-        })
+      // const nextNextCat = this.frameworkService.getNextCategory(nextCat.code)
+      // const selectedTerms = this.frameworkService.getPreviousSelectedTerms(nextCat.code)
+      // const colInfo = Array.from(this.frameworkService.list.values()).filter(l => l.code === nextCat.code )
+      // let nextColInfo = []
+      // if(nextNextCat && nextNextCat.code) {
+      //   nextColInfo = Array.from(this.frameworkService.list.values()).filter(l => l.code === nextNextCat.code )
+      // }
+      //   dialog = this.dialog.open(CreateTermFromFrameworkComponent, {
+      //     data: { 
+      //       mode:'multi-create',
+      //       openMode: 'edit',
+      //       cardColInfo: this.data.columnInfo,
+      //       columnInfo: colInfo && colInfo.length ? colInfo[0] : [],
+      //       nextColInfo: nextColInfo && nextColInfo.length ? nextColInfo[0] : [],
+      //       frameworkId: this.frameworkService.getFrameworkId(),
+      //       selectedparents: this.heightLighted,
+      //       colIndex: nextCat.index,
+      //       childrenData: data.children,
+      //       selectedParentTerms: selectedTerms
+      //     },
+      //     width: '800px',
+      //     panelClass: 'custom-dialog-container'
+      //   })
       
-    
+      this.create(data, 'edit')
     }
     else {
       dialog = this.dialog.open(CreateTermComponent, {
@@ -238,14 +237,13 @@ export class TermCardComponent implements OnInit, OnDestroy {
         type: 'update',
         cardRef: cardRef
       }
-      
       // this.frameworkService.updateAfterAddOrEditSubject(responseData)
       setTimeout(() => {
         window.dispatchEvent(new Event('resize'))
       }, 100)
     })
   }
-  create(data: any){
+  create(data: any, mode?:string){
     const nexColInfo = this.getNextCat(data)
     const nextCat = nexColInfo || data.columnInfo
     const nextNextCat = this.frameworkService.getNextCategory(nextCat.code)
@@ -261,7 +259,7 @@ export class TermCardComponent implements OnInit, OnDestroy {
         dialog = this.dialog.open(CreateTermFromFrameworkComponent, {
           data: { 
             mode:'multi-create',
-            openMode: 'add',
+            openMode: mode || 'add',
             cardColInfo: this.data.columnInfo,
             columnInfo: colInfo && colInfo.length ? colInfo[0] : [],
             nextColInfo: nextColInfo && nextColInfo.length ? nextColInfo[0] : [],
@@ -293,7 +291,6 @@ export class TermCardComponent implements OnInit, OnDestroy {
         if(!res) {
           return;
         }
-        console.log('data',data);
         
         const responseData = {
           res,
@@ -339,11 +336,12 @@ export class TermCardComponent implements OnInit, OnDestroy {
       dialogAction: 'retire',
       descriptions: [
         {
-          header: '',
+          header: `competency ${data.category ==="subtheme"? 'sub-theme': 'theme'} will be deleted`,
+          headerClass: 'flex items-center justify-center text-blue textBold',
           messages: [
             {
               msgClass: '',
-              msg: `On removing your competency ${data.category ==="subtheme"? 'sub-theme': 'theme'} will be delinked.`,
+              msg: `Do you want to proced?`,
             },
           ],
         },
@@ -351,14 +349,14 @@ export class TermCardComponent implements OnInit, OnDestroy {
       footerClass: 'items-center justify-center',
       buttons: [
         {
-          btnText: 'Yes',
-          btnClass: 'btn-full-red',
-          response: true,
+          btnText: 'No',
+          btnClass: 'btn-outline',
+          response: false,
         },
         {
-          btnText: 'No',
-          btnClass: '',
-          response: false,
+          btnText: 'Yes',
+          btnClass: 'btn-full-success',
+          response: true,
         },
       ],
       cardInfo: data

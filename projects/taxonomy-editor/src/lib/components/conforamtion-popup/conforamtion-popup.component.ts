@@ -1,5 +1,5 @@
 import { Component, Inject, OnInit } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material';
+import { MAT_DIALOG_DATA, MatDialogRef, MatSnackBar } from '@angular/material';
 import { FrameworkService } from '../../services/framework.service';
 /* tslint:disable */
 import _ from 'lodash'
@@ -17,7 +17,8 @@ export class ConforamtionPopupComponent implements OnInit {
   constructor(
     private dialogRef: MatDialogRef<ConforamtionPopupComponent>,
     @Inject(MAT_DIALOG_DATA) private data: any,
-    public frameworkService: FrameworkService
+    public frameworkService: FrameworkService,
+    private _snackBar: MatSnackBar,
   ) { 
     this.dialogDetails = this.data
   }
@@ -51,7 +52,11 @@ export class ConforamtionPopupComponent implements OnInit {
           this.frameworkService.updateFrameworkList(cardData.category, parentCol, removedExisting, 'delete')
           this.frameworkService.currentSelection.next({ type: parentColumnConfigData.code, data: parentCol, cardRef: parentCol.cardRef })
           this.dialogClose(event)
-        })
+          this._snackBar.open(`Competency ${cardData.category} deleted successfully.`)
+        },((err: any)=> {
+          this.showLoader = false
+          this._snackBar.open(`Competency ${cardData.category} delete failed.`)
+        }))
       } else {
         this.dialogRef.close(event)
       }

@@ -7,7 +7,13 @@
         </div>
       </ng-container>
       <div class="dialogNew">
-        <ng-container [ngTemplateOutlet]="modalTitle"></ng-container>
+        <div class="flex items-center justify-between">
+            <ng-container [ngTemplateOutlet]="modalTitle"></ng-container>
+            <button type="button" mat-icon-button i18n-aria-label aria-label="action items"
+            [matMenuTriggerFor]="cardMenu" [matMenuTriggerData]="{'data':data}" class="action-btn">
+            <mat-icon>more_vert</mat-icon>
+            </button>
+        </div>
         <div class="flex gap-4">
             <ng-container *ngFor="let term of data?.selectedParentTerms">
                 <ng-container *ngIf="term.category !== 'competency'">
@@ -71,13 +77,17 @@
                                                 </label>
                                                 <mat-form-field appearance="outline" class="flex-1">
                                                     <mat-select [disabled]="data?.columnInfo?.code === 'subtheme' || data.openMode ==='view'" placeholder="Choose the Competency Theme" formControlName="competencyTheme">
-                                                        <mat-option *ngFor="let option of filteredallCompetencyTheme" [value]="option" [disabled]="onDisableTheme(option) || data.openMode ==='view'" 
-                                                         (onSelectionChange)="OnThemeSelection($event, i, option)"  >{{option.name}}
-                                                        
-                                                       <ng-container *ngIf="option.refId">
-                                                        <span class="ml-2 ref-id">({{option.refId}})</span>
-                                                       </ng-container>
-                                                        </mat-option>
+                                                        <ng-container >
+                                                            <ng-container >
+                                                                <mat-option *ngFor="let option of filteredallCompetencyTheme"  [value]="option" [disabled]="onDisableTheme(option) || data.openMode ==='view'" 
+                                                                (onSelectionChange)="OnThemeSelection($event, i, option)"  >{{option.name}}
+                                                                {{onDisableTheme(option)}}
+                                                                <ng-container *ngIf="option.refId">
+                                                                <span class="ml-2 ref-id">({{option.refId}})</span>
+                                                                </ng-container>
+                                                               </mat-option>
+                                                            </ng-container>
+                                                        </ng-container>
                                                     </mat-select>
                                                 </mat-form-field>
                                                 <mat-error *ngIf="isTermExist">{{app_strings.alreadyExist}}</mat-error>
@@ -105,6 +115,7 @@
                                                   <mat-select-trigger >
                                                     <mat-chip-list>
                                                         <!-- -->
+                                                        
                                                       <mat-chip *ngFor="let item of competencyForm?.get('compThemeFields')['controls'][i]['controls']?.competencySubTheme?.value" 
                                                       (removed)="onTermRemove(item, i)" [disabled]="data.openMode ==='view'"
                                                       [ngClass]="{'sub-theme-disable': data?.openMode ==='view'}"  [removable]="data?.openMode ==='view'? false: true">
@@ -161,7 +172,7 @@
                                     <!-- <ng-container *ngIf="competencyForm?.get('compThemeFields')['controls'][0]['controls']?.competencySubTheme?.value?.length;else updateBtn"> -->
                                         <button mat-raised-button color="primary" type="button" cdkFocusInitial
                                         [disabled]="competencyForm.invalid || disableMultiCreate" *ngIf="!disableCreate" (click)="multiCreateSubTheme(competencyForm, data)">
-                                        {{app_strings.update}}
+                                        {{app_strings.update}} jmdjgjmfg
                                         </button>
                                     <!-- </ng-container> -->
                                     
@@ -204,3 +215,15 @@
         </ng-container>
     </ng-template>
 </div>
+
+
+<mat-menu #cardMenu="matMenu" class="menu-sec">
+    <ng-template matMenuContent let-rowData="data" let-cardRef="cardRef">
+        <button  (click)="deleteTheme()"
+            mat-menu-item name="channel-analytics-button" class="ws-mat-primary-text" i18n-aria-label
+            aria-label="Analytics">
+            <mat-icon>delete</mat-icon>
+            <span>Delete</span>
+        </button>
+    </ng-template>
+</mat-menu>
