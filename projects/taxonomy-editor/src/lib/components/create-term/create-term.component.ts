@@ -398,17 +398,18 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
         return  ele.name.toLowerCase() === option.title.toLowerCase()
         }
       })
-       if(result < 0){
-        let formArray = this.createThemeFormMulti.get('themeFields') as FormArray;
-        result = formArray.value.findIndex((formEle: any) => {
-          if(formEle.name && formEle.name.id){
-            return  formEle.name.id === option.id
-          }
-        });
-       }
+      
    
-      return result >= 0 ? true: false
+      
     }
+    if(result < 0){
+      let formArray = this.createThemeFormMulti.get('themeFields') as FormArray;
+      result = formArray.value.findIndex((formEle: any) => {
+        if(formEle.name && formEle.name.id){
+          return  formEle.name.id === option.id
+        }
+      });
+     }
     //
     // console.log(this.seletedCompetencyArea)
     return result >= 0 ? true: false
