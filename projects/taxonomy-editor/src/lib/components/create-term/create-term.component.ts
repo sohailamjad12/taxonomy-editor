@@ -416,11 +416,19 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
 
   multiCreate(form, data) {
     this.disableMultiCreate = true
+    if(data.childrenData){
+      this.previousCatCode = data.childrenData.category;
+      this.previousTermCatCode = data.childrenData.code
+     }   
+    // console.log(data.childrenData.category);
+    // console.log(this.previousCategoryCode)
+     
     let counter = 0
     let createdTerms = []
     if(form.valid) {
       
       const themeFields = form && form.value && form.value.themeFields
+      
       
       if(themeFields && themeFields.length) {
         themeFields.forEach((val, i) =>{
@@ -432,24 +440,30 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
             status: appConstants.LIVE,
             refId:val.name.id,
             refType:this.data.columnInfo.code,
-            // framework:this.data.frameworkId,
+            framework:this.data.frameworkId,
             // approvalStatus:appConstants.DRAFT,
-            parents: [
-              { identifier: `${this.data.frameworkId}_${this.data.columnInfo.code}` }
-            ],
+            // parents: [
+            //   { identifier: `${this.data.frameworkId}_${this.data.columnInfo.code}` }
+            // ],
             additionalProperties: {
-              displayName:val.dname
+              displayName:val.dname,
+              previousCategoryCode: this.previousCatCode ? this.previousCatCode:  this.previousCategoryCode,
+              previousTermCode:this.previousTermCatCode ? this.previousTermCode : this.previousTermCode,
+              "timeStamp": new Date().getTime()
             }
           }
+          // const requestBody = {
+          //   request: {
+          //     term: term
+          //   }
+          // }
           const requestBody = {
-            request: {
-              term: term
-            }
+              ... term
           }
     
-          this.frameWorkService.createTerm(this.data.frameworkId, this.data.columnInfo.code, requestBody).subscribe((res: any) => {
-            requestBody.request.term['identifier'] = res.result.node_id[0]
-            createdTerms.push(requestBody.request.term)
+          this.frameWorkService.createTermsWrapper(this.data.columnInfo.code, requestBody).subscribe((res: any) => {
+            requestBody['identifier'] = res.node_id[0]
+            createdTerms.push(requestBody)
             
             counter++
             
@@ -457,9 +471,15 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
               this.updateTermAssociationsMulti(createdTerms)
               // this.dialogClose({ term: createdTerms, created: true, multi:true })
             }
-          })
+          },
+          (error: any) => {
+            // Error handler
+            console.error('There was an error:', error);
+            const errorMessage = error.error.params.err || 'Unknown error occurred';
+            this._snackBar.open(errorMessage)
+          }
+        )
         })
-        this.disableMultiCreate = true
       }
     }
   }
@@ -739,6 +759,8 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
   }
 
   saveTerm() {
+    console.log('saveTerm Calling');
+    
     if (this._filter(this.createTermForm.value.name).length > 0) {
       this.isTermExist = true
       // console.log('Already exist')
@@ -751,25 +773,27 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
         description: this.createTermForm.value.description,
         category: this.data.columnInfo.code,
         status: appConstants.LIVE,
+        framework:this.data.frameworkId,
         // framework:this.data.frameworkId,
         // approvalStatus:appConstants.DRAFT,
-        parents: [
-          { identifier: `${this.data.frameworkId}_${this.data.columnInfo.code}` }
-        ],
+        // parents: [
+        //   { identifier: `${this.data.frameworkId}_${this.data.columnInfo.code}` }
+        // ],
+
         additionalProperties: {
-          displayName: this.createTermForm.value.dname
+          displayName: this.createTermForm.value.dname,
+          previousCategoryCode: this.previousCategoryCode,
+              previousTermCode: this.previousTermCode
         }
       }
       const requestBody = {
-        request: {
-          term: term
-        }
+         ...term
       }
 
-      this.frameWorkService.createTerm(this.data.frameworkId, this.data.columnInfo.code, requestBody).subscribe((res: any) => {
-        requestBody.request.term['identifier'] = res.result.node_id[0]
-        this.dialogClose({ term: requestBody.request.term, created: true })
-        this.selectedTerm = requestBody.request.term
+      this.frameWorkService.createTermsWrapper(this.data.columnInfo.code, requestBody).subscribe((res: any) => {
+        requestBody['identifier'] = res.node_id[0]
+        this.dialogClose({ term: requestBody, created: true })
+        this.selectedTerm = requestBody
         this.updateTermAssociations()
       })
     }
