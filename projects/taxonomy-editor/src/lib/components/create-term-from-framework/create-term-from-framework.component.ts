@@ -276,7 +276,7 @@ export class CreateTermFromFrameworkComponent implements OnInit {
 
   addCompetencyTheme(){
     if (this.data.mode === 'multi-create') {
-      this.compThemeFields.push(this.createCompThemeFields());
+      this.compThemeFields.insert(0, this.createCompThemeFields());
     }
   }
 
@@ -808,7 +808,7 @@ export class CreateTermFromFrameworkComponent implements OnInit {
               this.disableMultiCreate = false
             }
             if(createdSubTheme[0].category === 'subtheme'){         
-              this._snackBar.open(`Competency  updated successfully.`)
+              this._snackBar.open(`Competency theme updated successfully.`)
             }
           }
         }
@@ -846,6 +846,7 @@ export class CreateTermFromFrameworkComponent implements OnInit {
           this.dialogClose({ term: [], created: true, multi:true, callUpdate: false })
           this.frameWorkService.currentSelection.next({ type: parentColumnConfigData.code, data: parentCol, cardRef: parentCol.cardRef });
           this.disableMultiCreate = false
+          this._snackBar.open(`Competency Theme deleted successfully.`)
 
         })
     }
@@ -863,17 +864,17 @@ export class CreateTermFromFrameworkComponent implements OnInit {
         return  ele.refId === option.refId
         }
       })
-       if(result < 0){
-        let formArray = this.competencyForm.get('compThemeFields') as FormArray;
-        result = formArray.value.findIndex((formEle: any) => {
-          if(formEle.competencyTheme && formEle.competencyTheme.refId ){
-            return  formEle.competencyTheme.refId === option.refId
-          }
-        });
-       }
-   
-      return result >= 0 ? true: false
     }
+
+    if(result < 0){
+      let formArray = this.competencyForm.get('compThemeFields') as FormArray;
+      result = formArray.value.findIndex((formEle: any) => {
+        if(formEle.competencyTheme && formEle.competencyTheme.refId ){
+          return  formEle.competencyTheme.refId === option.refId
+        }
+      });
+     }
+ 
     // 
     // console.log(this.seletedCompetencyArea)
     return result >= 0 ? true: false
@@ -954,6 +955,8 @@ export class CreateTermFromFrameworkComponent implements OnInit {
       this._snackBar.open(`Competency ${cardData.category} delete failed.`)
     }))
   }
+
+
   // getter methods
 
   get compThemeFields(): FormArray {

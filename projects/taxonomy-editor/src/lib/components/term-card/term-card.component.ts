@@ -367,8 +367,7 @@ export class TermCardComponent implements OnInit, OnDestroy {
           width: '500px',
           maxWidth: '80vw',
           maxHeight: '90vh',
-          disableClose: true,
-          panelClass: 'custom-dialog-container'
+          disableClose: true
         })
         dialog.afterClosed().subscribe(_res => {
          
