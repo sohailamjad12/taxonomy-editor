@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, Output, EventEmitter, OnDestroy, HostListener } from '@angular/core';
+import { Component, Input, OnInit, Output, EventEmitter, OnDestroy, HostListener, ChangeDetectorRef } from '@angular/core';
 import { FrameworkService } from '../../services/framework.service';
 import { MatDialog } from '@angular/material/dialog';
 import { CreateTermComponent } from '../create-term/create-term.component';
@@ -44,13 +44,15 @@ export class TaxonomyViewComponent implements OnInit, OnDestroy {
   columnId:string = '';
   configCodeBtn:any;
   dataConfig:any
+  isFraworkLoading = true
   constructor(private frameworkService: FrameworkService, 
     private localSvc: LocalConnectionService, 
     public dialog: MatDialog, 
     private approvalService: ApprovalService,
     private router: Router,
     private _snackBar: MatSnackBar,
-    private connectorSvc: ConnectorService) { }
+    private connectorSvc: ConnectorService,
+    private cdr: ChangeDetectorRef) { }
 
   ngOnInit() {
     this.init()
@@ -67,6 +69,10 @@ export class TaxonomyViewComponent implements OnInit, OnDestroy {
     this.draftTerms = this.approvalList;
   }
 
+  ngAfterContentChecked(): void {
+    this.cdr.detectChanges();
+ } 
+
   init() {
     this.initConfig();
     this.frameworkService.getFrameworkInfo().subscribe(res => {
@@ -77,6 +83,7 @@ export class TaxonomyViewComponent implements OnInit, OnDestroy {
       this.isLoading = false
         setTimeout(() => {
              this.drawHeaderLine(res.result.framework.categories.length);  
+             this.makeFirstTermSelected()
         },500)
     }, (err) => {
       console.error('error in fetching framework', err)
@@ -133,6 +140,21 @@ export class TaxonomyViewComponent implements OnInit, OnDestroy {
     }
    
   }
+
+  makeFirstTermSelected() {
+    const firstListItem = this.frameworkService.list.entries().next().value as any
+    if(firstListItem && firstListItem.length >= 2){
+      if(firstListItem[1] && firstListItem[1].children && firstListItem[1].children.length) {
+        const firstTerm = firstListItem[1].children[0] as any
+        const cardRef = document.getElementById(firstTerm.name)
+        firstTerm.selected = true
+        this.frameworkService.currentSelection.next({ type: firstTerm.category, data: firstTerm, cardRef })
+        this.isFraworkLoading = false
+        console.log('firstListItem :: ', firstListItem)
+      }
+    }
+  }
+
   updateTaxonomyTerm(data: { selectedTerm: any, isSelected: boolean, isUpdate?:any}) {
     if(data && data.selectedTerm && data.selectedTerm.category) {
       console.log('updateTaxonomyTerm inside the output event, ')
@@ -401,8 +423,9 @@ export class TaxonomyViewComponent implements OnInit, OnDestroy {
   ngOnDestroy(){
       this.frameworkService.removeOldLine();
       // this.environment = null
-      // this.frameworkService.resetAll()
-      this.connectorSvc.updateConnectorsMap({})
+      // this.frameworkService.resetAndFresh()
+      // this.connectorSvc.removeAllLines()
+      // this.connectorSvc.updateConnectorsMap({})
   }
 
   getNextCat(data) {
