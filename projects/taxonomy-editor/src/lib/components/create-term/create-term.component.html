@@ -1,4 +1,10 @@
 <ng-container [ngSwitch]="data?.columnInfo?.code || 'defaultCreate'">
+    <ng-container *ngIf="disableMultiCreate">
+        <div class="flex flex-col flex-1 w-100 absolute loader-bg items-center pt-5 text-center">
+          <mat-spinner class="display-inline-block mb-5" [diameter]="50" [strokeWidth]="3"></mat-spinner>
+          <!-- <p>{{loaderMsg}}</p> -->
+        </div>
+      </ng-container>
     <ng-container *ngSwitchDefault [ngTemplateOutlet]="themeCreate"></ng-container>
     <ng-container *ngSwitchCase="'theme'" [ngTemplateOutlet]="themeCreate"></ng-container>
     <ng-container *ngSwitchCase="'subtheme'" [ngTemplateOutlet]="themeCreate"></ng-container>
@@ -44,7 +50,7 @@
                 <button mat-raised-button color="default" type="reset"
                     (click)="dialogClose('')">{{app_strings.cancel}}</button>
                 <button mat-raised-button color="primary" type="submit" cdkFocusInitial
-                    *ngIf="!disableCreate">{{app_strings.create}}</button>
+                    *ngIf="!disableCreate || disableMultiCreate">{{app_strings.create}}</button>
                 <button mat-raised-button color="primary" type="submit" cdkFocusInitial
                     *ngIf="disableCreate">{{app_strings.update}}</button>
             </footer>
@@ -52,14 +58,14 @@
     </div>
 </ng-template>
 
-<ng-template #themeCreate>
-    <div class="dialogNew">
+<ng-template #themeCreate >
+    <div class="dialogNew" [ngClass]="{'disabled-div': disableMultiCreate}" >
         <ng-container [ngTemplateOutlet]="modalTitle"></ng-container>
         <div class="flex gap-4">
             <ng-container *ngFor="let term of data?.selectedParentTerms">
                 <div class="flex-1 flex-col">
                     <label for="name" class="margin-remove-bottom form-label" aria-label="First name label">
-                        {{getCategoryName(term.category)}}
+                        {{getCategoryName(term.category,term)}}
                     </label>
                     <mat-form-field appearance="outline" class="flex-1">
                         <input matInput name="name" id="name" #name placeholder="{{app_strings.name}}"
@@ -85,7 +91,7 @@
                                     <mat-select placeholder="{{app_strings?.name}}" formControlName="name" id="name" #name (selectionChange)="change($event,createThemeForm)">
                                         <input #search autocomplete="off" placeholder="Search" class="assigneeSearch"
                                           (keydown.space)="$event.stopPropagation()"  (keyup)="onKey($event)" matInput>
-                                        <mat-option *ngFor="let option of filteredMasterList"    (blur)="updateDname(option?.title, createThemeForm)" [value]="option">{{option.title}}</mat-option>
+                                        <mat-option *ngFor="let option of filteredMasterList"    (blur)="updateDname(option?.title, createThemeForm)" [disabled]="onDisableTheme(option)" [value]="option">{{option.title}}</mat-option>
                                         <mat-option *ngIf="filteredMasterList.length === 0" disabled>
                                             No results found!
                                           </mat-option>
@@ -205,14 +211,15 @@
                                             {{option.name}}
                                         </mat-option>
                                         </mat-autocomplete> -->
+                                        
                                         <mat-select placeholder="{{app_strings?.name}}" formControlName="name" id="name" #name (selectionChange)="change($event,createThemeFormMulti, i )">
                                             <input #search autocomplete="off" placeholder="Search" class="assigneeSearch"
                                               (keydown.space)="$event.stopPropagation()"   (keyup)="onKey($event)" matInput>
-                                            <mat-option *ngFor="let option of filteredMasterList"    (blur)="updateDname(option?.title, createThemeFormMulti, i)" [value]="option">{{option.title}}</mat-option>
+                                            <mat-option *ngFor="let option of filteredMasterList"    (blur)="updateDname(option?.title, createThemeFormMulti, i)" [disabled]="onDisableTheme(option)"  [value]="option">{{option.title}} {{onDisableTheme(option)}}</mat-option>
                                             <mat-option *ngIf="filteredMasterList.length === 0" disabled>
                                                 No results found!
                                               </mat-option>
-                                        
+                                            
                                           </mat-select>
                                           
                                         </mat-form-field>
