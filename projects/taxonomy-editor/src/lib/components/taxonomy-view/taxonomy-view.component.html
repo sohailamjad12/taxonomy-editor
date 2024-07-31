@@ -54,7 +54,7 @@
     <lib-action-bar *ngIf="showActionBar" [actionType]="isApprovalView" [configType]="workFlowStatus"
         (sendApproval)="sendForApproval()" (closeAction)="closeActionBar($event)"></lib-action-bar>
 </div>
-<div *ngIf="!(list && list.length > 0 )" class="flex heightFix ">
+<div *ngIf="!(list && list.length > 0 ) && isFraworkLoading" class="flex heightFix ">
     <h1 i18n>{{app_strings.noData}}</h1>
     <div>
         <div *ngIf="isLoading" class="spinner">
