@@ -362,7 +362,14 @@ export class TaxonomyViewComponent implements OnInit, OnDestroy {
     this.categoryList.push(event);
   }
   
-
+  getCount(code: string): number {
+    let count = 0
+    if (this.categoryList) {
+      const category = this.categoryList.find((category: any) => category.category === code)
+      count = category && category.count ? category.count : 0
+    }
+    return count
+  }
 
   sendForApproval(){
     if(!this.isApprovalView){
