@@ -18,10 +18,8 @@
                                 <!-- {{column.name}} -->
                                 {{column.config.categoryDisplayName || column.name }}
                                 <ng-container *ngIf="i != 0 && categoryList?.length > 0; else firstColumn">
-                                    <ng-container *ngFor="let category of categoryList">
-                                        <ng-container *ngIf="(column.code == category.category) && column.index !== 1">
-                                            <span class="count">({{category.count}})</span>
-                                        </ng-container>
+                                    <ng-container *ngIf="column.index !== 1">
+                                        <span class="count">({{getCount(column.code)}})</span>
                                     </ng-container>
                                 </ng-container>
                             </span>
