@@ -439,7 +439,8 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
               { identifier: `${this.data.frameworkId}_${this.data.columnInfo.code}` }
             ],
             additionalProperties: {
-              displayName:val.dname
+              displayName:val.dname,
+              timeStamp: new Date().getTime(),
             }
           }
           const requestBody = {
@@ -758,7 +759,8 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
           { identifier: `${this.data.frameworkId}_${this.data.columnInfo.code}` }
         ],
         additionalProperties: {
-          displayName: this.createTermForm.value.dname
+          displayName: this.createTermForm.value.dname,
+          timeStamp: new Date().getTime(),
         }
       }
       const requestBody = {
@@ -918,7 +920,8 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
           { identifier: `${this.data.frameworkId}_${this.data.columnInfo.code}` }
         ],
         additionalProperties: {
-          displayName:this.createTermForm.value.dname
+          displayName:this.createTermForm.value.dname,
+          timeStamp: new Date().getTime(),
         }
       }
       const requestBody = {
