@@ -371,6 +371,9 @@ export class TermCardComponent implements OnInit, OnDestroy {
         })
         dialog.afterClosed().subscribe(_res => {
          
+        setTimeout(() => {
+          window.dispatchEvent(new Event('resize'))
+        }, 100)
         })
       
     

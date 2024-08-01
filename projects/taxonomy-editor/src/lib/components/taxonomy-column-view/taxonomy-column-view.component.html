@@ -11,7 +11,7 @@
     </div>
 </ng-container>
 <ng-container *ngIf="columnItems && columnItems.length > 0; else noDataTemplate;">
-    <ng-container *ngFor="let child of columnItems; let j = index">
+    <ng-container *ngFor="let child of columnItems | orderBy:'timeStamp'; let j = index">
         <div #cardEle id="{{column.code}}Card{{j+1}}" >
             <lib-term-card
                 [data]="{'children': child, 'selected' : false, 'category':column.code, cardSubType: 'minimal', isViewOnly:false,'index':column.index, columnInfo: column}"
