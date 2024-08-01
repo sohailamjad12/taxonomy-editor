@@ -147,6 +147,7 @@ export class TaxonomyViewComponent implements OnInit, OnDestroy {
       if(firstListItem[1] && firstListItem[1].children && firstListItem[1].children.length) {
         const firstTerm = firstListItem[1].children[0] as any
         const cardRef = document.getElementById(firstTerm.name)
+        this.categoryList = []
         firstTerm.selected = true
         this.frameworkService.currentSelection.next({ type: firstTerm.category, data: firstTerm, cardRef })
         this.isFraworkLoading = false
