@@ -394,7 +394,7 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
     let result = -1
     if(parentCol && parentCol.children && parentCol.children.length){
       result = parentCol.children.findIndex((ele: any) => {
-        if( (ele.refType === 'theme') ) {
+        if( (ele.refType === 'theme'|| ele.refType === 'subtheme') ) {
         return  ele.name.toLowerCase() === option.title.toLowerCase()
         }
       })
