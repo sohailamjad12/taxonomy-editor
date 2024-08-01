@@ -336,12 +336,12 @@ export class TermCardComponent implements OnInit, OnDestroy {
       dialogAction: 'retire',
       descriptions: [
         {
-          header: `competency ${data.category ==="subtheme"? 'sub-theme': 'theme'} will be deleted`,
+          header: `Competency ${data.category ==="subtheme"? 'sub-theme': 'theme'} will be deleted`,
           headerClass: 'flex items-center justify-center text-blue textBold',
           messages: [
             {
-              msgClass: '',
-              msg: `Do you want to proced?`,
+              msgClass: 'mb-2 mt-2',
+              msg: `Do you want to proceed?`,
             },
           ],
         },

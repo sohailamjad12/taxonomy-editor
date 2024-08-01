@@ -131,7 +131,7 @@ export class CreateTermFromFrameworkComponent implements OnInit {
 
 
   getCreateName(data: any) {
-      let popUpCategory = data.cardColInfo.name
+      let popUpCategory = data.cardColInfo ? data.cardColInfo.name : data.columnInfo.name
       switch(popUpCategory){
         case 'Designation':
         return `Create Competency Mapping`;
@@ -745,7 +745,12 @@ export class CreateTermFromFrameworkComponent implements OnInit {
 
   dialogClose(term: any) {
     this.frameWorkService.publishFramework().subscribe(res => {
+      this.disableMultiCreate = false
       this.dialogRef.close(term)
+    },(err:any)=> {
+      this.disableMultiCreate = false
+      this.dialogRef.close(term)
+      this._snackBar.open(`Publish  failed.`)
     });
   }
 
@@ -806,8 +811,6 @@ export class CreateTermFromFrameworkComponent implements OnInit {
             if(!(removedExisting && removedExisting.length)) {
               this.dialogClose({ term: this.selectedTermArray, created: true, multi:true, callUpdate: false })
               this.disableMultiCreate = false
-            }
-            if(createdSubTheme[0].category === 'subtheme'){         
               this._snackBar.open(`Competency theme updated successfully.`)
             }
           }
@@ -846,7 +849,7 @@ export class CreateTermFromFrameworkComponent implements OnInit {
           this.dialogClose({ term: [], created: true, multi:true, callUpdate: false })
           this.frameWorkService.currentSelection.next({ type: parentColumnConfigData.code, data: parentCol, cardRef: parentCol.cardRef });
           this.disableMultiCreate = false
-          this._snackBar.open(`Competency Theme deleted successfully.`)
+          this._snackBar.open(`Competency theme updated successfully.`)
 
         })
     }
@@ -949,10 +952,10 @@ export class CreateTermFromFrameworkComponent implements OnInit {
       this.frameWorkService.currentSelection.next({ type: parentColumnConfigData.code, data: parentCol, cardRef: parentCol.cardRef })
       this.dialogClose({})
       this.disableMultiCreate = false
-      this._snackBar.open(`Competency ${cardData.category} deleted successfully.`)
+      this._snackBar.open(`Competency theme deleted successfully.`)
     },((err: any)=> {
       this.disableMultiCreate = false
-      this._snackBar.open(`Competency ${cardData.category} delete failed.`)
+      this._snackBar.open(`Competency theme delete failed.`)
     }))
   }
 
