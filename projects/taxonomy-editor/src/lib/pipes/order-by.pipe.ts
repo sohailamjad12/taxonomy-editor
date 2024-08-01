@@ -8,12 +8,26 @@ export class OrderByPipe implements PipeTransform {
   approvalTerms = [];
   constructor(private approvalService: ApprovalService){}
 
-  transform(value): any{
+  transform(value: any, sortBy?: string, order?: string): any{
+    debugger
     // return null;
-    if(value) {
-      return value.slice().reverse();
+    if(!sortBy) {
+      if(value) {
+        return value.slice().reverse();
+      } else {
+        return null
+      }
     } else {
-      return null
+      if(Array.isArray(value)) {
+          return  value.sort((a, b) => {
+            const timestampA = a.additionalProperties.timeStamp ? new Date(Number(a.additionalProperties.timeStamp)).getTime() : 0;
+            const timestampB = b.additionalProperties.timeStamp ? new Date(Number(b.additionalProperties.timeStamp)).getTime() : 0;
+             
+            return  timestampB - timestampA;
+            
+            });
+     
+      }
     }
      
   }
