@@ -44,7 +44,7 @@
       </div>
     </ng-container>
     <ng-container *ngIf="description.messages">
-      <div class="description mt-1 mb-6 flex w-full justify-center">
+      <div class="description mt-1  flex w-full justify-center">
         <span>
           <ng-container *ngFor="let msgDetails of description.messages">
             <span [ngClass]="msgDetails.msgClass">{{msgDetails.msg}}</span>
