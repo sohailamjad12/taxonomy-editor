@@ -204,6 +204,8 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
   }
 
   addThemeFields() {
+    this.values = ''
+    this.filteredMasterList = [...this.masterList]
     if (this.data.mode === 'multi-create') {
       // this.themeFields.push(this.createThemeFields());
       this.themeFields.insert(0, this.createThemeFields());
