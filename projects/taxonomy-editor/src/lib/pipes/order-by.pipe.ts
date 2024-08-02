@@ -20,8 +20,8 @@ export class OrderByPipe implements PipeTransform {
     } else {
       if(Array.isArray(value)) {
           return  value.sort((a, b) => {
-            const timestampA = a.additionalProperties.timeStamp ? new Date(Number(a.additionalProperties.timeStamp)).getTime() : 0;
-            const timestampB = b.additionalProperties.timeStamp ? new Date(Number(b.additionalProperties.timeStamp)).getTime() : 0;
+            const timestampA = a.additionalProperties && a.additionalProperties.timeStamp ? new Date(Number(a.additionalProperties.timeStamp)).getTime() : 0;
+            const timestampB = b.additionalProperties && b.additionalProperties.timeStamp ? new Date(Number(b.additionalProperties.timeStamp)).getTime() : 0;
              
             return  timestampB - timestampA;
             
